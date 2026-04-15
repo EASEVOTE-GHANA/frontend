@@ -11,7 +11,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "sharp": "^0.34.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.0.0",
@@ -31,12 +30,17 @@
     "react-hot-toast": "^2.6.0",
     "react-intersection-observer": "^10.0.0",
     "recharts": "^2.15.2",
+    "sharp": "^0.34.0",
     "simple-icons": "^16.0.0",
+    "slugify": "^1.6.9",
     "tailwind-merge": "^3.4.0",
     "zod": "^3.25.76"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["sharp", "esbuild"]
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
