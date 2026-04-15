@@ -53,18 +53,23 @@ export default function FAQManager({ initialFaqs }: FAQManagerProps) {
   ];
 
   const filteredFaqs = faqs.filter(
-    (faq) =>
-      faq.content.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.content.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    (faq: any) => {
+      const question = faq.content?.question || faq.question || "";
+      const answer = faq.content?.answer || faq.answer || "";
+      return (
+        question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        answer.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
   );
 
   const handleOpenModal = (faq?: any) => {
     if (faq) {
       setEditingFaq(faq);
       setFormData({
-        question: faq.content.question,
-        answer: faq.content.answer,
-        category: faq.content.category,
+        question: faq.content?.question || faq.question || "",
+        answer: faq.content?.answer || faq.answer || "",
+        category: faq.content?.category || faq.category || "General",
       });
     } else {
       setEditingFaq(null);
@@ -181,10 +186,10 @@ export default function FAQManager({ initialFaqs }: FAQManagerProps) {
                 </span>
               </div>
               <h3 className="font-bold text-gray-900 mb-1">
-                {faq.content.question}
+                {(faq as any).content?.question || (faq as any).question}
               </h3>
               <p className="text-sm text-gray-500 line-clamp-2">
-                {faq.content.answer}
+                {(faq as any).content?.answer || (faq as any).answer}
               </p>
             </div>
             <div className="flex items-center gap-1">

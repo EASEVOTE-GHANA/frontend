@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 export default async function FAQsPage() {
   const session = await getServerSession(authOptions);
   const apiClient = createServerApiClient(session?.accessToken as string | undefined);
-  const faqs = await apiClient.get("/cms/faqs").catch(() => []);
+  const res = (await apiClient.get("/cms/faqs").catch(() => ({}))) || {};
+  const faqs = (res as any).faqs || (res as any).data || (Array.isArray(res) ? res : []);
 
   return (
     <div className="space-y-6">
