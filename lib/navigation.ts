@@ -38,22 +38,28 @@ export type NavigationSection = {
 
 export const superAdminNavigation: NavigationSection[] = [
   {
-    items: [{ name: "Overview", href: "/super-admin", icon: LayoutDashboard }],
+    items: [{ name: "Overview", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Platform Management",
     items: [
-      { name: "Organizers", href: "/super-admin/organizers", icon: Building2 },
-      { name: "Admins", href: "/super-admin/admins", icon: UserCog },
+      { name: "Organizers", href: "/dashboard/organizers", icon: Building2 },
+      { name: "Admins", href: "/dashboard/admins", icon: UserCog },
     ],
   },
   {
     title: "Events & Content",
     items: [
-      { name: "All Events", href: "/super-admin/events", icon: Calendar },
-      { name: "Voting Events", href: "/super-admin/voting", icon: Vote },
-      { name: "Ticketing", href: "/super-admin/ticketing", icon: Ticket },
-      { name: "Deleted Events", href: "/admin/events/deleted", icon: Trash2 },
+      {
+        name: "All Events",
+        href: "/dashboard/events",
+        icon: Calendar,
+        children: [
+          { name: "Voting Events", href: "/dashboard/voting" },
+          { name: "Ticketing", href: "/dashboard/ticketing" },
+          { name: "Deleted Events", href: "/dashboard/events/deleted" },
+        ],
+      },
     ],
   },
   {
@@ -61,14 +67,14 @@ export const superAdminNavigation: NavigationSection[] = [
     items: [
       {
         name: "Transactions",
-        href: "/super-admin/transactions",
+        href: "/dashboard/transactions",
         icon: DollarSign,
       },
-      { name: "Payouts", href: "/super-admin/payouts", icon: CreditCard },
-      { name: "Revenue", href: "/super-admin/revenue", icon: TrendingUp },
+      { name: "Payouts", href: "/dashboard/payouts", icon: CreditCard },
+      { name: "Revenue", href: "/dashboard/revenue", icon: TrendingUp },
       {
         name: "Payment Gateways",
-        href: "/super-admin/finance/settings",
+        href: "/dashboard/finance/settings",
         icon: Settings,
       },
     ],
@@ -78,99 +84,112 @@ export const superAdminNavigation: NavigationSection[] = [
     items: [
       {
         name: "Platform Analytics",
-        href: "/super-admin/analytics",
+        href: "/dashboard/analytics",
         icon: BarChart3,
       },
-      { name: "Reports", href: "/super-admin/reports", icon: PieChart },
+      { name: "Reports", href: "/dashboard/reports", icon: PieChart },
     ],
   },
   {
     title: "CMS",
     items: [
-      { name: "Blog Posts", href: "/super-admin/cms/blogs", icon: FileText },
-      { name: "FAQs", href: "/super-admin/cms/faqs", icon: HelpCircle },
-      { name: "Banners", href: "/super-admin/cms/banners", icon: Megaphone },
+      { name: "Blog Posts", href: "/dashboard/cms/blogs", icon: FileText },
+      { name: "FAQs", href: "/dashboard/cms/faqs", icon: HelpCircle },
+      { name: "Banners", href: "/dashboard/cms/banners", icon: Megaphone },
     ],
   },
   {
     title: "System",
     items: [
-      { name: "Settings", href: "/super-admin/settings", icon: Settings },
-      { name: "Security", href: "/super-admin/security", icon: Shield },
-      { name: "Notifications", href: "/super-admin/notifications", icon: Bell },
-      { name: "My Account", href: "/super-admin/account", icon: UserCog },
+      { name: "Settings", href: "/dashboard/settings", icon: Settings },
+      { name: "Security", href: "/dashboard/security", icon: Shield },
+      { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
+      { name: "My Account", href: "/dashboard/account", icon: UserCog },
     ],
   },
 ];
 
 export const adminNavigation: NavigationSection[] = [
   {
-    items: [{ name: "Overview", href: "/admin", icon: LayoutDashboard }],
+    items: [{ name: "Overview", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "Event Management",
     items: [
-      { name: "All Events", href: "/admin/events", icon: Calendar },
-      { name: "Voting Events", href: "/admin/voting", icon: Vote },
-      { name: "Ticketing Events", href: "/admin/ticketing", icon: Ticket },
-      { name: "Pending Approvals", href: "/admin/approvals", icon: FileText },
-      { name: "Deleted Events", href: "/admin/events/deleted", icon: Trash2 },
+      {
+        name: "All Events",
+        href: "/dashboard/events",
+        icon: Calendar,
+        children: [
+          { name: "Voting Events", href: "/dashboard/voting" },
+          { name: "Ticketing Events", href: "/dashboard/ticketing" },
+          { name: "Deleted Events", href: "/dashboard/events/deleted" },
+        ],
+      },
+      { name: "Pending Approvals", href: "/dashboard/approvals", icon: FileText },
     ],
   },
   {
     title: "Users & Organizers",
     items: [
-      { name: "Organizers", href: "/admin/organizers", icon: Building2 },
+      { name: "Organizers", href: "/dashboard/organizers", icon: Building2 },
     ],
   },
   {
     title: "Financial",
     items: [
-      { name: "Transactions", href: "/admin/transactions", icon: DollarSign },
-      { name: "Payout Requests", href: "/admin/payouts", icon: CreditCard },
+      { name: "Transactions", href: "/dashboard/transactions", icon: DollarSign },
+      { name: "Payout Requests", href: "/dashboard/payouts", icon: CreditCard },
     ],
   },
   {
     title: "Analytics",
-    items: [{ name: "Reports", href: "/admin/reports", icon: BarChart3 }],
+    items: [{ name: "Reports", href: "/dashboard/reports", icon: BarChart3 }],
   },
   {
     title: "Settings",
-    items: [{ name: "My Account", href: "/admin/account", icon: Settings }],
+    items: [{ name: "My Account", href: "/dashboard/account", icon: Settings }],
   },
 ];
 
 export const organizerNavigation: NavigationSection[] = [
   {
-    items: [{ name: "Dashboard", href: "/organizer", icon: LayoutDashboard }],
+    items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
   },
   {
     title: "My Events",
     items: [
-      { name: "All Events", href: "/organizer/events", icon: Calendar },
-      { name: "Create Event", href: "/organizer/events/new", icon: Vote },
-      { name: "Ticketing", href: "/organizer/ticketing", icon: Ticket },
+      {
+        name: "All Events",
+        href: "/dashboard/events",
+        icon: Calendar,
+        children: [
+          { name: "Voting Events", href: "/dashboard/voting" },
+          { name: "Ticketing", href: "/dashboard/ticketing" },
+          { name: "Deleted Events", href: "/dashboard/events/deleted" },
+        ],
+      },
+      { name: "Create Event", href: "/dashboard/events/new", icon: Vote },
     ],
   },
   {
     title: "Voting",
     items: [
-      { name: "Voting Events", href: "/organizer/voting", icon: Vote },
-      { name: "Nominations", href: "/organizer/nominations", icon: Users },
-      { name: "Vote Results", href: "/organizer/results", icon: BarChart3 },
+      { name: "Nominations", href: "/dashboard/nominations", icon: Users },
+      { name: "Vote Results", href: "/dashboard/results", icon: BarChart3 },
     ],
   },
   {
     title: "Financial",
     items: [
-      { name: "Earnings", href: "/organizer/earnings", icon: DollarSign },
-      { name: "Payout History", href: "/organizer/payouts", icon: CreditCard },
+      { name: "Earnings", href: "/dashboard/earnings", icon: DollarSign },
+      { name: "Payout History", href: "/dashboard/payouts", icon: CreditCard },
     ],
   },
   {
     title: "Settings",
     items: [
-      { name: "Profile", href: "/organizer/profile", icon: UserCog },
+      { name: "Profile", href: "/dashboard/account", icon: UserCog },
     ],
   },
 ];

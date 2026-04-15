@@ -7,8 +7,8 @@ if (!process.env.NEXTAUTH_SECRET && process.env.NODE_ENV === "production") {
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET || "development-secret-only";
 
 const API_URL =
-  process.env.API_URL ||
-  (process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/api` : "https://e-voting-and-ticketing-backend.onrender.com/api");
+  process.env.API_URL || 
+  "http://localhost:5000/api";
 
 declare module "next-auth" {
   interface Session {
@@ -146,11 +146,9 @@ export const authOptions: NextAuthOptions = {
 export function getRoleRedirectPath(role: string): string {
   switch (role) {
     case "SUPER_ADMIN":
-      return "/super-admin";
     case "ADMIN":
-      return "/admin";
     case "ORGANIZER":
-      return "/organizer";
+      return "/dashboard";
     default:
       return "/";
   }

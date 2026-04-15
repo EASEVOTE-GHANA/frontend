@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
-const RAW_BACKEND_URL =
-  process.env.API_URL ||
-  process.env.NEXTAUTH_URL ||
-  "http://localhost:5000";
-
-// Ensure the URL has the /api prefix if it's missing
-const BACKEND_URL = RAW_BACKEND_URL.endsWith("/api")
-  ? RAW_BACKEND_URL
-  : `${RAW_BACKEND_URL}/api`;
+const BACKEND_URL = (process.env.API_URL || "http://localhost:5000/api").endsWith("/api")
+  ? (process.env.API_URL || "http://localhost:5000/api")
+  : `${(process.env.API_URL || "http://localhost:5000/api")}/api`;
 
 /**
  * Proxy route: /api/proxy/[...path]

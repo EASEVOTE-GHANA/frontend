@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { clsx } from "clsx";
+import { useState } from "react";
 import type { NavigationSection } from "@/lib/navigation";
 
 type SidebarProps = {
@@ -22,6 +23,21 @@ export function Sidebar({
   portalName,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (href: string) => {
+    setExpandedItems((prev) => ({ ...prev, [href]: !prev[href] }));
+  };
+
+  // Auto-expand parent if a child is active
+  const isChildActive = (children?: { name: string; href: string }[]) => {
+    if (!children) return false;
+    return children.some(
+      (child) =>
+        pathname === child.href ||
+        (pathname?.startsWith(child.href + "/") ?? false)
+    );
+  };
 
   return (
     <aside
@@ -61,35 +77,84 @@ export function Sidebar({
             )}
             <ul className="space-y-1 px-2">
               {section.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/" && pathname?.startsWith(item.href + "/"));
+                const isExactDashboard = item.href === "/dashboard";
+                const hasChildren = item.children && item.children.length > 0;
+                const childActive = isChildActive(item.children);
+                const isActive = isExactDashboard
+                  ? pathname === "/dashboard"
+                  : hasChildren
+                    ? pathname === item.href // Only exact match when it has children
+                    : pathname === item.href ||
+                      (pathname?.startsWith(item.href + "/") ?? false);
+                const isExpanded =
+                  expandedItems[item.href] ?? (isActive || childActive);
                 const Icon = item.icon;
 
                 return (
                   <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={clsx(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-secondary-700 text-white!"
-                          : "text-slate-300! hover:bg-primary-800 hover:text-white"
+                    <div className="flex items-center">
+                      <Link
+                        href={item.href}
+                        className={clsx(
+                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors flex-1",
+                          isActive || childActive
+                            ? "bg-secondary-700 text-white!"
+                            : "text-slate-300! hover:bg-primary-800 hover:text-white"
+                        )}
+                        title={isCollapsed ? item.name : undefined}
+                      >
+                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1">{item.name}</span>
+                            {item.badge !== undefined && (
+                              <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                {item.badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </Link>
+                      {hasChildren && !isCollapsed && (
+                        <button
+                          onClick={() => toggleExpand(item.href)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-primary-800 transition-colors"
+                        >
+                          <ChevronDown
+                            className={clsx(
+                              "h-4 w-4 transition-transform",
+                              isExpanded && "rotate-180"
+                            )}
+                          />
+                        </button>
                       )}
-                      title={isCollapsed ? item.name : undefined}
-                    >
-                      <Icon className="h-5 w-5 flex-shrink-0" />
-                      {!isCollapsed && (
-                        <>
-                          <span className="flex-1">{item.name}</span>
-                          {item.badge !== undefined && (
-                            <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                              {item.badge}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </Link>
+                    </div>
+
+                    {/* Children */}
+                    {hasChildren && isExpanded && !isCollapsed && (
+                      <ul className="ml-6 mt-1 space-y-0.5 border-l border-slate-700 pl-3">
+                        {item.children!.map((child) => {
+                          const isChildItemActive =
+                            pathname === child.href ||
+                            (pathname?.startsWith(child.href + "/") ?? false);
+                          return (
+                            <li key={child.href}>
+                              <Link
+                                href={child.href}
+                                className={clsx(
+                                  "block px-3 py-2 text-sm rounded-lg transition-colors",
+                                  isChildItemActive
+                                    ? "text-white! font-medium bg-primary-800"
+                                    : "text-slate-400! hover:text-white hover:bg-primary-800"
+                                )}
+                              >
+                                {child.name}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </li>
                 );
               })}

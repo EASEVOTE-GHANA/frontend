@@ -21,6 +21,12 @@ type Column<T> = {
   width?: string;
 };
 
+type FilterOption = {
+  label: string;
+  key: string;
+  options: { label: string; value: string }[];
+};
+
 type DataTableProps<T> = {
   data: T[];
   columns: Column<T>[];
@@ -31,6 +37,7 @@ type DataTableProps<T> = {
   loading?: boolean;
   emptyMessage?: string;
   actions?: (item: T) => React.ReactNode;
+  filters?: FilterOption[];
 };
 
 export function DataTable<T extends { id: string | number }>({
@@ -44,14 +51,52 @@ export function DataTable<T extends { id: string | number }>({
   emptyMessage = "No data available",
   actions,
   searchKey,
+  filters,
 }: DataTableProps<T> & { searchKey?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+
+  // Reset page when search or filters change
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (key: string, value: string) => {
+    setActiveFilters((prev) => {
+      const next = { ...prev };
+      if (value === "") {
+        delete next[key];
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
+    setCurrentPage(1);
+    setShowFilterDropdown(false);
+  };
+
+  const getValue = (item: T, key: string): unknown => {
+    return key.split(".").reduce((obj: unknown, k) => {
+      if (obj && typeof obj === "object") {
+        return (obj as Record<string, unknown>)[k];
+      }
+      return undefined;
+    }, item);
+  };
 
   // Filter data
   const filteredData = data.filter((item) => {
+    // Apply active filters
+    for (const [key, value] of Object.entries(activeFilters)) {
+      const itemValue = getValue(item, key);
+      if (String(itemValue) !== value) return false;
+    }
+
     if (!searchQuery) return true;
 
     // If a specific key is provided, search only that field
@@ -83,14 +128,7 @@ export function DataTable<T extends { id: string | number }>({
     }
   };
 
-  const getValue = (item: T, key: string): unknown => {
-    return key.split(".").reduce((obj: unknown, k) => {
-      if (obj && typeof obj === "object") {
-        return (obj as Record<string, unknown>)[k];
-      }
-      return undefined;
-    }, item);
-  };
+
 
   if (loading) {
     return (
@@ -110,7 +148,7 @@ export function DataTable<T extends { id: string | number }>({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-200 relative">
       {searchable && (
         <div className="p-4 border-b border-slate-200 flex items-center gap-3">
           <div className="relative flex-1 max-w-md">
@@ -119,18 +157,61 @@ export function DataTable<T extends { id: string | number }>({
               type="text"
               placeholder={searchPlaceholder}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
-          <button className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-            <Filter className="h-4 w-4" />
-            Filter
-          </button>
-          <button className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-            <Download className="h-4 w-4" />
-            Export
-          </button>
+          {filters && filters.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                className={clsx(
+                  "flex items-center gap-2 px-3 py-2 border rounded-lg text-sm transition-colors",
+                  Object.keys(activeFilters).length > 0
+                    ? "border-primary-600 bg-primary-50 text-primary-700"
+                    : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                )}
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+                {Object.keys(activeFilters).length > 0 && (
+                  <span className="bg-primary-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                    {Object.keys(activeFilters).length}
+                  </span>
+                )}
+              </button>
+              {showFilterDropdown && (
+                <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-20 min-w-[200px] p-2">
+                  {filters.map((filter) => (
+                    <div key={filter.key} className="space-y-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-2">{filter.label}</p>
+                      <button
+                        onClick={() => handleFilterChange(filter.key, "")}
+                        className={clsx(
+                          "w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors",
+                          !activeFilters[filter.key] ? "bg-primary-50 text-primary-700 font-medium" : "text-slate-600 hover:bg-slate-50"
+                        )}
+                      >
+                        All
+                      </button>
+                      {filter.options.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => handleFilterChange(filter.key, opt.value)}
+                          className={clsx(
+                            "w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors",
+                            activeFilters[filter.key] === opt.value ? "bg-primary-50 text-primary-700 font-medium" : "text-slate-600 hover:bg-slate-50"
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -204,8 +285,8 @@ export function DataTable<T extends { id: string | number }>({
       {totalPages > 1 && (
         <div className="px-4 py-3 border-t border-slate-200 flex items-center justify-between">
           <p className="text-sm text-slate-600">
-            Showing {startIndex + 1} to {Math.min(endIndex, data.length)} of{" "}
-            {data.length} results
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of{" "}
+            {filteredData.length} results
           </p>
           <div className="flex items-center gap-1">
             <button

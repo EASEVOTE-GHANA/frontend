@@ -44,13 +44,8 @@ export default function SignInPage() {
       const session = await response.json();
 
       if (session?.user?.role) {
-        const redirectPath =
-          session.user.role === "SUPER_ADMIN"
-            ? "/super-admin"
-            : session.user.role === "ADMIN"
-              ? "/admin"
-              : "/organizer";
-        router.push(redirectPath);
+        // Unified dashboard route handles role-based views
+        router.push("/dashboard");
         router.refresh();
       } else {
         router.push("/");
@@ -127,7 +122,7 @@ export default function SignInPage() {
 
           <div className="mb-10">
             <h1 className="text-3xl sm:text-4xl font-display font-bold text-slate-900 mb-3">
-              Organizer Login
+              Welcome Back
             </h1>
             <p className="text-slate-500">
               Enter your credentials to access your dashboard.
@@ -144,7 +139,7 @@ export default function SignInPage() {
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-1">
               <label className="text-sm font-bold text-slate-700">
-                Work Email Address
+                Email Address
               </label>
               <div className="relative">
                 <Mail
@@ -215,42 +210,6 @@ export default function SignInPage() {
               )}
             </button>
           </form>
-
-          {/* Social Auth */}
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-slate-500">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-slate-700">
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
-                  <path
-                    d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-                    fill="currentColor"
-                  />
-                </svg>
-                Google
-              </button>
-              <button className="flex items-center justify-center gap-2 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-slate-700">
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.48 2.24-.82 3.67-.8 2.8.03 3.93 1.36 4.96 2.43-3.7 2.4-2.04 7.61 1.77 8.24-.9 2.05-2.02 3.86-5.48 2.3zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                </svg>
-                Apple
-              </button>
-            </div>
-          </div>
 
           {/* Footer Switch */}
           <div className="mt-10 text-center">
