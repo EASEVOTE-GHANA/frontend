@@ -14,6 +14,7 @@ import {
   Menu,
 } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useModal } from "@/components/providers/ModalProvider";
 import { formatDistanceToNow } from "date-fns";
 import clsx from "clsx";
 
@@ -45,6 +46,23 @@ export function Header({
     markAllAsRead, 
     loading 
   } = useNotifications();
+
+  const modal = useModal();
+
+  const handleSignOut = async () => {
+    const confirmed = await modal.confirm({
+      title: "Sign Out",
+      message: "Are you sure you want to sign out of your account?",
+      confirmText: "Sign Out",
+      cancelText: "Stay Logged In",
+      variant: "danger"
+    });
+
+    if (confirmed) {
+      await signOut({ redirect: false });
+      window.location.href = "/sign-in";
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:px-6">
@@ -205,7 +223,7 @@ export function Header({
               </div>
               <div className="border-t border-slate-100 py-1">
                 <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={handleSignOut}
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
