@@ -142,11 +142,15 @@ const Hero = ({ banners }: HeroProps) => {
                   style={{ width: `calc(${100 / itemsPerView}% - 16px)` }} // Adjust for gap
                   onClick={() => banner.linkUrl && (window.location.href = banner.linkUrl)}
                 >
-                  <img
-                    src={banner.imageUrl}
-                    alt={banner.title || `Event Slide ${idx + 1}`}
-                    className="w-full h-64 object-cover rounded-xl shadow-md hover:shadow-lg transition-shadow"
-                  />
+                  <div className="w-full h-64 relative overflow-hidden rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <Image
+                      src={banner.imageUrl}
+                      alt={banner.title || `Event Slide ${idx + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-brand-deep/80 to-transparent rounded-xl flex items-end p-4">
                     <span className="text-white font-bold text-sm">
                       {banner.title || "EaseVote Ghana"}

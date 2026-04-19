@@ -15,6 +15,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
+import Image from "next/image";
 
 type CandidateForm = {
   id?: string;
@@ -602,10 +603,12 @@ export function CategoriesManager({
                             />
                             <div className="flex gap-2">
                               {candidate.image && (
-                                <img
+                                <Image
                                   src={candidate.image}
-                                  alt="cand"
-                                  className="w-10 h-10 object-cover rounded"
+                                  alt="candidate preview"
+                                  width={40}
+                                  height={40}
+                                  className="object-cover rounded"
                                 />
                               )}
                               <label className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus-within:ring-2 focus-within:ring-primary-500 cursor-pointer flex items-center gap-2 bg-white ext-sm text-slate-500 hover:text-slate-700 hover:bg-slate-50 relative">

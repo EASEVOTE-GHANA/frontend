@@ -198,7 +198,13 @@ export default function OrganizerPayoutsClient({
                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-1">Amount (GHS)</label>
                         <input 
                             type="number" step="0.01" placeholder="0.00" required value={payoutAmount}
-                            onChange={(e) => setPayoutAmount(e.target.value)}
+                            onChange={(e) => {
+                                let val = e.target.value;
+                                if (val.length > 1 && val.startsWith("0") && val[1] !== ".") {
+                                    val = val.replace(/^0+/, "");
+                                }
+                                setPayoutAmount(val);
+                            }}
                             className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-primary-500 focus:bg-white outline-none transition-all font-bold text-lg"
                         />
                     </div>

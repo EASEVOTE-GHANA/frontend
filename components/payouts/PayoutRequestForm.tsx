@@ -26,7 +26,12 @@ export default function PayoutRequestForm({
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type } = e.target;
+    let newValue = value;
+    if (type === "number" && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+      newValue = newValue.replace(/^0+/, "");
+    }
+    setFormData({ ...formData, [name]: newValue });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

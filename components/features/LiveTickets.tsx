@@ -108,32 +108,41 @@ export default function LiveTickets({ events }: { events: any[] }) {
             >
               {/* Image Section */}
               <div className="relative h-48 bg-gray-800">
-                  <img
-                    src={
-                      ticket.imageUrl ||
-                      ticket.coverImage ||
-                      ticket.image ||
-                      "https://images.unsplash.com/photo-1540039155733-d730a53bf30c?q=80&w=2667&auto=format&fit=crop"
-                    }
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                    alt={ticket.title}
-                  />
-                  
-                  <div className="absolute top-4 left-4 flex gap-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm text-white ${
-                        getEventStatus(ticket).color
-                      } ${getEventStatus(ticket).isActive ? "animate-pulse" : ""}`}
-                    >
-                      {getEventStatus(ticket).label}
-                    </span>
-                  </div>
+                {(() => {
+                  const urls = [ticket.imageUrl, ticket.coverImage, ticket.image];
+                  const validUrl = urls.find(url =>
+                    url &&
+                    typeof url === 'string' &&
+                    !["null", "undefined", "cloudinary.com/example/"].some(str => url.toLowerCase().includes(str))
+                  );
+                  const finalSrc = validUrl || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
 
-                  {ticket.ticketTypes && ticket.ticketTypes.length > 0 && (
-                    <div className="absolute top-4 right-4 bg-brand-bright text-white text-sm font-bold pl-3 px-3 py-1 rounded-md font-bold text-sm">
-                      GHS {ticket.ticketTypes[0].price}.00
-                    </div>
-                  )}
+                  return (
+                    <img
+                      src={finalSrc}
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                      alt={ticket.title}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
+                      }}
+                    />
+                  );
+                })()}
+
+                <div className="absolute top-4 left-4 flex gap-2">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm text-white ${getEventStatus(ticket).color
+                      } ${getEventStatus(ticket).isActive ? "animate-pulse" : ""}`}
+                  >
+                    {getEventStatus(ticket).label}
+                  </span>
+                </div>
+
+                {ticket.ticketTypes && ticket.ticketTypes.length > 0 && (
+                  <div className="absolute top-4 right-4 bg-brand-bright text-white text-sm font-bold pl-3 px-3 py-1 rounded-md font-bold text-sm">
+                    GHS {ticket.ticketTypes[0].price}.00
+                  </div>
+                )}
               </div>
 
               {/* Stub Details - The "Rip-off" effect using a border-dashed line */}
@@ -181,11 +190,10 @@ export default function LiveTickets({ events }: { events: any[] }) {
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`p-2 rounded-full border transition-colors ${
-                currentPage === 1
-                  ? "border-white/10 text-white/30 cursor-not-allowed"
-                  : "border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-              }`}
+              className={`p-2 rounded-full border transition-colors ${currentPage === 1
+                ? "border-white/10 text-white/30 cursor-not-allowed"
+                : "border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                }`}
               aria-label="Previous page"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -198,11 +206,10 @@ export default function LiveTickets({ events }: { events: any[] }) {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`p-2 rounded-full border transition-colors ${
-                currentPage === totalPages
-                  ? "border-white/10 text-white/30 cursor-not-allowed"
-                  : "border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-              }`}
+              className={`p-2 rounded-full border transition-colors ${currentPage === totalPages
+                ? "border-white/10 text-white/30 cursor-not-allowed"
+                : "border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                }`}
               aria-label="Next page"
             >
               <ChevronRight className="w-5 h-5" />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Bell,
   Search,
@@ -118,12 +119,14 @@ export function Header({
             }}
             className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center overflow-hidden">
               {user.image ? (
-                <img
+                <Image
                   src={user.image}
                   alt={user.name || "User"}
-                  className="w-8 h-8 rounded-full object-cover"
+                  width={32}
+                  height={32}
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <User className="h-4 w-4 text-amber-600" />

@@ -28,6 +28,7 @@ import { clsx } from "clsx";
 import { EventForm } from "./EventForm";
 import { CategoriesManager } from "./CategoriesManager";
 import AdminEventActions from "@/app/(dashboard)/dashboard/events/AdminEventActions";
+import Image from "next/image";
 
 type EventDetails = {
   id: string;
@@ -299,10 +300,12 @@ export function AdminEventManager({
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
               <div className="h-64 bg-slate-100 w-full relative">
                 {event.imageUrl || event.coverImage ? (
-                  <img
-                    src={event.imageUrl || event.coverImage || ""}
+                  <Image
+                    src={event.imageUrl || event.coverImage || "/placeholder-event.png"}
                     alt={event.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-slate-400">
@@ -494,12 +497,13 @@ export function AdminEventManager({
                 Organizer
               </h3>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden">
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex-shrink-0 overflow-hidden relative">
                   {event.organizer.avatar ? (
-                    <img
+                    <Image
                       src={event.organizer.avatar}
                       alt={event.organizer.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold bg-indigo-50 text-indigo-600">
@@ -570,7 +574,11 @@ export function AdminEventManager({
 
       {activeTab === "edit" && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <EventForm eventId={event.id} backUrl={backUrl} />
+          <EventForm
+            eventId={event.id}
+            currentStatus={currentStatus}
+            backUrl={backUrl}
+          />
         </div>
       )}
 

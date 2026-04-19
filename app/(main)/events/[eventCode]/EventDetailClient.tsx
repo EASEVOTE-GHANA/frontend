@@ -24,6 +24,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TicketCheckoutModal } from "@/components/features/checkout/TicketCheckoutModal";
 import { getEventStatus } from "@/lib/utils/event-status";
+import Image from "next/image";
 
 interface EventDetailProps {
   event: any;
@@ -49,15 +50,15 @@ export default function EventDetailClient({
   });
   const router = useRouter();
 
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+
   const [votingStep, setVotingStep] = useState<"categories" | "nominees">(
     "categories",
   );
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
 
   // Live Results State
   const [resultsData, setResultsData] = useState<any>(null);
@@ -97,12 +98,15 @@ export default function EventDetailClient({
 
   const allCandidates = event.categories
     ? event.categories.flatMap((cat: any) =>
-        cat.candidates.map((c: any) => ({
-          ...c,
-          image: c.imageUrl || c.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=fce7f3&color=db2777&size=256`,
-          category: cat.name, // Ensure category name is attached (though mock data might already have it)
-        })),
-      )
+      cat.candidates.map((c: any) => ({
+        ...c,
+        image: (c.imageUrl && c.imageUrl !== "null" && c.imageUrl !== "undefined" && !c.imageUrl.includes("cloudinary.com/example/")) ? c.imageUrl :
+          (c.image && c.image !== "null" && c.image !== "undefined" && !c.image.includes("cloudinary.com/example/")) ? c.image :
+            null,
+        category: cat.name, // Ensure category name is attached
+        voteCount: c.voteCount ?? c.votes ?? 0,
+      })),
+    )
     : [];
 
   const categoriesMap = allCandidates.reduce(
@@ -137,10 +141,12 @@ export default function EventDetailClient({
 
       <div className="bg-slate-900 text-white relative">
         <div className="absolute inset-0 overflow-hidden">
-          <img
+          <Image
             src={event.imageUrl || event.coverImage || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"}
-            className="w-full h-full object-cover opacity-30 blur-sm"
-            alt="Cover"
+            alt="Hero Background"
+            fill
+            className="object-cover opacity-30 blur-sm"
+            priority
           />
           <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
         </div>
@@ -154,17 +160,19 @@ export default function EventDetailClient({
           </button>
 
           <div className="flex flex-col md:flex-row gap-8 items-end">
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800">
-              <img
+            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800 relative">
+              <Image
                 src={event.imageUrl || event.coverImage || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"}
-                className="w-full h-full object-cover"
                 alt="Event Logo"
+                fill
+                className="object-cover"
+                priority
               />
             </div>
 
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white ${getEventStatus(event).color}`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white! ${getEventStatus(event).color}`}>
                   {getEventStatus(event).label}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-white/10 text-xs font-bold uppercase tracking-wide">
@@ -188,15 +196,15 @@ export default function EventDetailClient({
                 )}
                 {(event.timelineEnd ||
                   getEventStatus(event).isActive) && (
-                  <div className="flex items-center gap-2">
-                    <Clock size={18} className="text-secondary-700" />
-                    {event.timelineEnd ? (
-                      <Countdown endTime={event.timelineEnd} />
-                    ) : (
-                      <span>Happening Now</span>
-                    )}
-                  </div>
-                )}
+                    <div className="flex items-center gap-2">
+                      <Clock size={18} className="text-secondary-700" />
+                      {event.timelineEnd ? (
+                        <Countdown endTime={event.timelineEnd} />
+                      ) : (
+                        <span>Happening Now</span>
+                      )}
+                    </div>
+                  )}
               </div>
 
               {/* Actions Bar */}
@@ -243,7 +251,7 @@ export default function EventDetailClient({
           <div className="flex space-x-8">
             {[
               ...(event.type === "VOTING" || event.type === "HYBRID"
-                ? getEventStatus(event).phase !== "ENDED" 
+                ? getEventStatus(event).phase !== "ENDED"
                   ? [{ id: "vote", label: "Vote", icon: Trophy }]
                   : []
                 : []),
@@ -252,8 +260,8 @@ export default function EventDetailClient({
                 : []),
               // Show Results tab for all Voting/Hybrid events
               // Prioritize it if ended or if live results are explicitly enabled
-              ...(event.type === "VOTING" || event.type === "HYBRID" 
-                ? [{ id: "results", label: "Results", icon: Trophy }] 
+              ...(event.type === "VOTING" || event.type === "HYBRID"
+                ? [{ id: "results", label: "Results", icon: Trophy }]
                 : []),
               { id: "overview", label: "About", icon: Info },
             ].map((tab) => (
@@ -264,11 +272,10 @@ export default function EventDetailClient({
                     tab.id as "vote" | "tickets" | "overview" | "results",
                   )
                 }
-                className={`py-4 flex items-center gap-2 font-bold border-b-2 ${
-                  activeTab === tab.id
+                className={`py-4 flex items-center gap-2 font-bold border-b-2 ${activeTab === tab.id
                     ? "border-secondary-200 text-secondary-700"
                     : "border-transparent text-slate-500"
-                }`}
+                  }`}
               >
                 <tab.icon size={16} /> {tab.label}
               </button>
@@ -285,40 +292,38 @@ export default function EventDetailClient({
             {/* STEP 1: Categories View */}
             {votingStep === "categories" && (
               <div>
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div>
-                      <h2 className="text-2xl font-display font-bold text-slate-900 mb-2">
-                        Select a Category
-                      </h2>
-                      <p className="text-slate-500">
-                        Choose a category to view nominees and cast your vote.
-                      </p>
-                    </div>
-                    
-                    {/* Phase Indicator */}
-                    {(() => {
-                      const status = getEventStatus(event);
-                      return (
-                        <div className={`px-4 py-2 rounded-2xl border flex items-center gap-2 self-start sm:self-center ${
-                          status.isActive 
-                            ? (status.phase === "VOTING" ? "bg-green-50 border-green-100 text-green-700" : "bg-blue-50 border-blue-100 text-blue-700")
-                            : "bg-slate-50 border-slate-100 text-slate-700"
-                        }`}>
-                          <span className={`w-2 h-2 rounded-full ${
-                            status.phase === "VOTING" ? "bg-green-500 animate-pulse" : 
-                            status.phase === "NOMINATION" ? "bg-blue-500" : 
-                            "bg-slate-400"
-                          }`}></span>
-                          <span className="text-xs font-bold uppercase tracking-wider">
-                            {status.phase === "VOTING" ? "Voting is Live" : 
-                             status.phase === "NOMINATION" ? "Nominations Open" : 
-                             status.phase === "ENDED" ? "Voting Ended" : 
-                             "Voting Starting Soon"}
-                          </span>
-                        </div>
-                      );
-                    })()}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                  <div>
+                    <h2 className="text-2xl font-display font-bold text-slate-900 mb-2">
+                      Select a Category
+                    </h2>
+                    <p className="text-slate-500">
+                      Choose a category to view nominees and cast your vote.
+                    </p>
                   </div>
+
+                  {/* Phase Indicator */}
+                  {(() => {
+                    const status = getEventStatus(event);
+                    return (
+                      <div className={`px-4 py-2 rounded-2xl border flex items-center gap-2 self-start sm:self-center ${status.isActive
+                          ? (status.phase === "VOTING" ? "bg-green-50 border-green-100 text-green-700" : "bg-blue-50 border-blue-100 text-blue-700")
+                          : "bg-slate-50 border-slate-100 text-slate-700"
+                        }`}>
+                        <span className={`w-2 h-2 rounded-full ${status.phase === "VOTING" ? "bg-green-500 animate-pulse" :
+                            status.phase === "NOMINATION" ? "bg-blue-500" :
+                              "bg-slate-400"
+                          }`}></span>
+                        <span className="text-xs font-bold uppercase tracking-wider">
+                          {status.phase === "VOTING" ? "Voting is Live" :
+                            status.phase === "NOMINATION" ? "Nominations Open" :
+                              status.phase === "ENDED" ? "Voting Ended" :
+                                "Voting Starting Soon"}
+                        </span>
+                      </div>
+                    );
+                  })()}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {categories.map((cat: any) => (
@@ -393,11 +398,19 @@ export default function EventDetailClient({
                         className="bg-white rounded-4xl p-4 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col"
                       >
                         <div className="relative aspect-square rounded-[1.5rem] overflow-hidden mb-4 bg-gray-100">
-                          <img
-                            src={candidate.image}
-                            alt={candidate.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
+                          {candidate.image ? (
+                            <Image
+                              src={candidate.image}
+                              alt={candidate.name}
+                              fill
+                              className="object-cover group-hover:scale-110 transition-transform duration-500"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-magenta-50 flex items-center justify-center text-magenta-600 font-bold text-6xl uppercase font-display transition-transform duration-500 group-hover:scale-110">
+                              {candidate.name.charAt(0)}
+                            </div>
+                          )}
                           <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono font-bold">
                             {candidate.code}
                           </div>
@@ -427,7 +440,7 @@ export default function EventDetailClient({
                           ) : (
                             <Link
                               href={`/events/${event.eventCode}/vote/${candidate._id || candidate.id}`}
-                              className="mt-auto w-full bg-primary-800 hover:bg-primary-900 text-white py-3 rounded-xl font-bold hover:-translate-y-1 transition-all shadow-lg shadow-primary-900/20 flex items-center justify-center"
+                              className="mt-auto w-full bg-primary-800 hover:bg-primary-900 text-white! py-3 rounded-xl font-bold hover:-translate-y-1 transition-all shadow-lg shadow-primary-900/20 flex items-center justify-center"
                             >
                               Vote
                             </Link>
@@ -516,133 +529,140 @@ export default function EventDetailClient({
         {/* ---------------- RESULTS TAB ---------------- */}
         {activeTab === "results" && (
           <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-10 relative">
-                {isResultsForbidden && getEventStatus(event).phase !== "ENDED" ? (
-                  <div className="bg-amber-50 border border-amber-100 p-6 rounded-2xl">
-                    <Trophy className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-                    <h2 className="text-xl font-bold text-amber-900 mb-2">Results are Hidden</h2>
-                    <p className="text-amber-700 text-sm">
-                      The organizer has hidden live results. Final tallies will be revealed once voting ends.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {getEventStatus(event).phase !== "ENDED" && (
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full mb-4">
-                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
-                        <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Refreshing Live</span>
-                      </div>
-                    )}
-                    <h2 className="text-3xl font-bold font-display text-slate-900 mb-2">
-                      {getEventStatus(event).phase === "ENDED" ? "Final Results" : "Live Results"}
-                    </h2>
-                    <p className="text-slate-500">
-                      {getEventStatus(event).phase === "ENDED" 
-                        ? "Official final tallies for all categories." 
-                        : "Top performing candidates across all categories."
-                      }
-                    </p>
-                  </>
-                )}
-              </div>
+            <div className="text-center mb-10 relative">
+              {isResultsForbidden && getEventStatus(event).phase !== "ENDED" ? (
+                <div className="bg-amber-50 border border-amber-100 p-6 rounded-2xl">
+                  <Trophy className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+                  <h2 className="text-xl font-bold text-amber-900 mb-2">Results are Hidden</h2>
+                  <p className="text-amber-700 text-sm">
+                    The organizer has hidden live results. Final tallies will be revealed once voting ends.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {getEventStatus(event).phase !== "ENDED" && (
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full mb-4">
+                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
+                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Refreshing Live</span>
+                    </div>
+                  )}
+                  <h2 className="text-3xl font-bold font-display text-slate-900 mb-2">
+                    {getEventStatus(event).phase === "ENDED" ? "Final Results" : "Live Results"}
+                  </h2>
+                  <p className="text-slate-500">
+                    {getEventStatus(event).phase === "ENDED"
+                      ? "Official final tallies for all categories."
+                      : "Top performing candidates across all categories."
+                    }
+                  </p>
+                </>
+              )}
+            </div>
 
             {!isResultsForbidden && (
               <div className="space-y-12">
                 {(resultsData?.categories || event.categories).map((category: any) => {
-                const sortedCandidates = [...category.candidates].sort(
-                  (a: any, b: any) => (b.voteCount || 0) - (a.voteCount || 0),
-                );
-
-                if (sortedCandidates.length === 0) return null;
-
-                const categoryTotalVotes =
-                  category.totalVotes ||
-                  sortedCandidates.reduce(
-                    (acc, c) => acc + (c.voteCount || 0),
-                    0,
+                  const sortedCandidates = [...category.candidates].sort(
+                    (a: any, b: any) => (b.voteCount ?? b.votes ?? 0) - (a.voteCount ?? a.votes ?? 0),
                   );
 
-                return (
-                  <div
-                    key={category.id}
-                    className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
-                  >
-                    <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                      <h3 className="text-xl font-bold text-slate-900">
-                        {category.name}
-                      </h3>
-                      <span className="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-gray-200">
-                        {event.showVoteCount
-                          ? `${categoryTotalVotes.toLocaleString()} votes`
-                          : `${sortedCandidates.length} candidates`}
-                      </span>
-                    </div>
+                  if (sortedCandidates.length === 0) return null;
 
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left">
-                        <thead>
-                          <tr className="bg-gray-50/30 text-slate-500 text-xs uppercase tracking-wider font-bold">
-                            <th className="px-6 py-4 w-16 text-center">Rank</th>
-                            <th className="px-6 py-4">Candidate</th>
-                            <th className="px-6 py-4 text-right">Votes</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {sortedCandidates.map((candidate, index) => (
-                            <tr
-                              key={candidate._id || candidate.id}
-                              className="hover:bg-gray-50/50 transition-colors"
-                            >
-                              <td className="px-6 py-4 text-center">
-                                <div
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mx-auto ${
-                                    index === 0
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : index === 1
-                                        ? "bg-gray-100 text-slate-600"
-                                        : index === 2
-                                          ? "bg-orange-100 text-orange-700"
-                                          : "bg-transparent text-slate-400"
-                                  }`}
-                                >
-                                  {index + 1}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
-                                    <img
-                                    src={candidate.imageUrl || candidate.image}
-                                      alt={candidate.name}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                  <div>
-                                    <div className="font-bold text-slate-900">
-                                      {candidate.name}
-                                    </div>
-                                    <div className="text-xs text-slate-500 font-mono">
-                                      {candidate.code}
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-right">
-                                <span className="font-bold text-slate-900">
-                                  {event.showVoteCount
-                                    ? (
-                                        candidate.voteCount || 0
-                                      ).toLocaleString()
-                                    : "---"}
-                                </span>
-                              </td>
+                  const categoryTotalVotes =
+                    category.totalVotes ||
+                    sortedCandidates.reduce(
+                      (acc, c) => acc + (c.voteCount ?? c.votes ?? 0),
+                      0,
+                    );
+
+                  return (
+                    <div
+                      key={category.id}
+                      className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+                    >
+                      <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-slate-900">
+                          {category.name}
+                        </h3>
+                        <span className="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-gray-200">
+                          {event.showVoteCount
+                            ? `${categoryTotalVotes.toLocaleString()} votes`
+                            : `${sortedCandidates.length} candidates`}
+                        </span>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="bg-gray-50/30 text-slate-500 text-xs uppercase tracking-wider font-bold">
+                              <th className="px-6 py-4 w-16 text-center">Rank</th>
+                              <th className="px-6 py-4">Candidate</th>
+                              <th className="px-6 py-4 text-right">Votes</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {sortedCandidates.map((candidate, index) => (
+                              <tr
+                                key={candidate._id || candidate.id}
+                                className="hover:bg-gray-50/50 transition-colors"
+                              >
+                                <td className="px-6 py-4 text-center">
+                                  <div
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mx-auto ${index === 0
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : index === 1
+                                          ? "bg-gray-100 text-slate-600"
+                                          : index === 2
+                                            ? "bg-orange-100 text-orange-700"
+                                            : "bg-transparent text-slate-400"
+                                      }`}
+                                  >
+                                    {index + 1}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 relative shrink-0">
+                                      {candidate.imageUrl || candidate.image ? (
+                                        <Image
+                                          src={candidate.imageUrl || candidate.image}
+                                          alt={candidate.name}
+                                          fill
+                                          className="object-cover"
+                                          sizes="40px"
+                                        />
+                                      ) : (
+                                        <div className="w-full h-full bg-magenta-100 text-magenta-600 flex items-center justify-center font-bold uppercase text-xs">
+                                          {candidate.name.charAt(0)}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <div className="font-bold text-slate-900">
+                                        {candidate.name}
+                                      </div>
+                                      <div className="text-xs text-slate-500 font-mono">
+                                        {candidate.code}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 text-right">
+                                  <span className="font-bold text-slate-900">
+                                    {event.showVoteCount
+                                      ? (
+                                        candidate.voteCount ?? candidate.votes ?? 0
+                                      ).toLocaleString()
+                                      : "---"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
                 })}
               </div>
             )}

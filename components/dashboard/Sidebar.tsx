@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { clsx } from "clsx";
 import { useState } from "react";
+import Image from "next/image";
 import type { NavigationSection } from "@/lib/navigation";
 
 type SidebarProps = {
@@ -50,7 +51,7 @@ export function Sidebar({
         {!isCollapsed && (
           <div className="flex items-center gap-2">
             {logo || (
-              <img src="/easevote.svg" alt="EaseVote" className="w-8 h-8 rounded-lg" />
+              <Image src="/easevote.svg" alt="EaseVote" width={32} height={32} className="rounded-lg" />
             )}
             <div className="flex flex-col">
               <span className="font-semibold text-sm">EaseVote</span>
@@ -60,7 +61,7 @@ export function Sidebar({
         )}
         {isCollapsed && (
           <div className="mx-auto">
-            <img src="/easevote.svg" alt="EaseVote" className="w-8 h-8 rounded-lg" />
+            <Image src="/easevote.svg" alt="EaseVote" width={32} height={32} className="rounded-lg" />
           </div>
         )}
       </div>

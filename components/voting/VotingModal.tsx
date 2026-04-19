@@ -124,7 +124,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
               <button
                 onClick={handleVote}
                 disabled={isProcessing}
-                className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-magenta-600 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-4 rounded-xl bg-slate-900 text-white! font-bold hover:bg-magenta-600 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isProcessing ? (
                   "Processing..."
@@ -150,7 +150,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
 
               <button
                 onClick={resetAndClose}
-                className="w-full py-3 rounded-xl bg-magenta-600 text-white font-bold hover:bg-magenta-700 transition"
+                className="w-full py-3 rounded-xl bg-magenta-600 text-white! font-bold hover:bg-magenta-700 transition"
               >
                 Done
               </button>

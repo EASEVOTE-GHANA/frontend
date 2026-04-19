@@ -18,9 +18,11 @@ import {
   Plus,
   Trash2,
   ExternalLink,
+  Clock,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { clsx } from "clsx";
+import Image from "next/image";
 
 type TicketTypeForm = {
   id: string;
@@ -75,16 +77,18 @@ type Event = {
 
 interface EventFormProps {
   eventId: string;
+  currentStatus?: string;
   backUrl?: string; // Where to go on cancel/back (e.g. /dashboard/events or /dashboard/events)
 }
 
-export function EventForm({ eventId, backUrl }: EventFormProps) {
+export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
   const router = useRouter();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -103,6 +107,10 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
     allowPublicNominations: false,
     imageUrl: "",
     imagePublicId: "",
+    votingStartDate: "",
+    votingStartTime: "09:00",
+    votingEndDate: "",
+    votingEndTime: "23:59",
   });
 
   const [ticketTypes, setTicketTypes] = useState<TicketTypeForm[]>([]);
@@ -131,10 +139,16 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
   const updateTicketType = (
     id: string,
     field: keyof TicketTypeForm,
-    value: string | number,
+    value: string,
   ) => {
+    let newValue = value;
+    // Strip leading zeros for quantities/prices unless it's a decimal like 0.5
+    if ((field === "price" || field === "quantity" || field === "maxPerOrder") && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+      newValue = newValue.replace(/^0+/, "");
+    }
+
     setTicketTypes((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)),
+      prev.map((t) => (t.id === id ? { ...t, [field]: newValue } : t)),
     );
   };
 
@@ -191,6 +205,8 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
 
         const start = parseDateTime(d.startDate);
         const end = parseDateTime(d.endDate);
+        const vStart = parseDateTime(d.votingStartTime || d.votingStartDate || d.startDate);
+        const vEnd = parseDateTime(d.votingEndTime || d.votingEndDate || d.endDate);
 
         setFormData({
           title: d.title || "",
@@ -200,6 +216,10 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
           startTime: start.time,
           endDate: end.date,
           endTime: end.time,
+          votingStartDate: vStart.date,
+          votingStartTime: vStart.time,
+          votingEndDate: vEnd.date,
+          votingEndTime: vEnd.time,
           costPerVote:
             d.costPerVote?.toString() || d.votePrice?.toString() || "",
           minVotesPerPurchase:
@@ -265,7 +285,62 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      let newValue = value;
+      // Strip leading zeros for numeric fields (but allow 0.5 etc)
+      if (type === "number" && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+        newValue = newValue.replace(/^0+/, "");
+      }
+      setFormData((prev) => ({ ...prev, [name]: newValue }));
+    }
+  };
+
+  const handleImageDelete = async () => {
+    if (confirm("Are you sure you want to remove the cover image?")) {
+      try {
+        if (formData.imagePublicId) {
+          await api.deleteImage(formData.imagePublicId).catch(console.error);
+        }
+        setFormData((prev) => ({ ...prev, imageUrl: "", imagePublicId: "" }));
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      alert("Invalid file type. Please upload a JPEG, PNG, or WEBP image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File is too large. Maximum size allowed is 5MB.");
+      return;
+    }
+
+    const uploadForm = new FormData();
+    uploadForm.append("image", file);
+    uploadForm.append("folder", "events");
+
+    try {
+      setIsUploadingImage(true);
+      if (formData.imagePublicId) {
+        await api.deleteImage(formData.imagePublicId).catch(console.error);
+      }
+      const res = await api.uploadFormData("/upload/image", uploadForm);
+      setFormData((prev) => ({
+        ...prev,
+        imageUrl: res.url || res.imageUrl,
+        imagePublicId: res.publicId,
+      }));
+      setSuccess("Image uploaded successfully!");
+    } catch (err) {
+      alert("Upload failed. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
@@ -281,8 +356,35 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
 
       const startISO = formData.startDate ? new Date(`${formData.startDate}T${formData.startTime}:00`).toISOString() : undefined;
       const endISO = formData.endDate ? new Date(`${formData.endDate}T${formData.endTime}:00`).toISOString() : undefined;
+      
+      const votingStartISO = (formData.type === "VOTING" || formData.type === "HYBRID") && formData.votingStartDate 
+        ? new Date(`${formData.votingStartDate}T${formData.votingStartTime}:00`).toISOString() 
+        : undefined;
+      const votingEndISO = (formData.type === "VOTING" || formData.type === "HYBRID") && formData.votingEndDate 
+        ? new Date(`${formData.votingEndDate}T${formData.votingEndTime}:00`).toISOString() 
+        : undefined;
+
+      // Validation
+      if ((formData.type === "VOTING" || formData.type === "HYBRID")) {
+        if (!votingStartISO || !votingEndISO) {
+          setError("Voting start and end dates are required for voting events.");
+          return;
+        }
+
+        // Window bounds validation
+        if (startISO && votingStartISO && new Date(votingStartISO) < new Date(startISO)) {
+          setError("Voting cannot start before the event starts.");
+          return;
+        }
+        if (endISO && votingEndISO && new Date(votingEndISO) > new Date(endISO)) {
+          setError("Voting cannot end after the event ends.");
+          return;
+        }
+      }
+
       const { 
         startDate, startTime, endDate, endTime,
+        votingStartDate, votingStartTime, votingEndDate, votingEndTime,
         ...cleanedData 
       } = formData;
 
@@ -290,6 +392,8 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
         ...cleanedData,
         ...(startISO && startISO !== originalStart ? { startDate: startISO } : {}),
         ...(endISO && endISO !== originalEnd ? { endDate: endISO } : {}),
+        ...(votingStartISO ? { votingStartTime: votingStartISO, votingStartDate: votingStartISO } : {}),
+        ...(votingEndISO ? { votingEndTime: votingEndISO, votingEndDate: votingEndISO } : {}),
         costPerVote: formData.costPerVote ? parseFloat(formData.costPerVote) : null,
         minVotesPerPurchase: parseInt(formData.minVotesPerPurchase) || 1,
         maxVotesPerPurchase: formData.maxVotesPerPurchase ? parseInt(formData.maxVotesPerPurchase) : null,
@@ -358,7 +462,8 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
     );
   }
 
-  const isLive = event.status === "LIVE";
+  const status = currentStatus || event.status;
+  const isLive = status === "LIVE";
   const backHref = backUrl || `/dashboard/events/${eventId}`;
 
   return (
@@ -378,12 +483,21 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
         </div>
       </div>
 
-      {isLive && (
+      {isLive && status === "LIVE" && (
         <div className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <AlertCircle className="h-5 w-5 text-yellow-600" />
           <p className="text-sm text-yellow-800">
             This event is currently live. Only certain fields can be edited. To
             make major changes, please pause the event first.
+          </p>
+        </div>
+      )}
+
+      {status === "PAUSED" && (
+        <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <Clock className="h-5 w-5 text-blue-600" />
+          <p className="text-sm text-blue-800">
+            This event is currently paused. You can edit all fields and then resume the event from the dashboard.
           </p>
         </div>
       )}
@@ -440,76 +554,75 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
                 Cover Image
               </label>
               <div className="flex flex-col gap-4">
-                {formData.imageUrl && (
-                  <div className="relative w-full h-48 bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
-                    <img
+                {formData.imageUrl ? (
+                  <div className="group relative w-full h-64 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                    <Image
                       src={formData.imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
+                      alt="Event Cover"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (formData.imagePublicId) {
-                          await api.deleteImage(formData.imagePublicId).catch(console.error);
-                        }
-                        setFormData(prev => ({ ...prev, imageUrl: "", imagePublicId: "" }));
-                      }}
-                      className="absolute top-2 right-2 p-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    
+                    {/* Hover Overlay */}
+                    <div className={clsx(
+                      "absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-all duration-300 flex items-center justify-center gap-3",
+                      isUploadingImage ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    )}>
+                      {isUploadingImage ? (
+                        <div className="flex flex-col items-center gap-2 text-white">
+                          <Loader2 className="h-8 w-8 animate-spin" />
+                          <span className="text-xs font-medium">Uploading...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <label className="flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white text-slate-900 rounded-full cursor-pointer transition-all transform translate-y-2 group-hover:translate-y-0 shadow-lg group-active:scale-95">
+                            <ImageIcon className="h-4 w-4" />
+                            <span className="text-sm font-semibold">Replace Cover Image</span>
+                            <input
+                              type="file"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleImageDelete}
+                            className="p-2.5 bg-red-600/90 hover:bg-red-600 text-white rounded-full transition-all transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:rotate-12 active:scale-95"
+                          >
+                            <Trash2 className="h-4.5 w-4.5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 hover:border-primary-400 transition-all group overflow-hidden relative">
+                    {isUploadingImage ? (
+                      <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2 text-primary-600 animate-in fade-in">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                        <span className="text-xs font-medium">Uploading cover image...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 transition-transform duration-300 group-hover:scale-105 text-center px-4">
+                        <div className="p-3 bg-slate-100 rounded-full text-slate-400 group-hover:bg-primary-50 group-hover:text-primary-500 transition-colors">
+                          <ImageIcon className="h-8 w-8" />
+                        </div>
+                        <div>
+                          <span className="block text-sm font-semibold text-slate-900">Upload Cover Image</span>
+                          <span className="block text-xs text-slate-500 mt-1">Recommended size: 1200x630 (PNG, JPG or WEBP)</span>
+                        </div>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={isUploadingImage}
+                    />
+                  </label>
                 )}
-                
-                <label className={clsx(
-                  "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors",
-                  formData.imageUrl && "h-12 border-none bg-slate-100 hover:bg-slate-200"
-                )}>
-                  <div className="flex flex-center gap-2">
-                    <ImageIcon className="h-5 w-5 text-slate-400" />
-                    <span className="text-sm text-slate-600 font-medium">
-                      {formData.imageUrl ? "Replace cover image" : "Upload cover image"}
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-
-                      // Validate
-                      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-                        alert("Invalid type");
-                        return;
-                      }
-                      if (file.size > 5 * 1024 * 1024) {
-                        alert("File too large");
-                        return;
-                      }
-
-                      const uploadForm = new FormData();
-                      uploadForm.append("image", file);
-                      uploadForm.append("folder", "events");
-
-                      try {
-                        if (formData.imagePublicId) {
-                          await api.deleteImage(formData.imagePublicId).catch(console.error);
-                        }
-                        const res = await api.uploadFormData("/upload/image", uploadForm);
-                        setFormData(prev => ({
-                          ...prev,
-                          imageUrl: res.url || res.imageUrl,
-                          imagePublicId: res.publicId
-                        }));
-                      } catch (err) {
-                        alert("Upload failed");
-                      }
-                    }}
-                  />
-                </label>
               </div>
             </div>
 
@@ -518,17 +631,23 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Event Type
                 </label>
-                <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
-                  disabled={isLive}
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
-                >
-                  <option value="VOTING">Voting</option>
-                  <option value="TICKETING">Ticketing</option>
-                  <option value="HYBRID">Hybrid</option>
-                </select>
+                {eventId ? (
+                  <div className="w-full px-4 py-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 font-medium flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary-500" />
+                    {formData.type.charAt(0) + formData.type.slice(1).toLowerCase()}
+                  </div>
+                ) : (
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="VOTING">Voting</option>
+                    <option value="TICKETING">Ticketing</option>
+                    <option value="HYBRID">Hybrid</option>
+                  </select>
+                )}
               </div>
 
               <div>
@@ -645,6 +764,88 @@ export function EventForm({ eventId, backUrl }: EventFormProps) {
             </div>
           </div>
         </div>
+
+        {(formData.type === "VOTING" || formData.type === "HYBRID") && (
+          <div className="bg-white rounded-xl border border-slate-200 p-6 mt-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <div className="p-1.5 bg-yellow-50 rounded-lg">
+                <Clock className="h-5 w-5 text-yellow-600" />
+              </div>
+              Voting Window (Required)
+            </h3>
+            <p className="text-xs text-slate-500 mb-4 -mt-2">
+              Define the exact period when votes can be cast. This can be different from the general event dates.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-slate-700">
+                  <Calendar className="h-4 w-4 inline mr-1" />
+                  Voting Opens *
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1 group">
+                    <input
+                      type="date"
+                      name="votingStartDate"
+                      value={formData.votingStartDate}
+                      onChange={handleChange}
+                      onClick={(e) => e.currentTarget.showPicker()}
+                      onKeyDown={(e) => e.preventDefault()}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 peer"
+                      required
+                    />
+                    <div className="w-full h-full px-4 py-2.5 border border-slate-200 rounded-lg bg-white flex items-center transition-all peer-focus:ring-2 peer-focus:ring-primary-500 peer-focus:border-primary-500 peer-hover:border-primary-300">
+                      <span className={formData.votingStartDate ? "text-slate-900" : "text-slate-400"}>
+                        {formData.votingStartDate ? formatInputDate(formData.votingStartDate) : "mm/dd/yyyy"}
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    type="time"
+                    name="votingStartTime"
+                    value={formData.votingStartTime}
+                    onChange={handleChange}
+                    className="w-32 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 hover:border-primary-300 transition-all cursor-pointer bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-slate-700">
+                  <Calendar className="h-4 w-4 inline mr-1" />
+                  Voting Closes *
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1 group">
+                    <input
+                      type="date"
+                      name="votingEndDate"
+                      value={formData.votingEndDate}
+                      min={formData.votingStartDate}
+                      onChange={handleChange}
+                      onClick={(e) => e.currentTarget.showPicker()}
+                      onKeyDown={(e) => e.preventDefault()}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 peer"
+                      required
+                    />
+                    <div className="w-full h-full px-4 py-2.5 border border-slate-200 rounded-lg bg-white flex items-center transition-all peer-focus:ring-2 peer-focus:ring-primary-500 peer-focus:border-primary-500 peer-hover:border-primary-300">
+                      <span className={formData.votingEndDate ? "text-slate-900" : "text-slate-400"}>
+                        {formData.votingEndDate ? formatInputDate(formData.votingEndDate) : "mm/dd/yyyy"}
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    type="time"
+                    name="votingEndTime"
+                    value={formData.votingEndTime}
+                    onChange={handleChange}
+                    className="w-32 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 hover:border-primary-300 transition-all cursor-pointer bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h3 className="text-lg font-semibold text-slate-900 mb-4">

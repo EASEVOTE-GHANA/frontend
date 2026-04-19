@@ -173,7 +173,12 @@ export default function CreateEventPage() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      let newValue = value;
+      // Strip leading zeros for numeric fields (but allow 0.5 etc)
+      if (type === "number" && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+        newValue = newValue.replace(/^0+/, "");
+      }
+      setFormData((prev) => ({ ...prev, [name]: newValue }));
     }
   };
 
@@ -207,8 +212,14 @@ export default function CreateEventPage() {
     field: keyof TicketTypeForm,
     value: string,
   ) => {
+    let newValue = value;
+    // Strip leading zeros for numeric fields (but allow 0.5 etc)
+    if ((field === "price" || field === "quantity" || field === "maxPerOrder") && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+      newValue = newValue.replace(/^0+/, "");
+    }
+
     setTicketTypes((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)),
+      prev.map((t) => (t.id === id ? { ...t, [field]: newValue } : t)),
     );
   };
 

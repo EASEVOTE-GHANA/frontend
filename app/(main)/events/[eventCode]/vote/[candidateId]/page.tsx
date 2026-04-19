@@ -54,7 +54,7 @@ export default async function VotePage({
       event={clientEvent as any}
       candidate={{ 
         ...candidate, 
-        image: candidate.image ?? "",
+        image: candidate.imageUrl || candidate.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(candidate.name)}&background=fce7f3&color=db2777&size=256`,
         categoryId: categoryId 
       }}
     />
