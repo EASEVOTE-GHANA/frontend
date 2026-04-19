@@ -22,6 +22,8 @@ export default async function EarningsPage() {
     totalRevenue: Number(balanceRes?.data?.netRevenue ?? 0),
     grossRevenue: Number(balanceRes?.data?.grossRevenue ?? 0),
     totalWithdrawn: Number(balanceRes?.data?.totalWithdrawn ?? 0),
+    unverifiedRevenue: Number(balanceRes?.data?.unverifiedRevenue ?? 0),
+    hasGaps: Boolean(balanceRes?.data?.hasGaps),
   };
 
   // Fetch payout/transaction history via /api/payouts/me

@@ -186,7 +186,6 @@ export const organizerNavigation: NavigationSection[] = [
     title: "Financial",
     items: [
       { name: "Earnings", href: "/dashboard/earnings", icon: DollarSign },
-      { name: "Payout History", href: "/dashboard/payouts", icon: CreditCard },
     ],
   },
   {

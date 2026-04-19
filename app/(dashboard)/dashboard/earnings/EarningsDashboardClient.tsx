@@ -21,18 +21,6 @@ import { clsx } from "clsx";
 import { api } from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 
-type Transaction = {
-  id: string;
-  reference: string;
-  type: string;
-  amount: number;
-  status: string;
-  createdAt: string;
-  eventName: string;
-  customerName: string;
-  paymentMethod: string;
-};
-
 interface DashboardProps {
   stats: {
     balance: number;
@@ -42,7 +30,17 @@ interface DashboardProps {
     unverifiedRevenue?: number;
     hasGaps?: boolean;
   };
-  transactions: Transaction[];
+  transactions: {
+    id: string;
+    reference: string;
+    type: string;
+    amount: number;
+    status: string;
+    createdAt: string;
+    eventName: string;
+    customerName: string;
+    paymentMethod: string;
+  }[];
 }
 
 export default function EarningsDashboardClient({
@@ -80,6 +78,32 @@ export default function EarningsDashboardClient({
 
     return matchesFilter && matchesSearch;
   });
+
+  const StatusBadge = ({ status }: { status: string }) => {
+    const styles = {
+      PAID: "bg-green-100 text-green-700 border-green-200",
+      COMPLETED: "bg-green-100 text-green-700 border-green-200",
+      PENDING: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      PROCESSING: "bg-blue-100 text-blue-700 border-blue-200",
+      REJECTED: "bg-red-100 text-red-700 border-red-200",
+      FAILED: "bg-red-100 text-red-700 border-red-200",
+    };
+    const style =
+      styles[status as keyof typeof styles] || "bg-gray-100 text-gray-700";
+
+    return (
+      <span
+        className={clsx(
+          "px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-tighter",
+          style
+        )}
+      >
+        {status.toLowerCase()}
+      </span>
+    );
+  };
+
+
 
   const handleRequestPayout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,29 +160,7 @@ export default function EarningsDashboardClient({
     }
   };
 
-  const StatusBadge = ({ status }: { status: string }) => {
-    const styles = {
-      PAID: "bg-green-100 text-green-700 border-green-200",
-      COMPLETED: "bg-green-100 text-green-700 border-green-200",
-      PENDING: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      PROCESSING: "bg-blue-100 text-blue-700 border-blue-200",
-      REJECTED: "bg-red-100 text-red-700 border-red-200",
-      FAILED: "bg-red-100 text-red-700 border-red-200",
-    };
-    const style =
-      styles[status as keyof typeof styles] || "bg-gray-100 text-gray-700";
 
-    return (
-      <span
-        className={clsx(
-          "px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-tighter",
-          style
-        )}
-      >
-        {status.toLowerCase()}
-      </span>
-    );
-  };
 
   return (
     <div className="space-y-8">
@@ -218,20 +220,20 @@ export default function EarningsDashboardClient({
       {/* Wallet & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Main Wallet Card */}
-        <div className="md:col-span-2 bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/20 rounded-full blur-[80px]"></div>
+        <div className="md:col-span-2 bg-primary-700 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-primary-900/20">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px]"></div>
           <div className="relative z-10 flex flex-col justify-between h-full min-h-[160px]">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-slate-400 font-bold mb-1 uppercase text-xs tracking-widest">
+                <p className="text-primary-100/80 font-bold mb-1 uppercase text-xs tracking-widest">
                   Withdrawable Balance
                 </p>
-                <h2 className="text-5xl font-black tracking-tighter">
+                <h2 className="text-5xl font-black tracking-tighter text-white!">
                   GHS {stats.balance.toFixed(2)}
                 </h2>
               </div>
               <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md border border-white/10">
-                <Wallet size={32} className="text-primary-400" />
+                <Wallet size={32} className="text-primary-100" />
               </div>
             </div>
 
@@ -239,14 +241,14 @@ export default function EarningsDashboardClient({
               <button
                 onClick={() => setIsModalOpen(true)}
                 disabled={stats.balance <= 0}
-                className="flex items-center gap-2 px-8 py-4 bg-white text-slate-900 rounded-2xl font-black hover:bg-primary-50 transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-8 py-4 bg-white text-primary-900 rounded-2xl font-black hover:bg-primary-50 transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
               >
                 Request Payout <ArrowUpRight size={20} />
               </button>
               <div className="flex items-center gap-4 px-6 py-4 bg-white/5 border border-white/10 rounded-2xl">
                  <div className="text-left">
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Withdrawn</p>
-                    <p className="font-bold">GHS {stats.totalWithdrawn.toFixed(2)}</p>
+                    <p className="text-[10px] text-primary-100/60 font-black uppercase tracking-widest">Total Withdrawn</p>
+                    <p className="font-bold text-white!">GHS {stats.totalWithdrawn.toFixed(2)}</p>
                  </div>
               </div>
             </div>
@@ -362,6 +364,8 @@ export default function EarningsDashboardClient({
           </table>
         </div>
       </div>
+
+
 
       {/* Payout Request Modal */}
       {isModalOpen && (
