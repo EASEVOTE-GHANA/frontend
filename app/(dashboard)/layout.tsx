@@ -48,7 +48,7 @@ export default function UnifiedDashboardLayout({
       }}
       portalName={portalName}
       profileUrl={profileUrl}
-      settingsUrl={profileUrl}
+      settingsUrl="/dashboard/settings"
     >
       {role === "ORGANIZER" && <OrganizerStatusBanner />}
       {children}
