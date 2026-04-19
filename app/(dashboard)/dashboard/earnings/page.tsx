@@ -20,6 +20,7 @@ export default async function EarningsPage() {
   const stats = {
     balance: Number(balanceRes?.data?.availableBalance ?? 0),
     totalRevenue: Number(balanceRes?.data?.netRevenue ?? 0),
+    grossRevenue: Number(balanceRes?.data?.grossRevenue ?? 0),
     totalWithdrawn: Number(balanceRes?.data?.totalWithdrawn ?? 0),
   };
 

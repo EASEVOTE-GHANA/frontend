@@ -13,7 +13,9 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  Clock
+  Clock,
+  Zap,
+  ArrowRight
 } from "lucide-react";
 import { clsx } from "clsx";
 import { api } from "@/lib/api-client";
@@ -35,7 +37,10 @@ interface DashboardProps {
   stats: {
     balance: number;
     totalRevenue: number;
+    grossRevenue: number;
     totalWithdrawn: number;
+    unverifiedRevenue?: number;
+    hasGaps?: boolean;
   };
   transactions: Transaction[];
 }
@@ -59,6 +64,8 @@ export default function EarningsDashboardClient({
     bankOrNetwork: "MTN"
   });
   const [error, setError] = useState("");
+  const [isReconciling, setIsReconciling] = useState(false);
+  const [reconcileSuccess, setReconcileSuccess] = useState(false);
 
   const filteredTransactions = transactions.filter((tx) => {
     const matchesFilter =
@@ -100,6 +107,35 @@ export default function EarningsDashboardClient({
     }
   };
 
+  const handleReconcileAll = async () => {
+    setIsReconciling(true);
+    setError("");
+    try {
+      // 1. Get gaps
+      const gapsRes = await api.get("/reconciliation/gaps");
+      const gaps = gapsRes.data || [];
+      
+      if (gaps.length === 0) {
+        setReconcileSuccess(true);
+        setTimeout(() => setReconcileSuccess(false), 3000);
+        return;
+      }
+
+      // 2. Reconcile each
+      for (const gap of gaps) {
+        await api.post(`/reconciliation/reconcile/${gap.eventId}`);
+      }
+
+      setReconcileSuccess(true);
+      setTimeout(() => setReconcileSuccess(false), 3000);
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Failed to reconcile revenue");
+    } finally {
+      setIsReconciling(false);
+    }
+  };
+
   const StatusBadge = ({ status }: { status: string }) => {
     const styles = {
       PAID: "bg-green-100 text-green-700 border-green-200",
@@ -137,11 +173,47 @@ export default function EarningsDashboardClient({
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition shadow-sm">
-            <Download size={16} /> Export Statement
-          </button>
         </div>
       </div>
+
+      {/* Reconciliation Alert */}
+      {stats.hasGaps && (
+        <div className="bg-primary-50 border border-primary-100 rounded-[2rem] p-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white rounded-2xl text-primary-600 shadow-sm">
+              <Zap size={24} className="fill-primary-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">Revenue Update Available</h3>
+              <p className="text-sm text-slate-600 font-medium">
+                We detected <span className="font-bold text-primary-700">GHS {stats.unverifiedRevenue?.toFixed(2)}</span> in revenue from your events (e.g. Sample Data) that isn't in your balance yet.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={handleReconcileAll}
+            disabled={isReconciling}
+            className={clsx(
+                "flex items-center gap-2 px-8 py-3 rounded-2xl font-black transition-all shadow-md active:scale-95 whitespace-nowrap",
+                reconcileSuccess ? "bg-green-500 text-white" : "bg-primary-600 text-white hover:bg-primary-700"
+            )}
+          >
+            {isReconciling ? (
+              <>
+                <Loader2 size={20} className="animate-spin" /> Verifying...
+              </>
+            ) : reconcileSuccess ? (
+              <>
+                <CheckCircle2 size={20} /> Verified & Synced
+              </>
+            ) : (
+              <>
+                Verify & Sync Now <ArrowRight size={20} />
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Wallet & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -181,23 +253,30 @@ export default function EarningsDashboardClient({
           </div>
         </div>
 
-        {/* Total Revenue Card */}
         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-6">
             <div className="p-3 bg-primary-50 text-primary-700 rounded-2xl">
               <DollarSign size={24} />
             </div>
-            <span className="text-slate-500 font-black uppercase text-xs tracking-widest">Organizer Net Share</span>
+            <div>
+              <span className="text-slate-400 font-black uppercase text-[10px] tracking-widest block">Total Verified Revenue</span>
+              <p className="font-bold text-slate-900">GHS {stats.grossRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            </div>
           </div>
-          <p className="text-4xl font-black text-slate-900 tracking-tighter">
-            GHS{" "}
-            {stats.totalRevenue.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            })}
-          </p>
+          
+          <div className="space-y-1">
+            <span className="text-slate-500 font-black uppercase text-xs tracking-widest">Organizer Net Share</span>
+            <p className="text-4xl font-black text-slate-900 tracking-tighter">
+              GHS{" "}
+              {stats.totalRevenue.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </p>
+          </div>
+          
           <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2">
              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-             <p className="text-xs text-slate-500 font-medium">Verified Earnings</p>
+             <p className="text-xs text-slate-500 font-medium">Verified Earnings (After Commission)</p>
           </div>
         </div>
       </div>

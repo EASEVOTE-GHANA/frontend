@@ -31,9 +31,8 @@ export function OrganizerOverview({ data }: OrganizerOverviewProps) {
         <div className="flex items-center gap-3">
             <Link
                 href="/dashboard/events/new"
-                className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-slate-200 active:scale-95"
+                className="flex items-center gap-2 bg-primary-900 hover:bg-primary-800 text-white! px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-primary-900/20 active:scale-95"
             >
-                <Zap size={18} className="text-amber-400 fill-amber-400" />
                 Launch Event
             </Link>
         </div>

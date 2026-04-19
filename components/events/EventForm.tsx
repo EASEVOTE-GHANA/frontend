@@ -251,16 +251,8 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
         if (data.ticketTypes && data.ticketTypes.length > 0) {
           setTicketTypes(
             data.ticketTypes.map(
-              (t: {
-                id: string;
-                name: string;
-                description: string | null;
-                price: number;
-                quantity: number;
-                soldCount: number;
-                maxPerOrder: number;
-              }) => ({
-                id: t.id,
+              (t: any) => ({
+                id: (t.id || t._id || t.id)?.toString(),
                 name: t.name,
                 description: t.description || "",
                 price: t.price.toString(),
@@ -439,10 +431,17 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
             maxPerOrder: parseInt(t.maxPerOrder) || 10,
           };
 
+          const ticketId = t.id || (t as any)._id;
+          
+          if (!ticketId && !t.isNew) {
+            console.warn("Skipping ticket update due to missing ID:", t.name);
+            continue;
+          }
+
           if (t.isNew) {
             await api.post(`/events/${eventId}/ticket-types`, tPayload);
           } else {
-            await api.put(`/events/${eventId}/ticket-types/${t.id}`, tPayload);
+            await api.put(`/events/${eventId}/ticket-types/${ticketId}`, tPayload);
           }
         }
       }

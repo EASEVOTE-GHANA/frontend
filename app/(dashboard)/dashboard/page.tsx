@@ -140,11 +140,10 @@ export default async function DashboardPage() {
 
   // ─── 2. Organizer View ─────────────────────────────────────────
   if (role === "ORGANIZER") {
-    // Correct endpoint: GET /api/events/my/events
     const eventsRes = await apiClient.get("/events/my/events?limit=100").catch(() => ({ data: [] }));
-    const rawEvents: any[] = Array.isArray(eventsRes) ? eventsRes : eventsRes?.data ?? [];
+    const rawEvents: any[] = Array.isArray(eventsRes) ? eventsRes : (eventsRes as any)?.data ?? [];
 
-    // Aggregate from real event data
+    // Aggregate results from raw event data
     let totalRevenue = 0;
     let totalVotes = 0;
     rawEvents.forEach((e: any) => {

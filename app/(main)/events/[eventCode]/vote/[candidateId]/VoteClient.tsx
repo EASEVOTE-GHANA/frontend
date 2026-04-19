@@ -145,7 +145,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
               />
             ) : (
               <div className="w-full h-full min-h-[24rem] bg-primary-900 flex items-center justify-center">
-                <span className="text-[8rem] font-black text-white uppercase select-none leading-none">
+                <span className="text-[8rem] font-black text-white! uppercase select-none leading-none">
                   {candidate.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
                 </span>
               </div>

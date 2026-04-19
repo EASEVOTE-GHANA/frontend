@@ -94,7 +94,7 @@ export default async function AdminEventDetailsPage(props: Props) {
   return (
     <AdminEventManager
       event={event as any}
-      role="ADMIN"
+      role={session?.user?.role as any}
       backUrl="/dashboard/events"
     />
   );

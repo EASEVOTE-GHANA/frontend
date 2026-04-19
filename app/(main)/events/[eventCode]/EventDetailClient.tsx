@@ -436,7 +436,7 @@ export default function EventDetailClient({
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             />
                           ) : (
-                            <div className="w-full h-full bg-primary-900 flex items-center justify-center text-white font-bold text-6xl uppercase font-display transition-transform duration-500 group-hover:scale-110">
+                            <div className="w-full h-full bg-primary-900 flex items-center justify-center text-white! font-bold text-6xl uppercase font-display transition-transform duration-500 group-hover:scale-110">
                               {candidate.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
                             </div>
                           )}
