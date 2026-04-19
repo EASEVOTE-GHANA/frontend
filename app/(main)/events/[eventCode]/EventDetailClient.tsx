@@ -46,7 +46,9 @@ export default function EventDetailClient({
     "vote" | "tickets" | "overview" | "results"
   >(() => {
     const status = getEventStatus(event);
-    if (status.phase === "ENDED") return "results";
+    const resultsEnabled = event.liveResults !== false && event.showLiveResults !== false;
+    
+    if (status.phase === "ENDED" && resultsEnabled) return "results";
     return event.type === "TICKETING" ? "tickets" : "vote";
   });
   const router = useRouter();
@@ -284,10 +286,11 @@ export default function EventDetailClient({
               ...(event.type === "TICKETING" || event.type === "HYBRID"
                 ? [{ id: "tickets", label: "Tickets", icon: Ticket }]
                 : []),
-              // Show Results tab for all Voting/Hybrid events
-              // Prioritize it if ended or if live results are explicitly enabled
+              // Show Results tab for Voting/Hybrid events only if enabled
               ...(event.type === "VOTING" || event.type === "HYBRID"
-                ? [{ id: "results", label: "Results", icon: Trophy }]
+                ? (event.liveResults !== false && event.showLiveResults !== false)
+                  ? [{ id: "results", label: "Results", icon: Trophy }]
+                  : []
                 : []),
               { id: "overview", label: "About", icon: Info },
             ].map((tab) => (
@@ -433,8 +436,8 @@ export default function EventDetailClient({
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             />
                           ) : (
-                            <div className="w-full h-full bg-primary-50 flex items-center justify-center text-primary-600 font-bold text-6xl uppercase font-display transition-transform duration-500 group-hover:scale-110">
-                              {candidate.name.charAt(0)}
+                            <div className="w-full h-full bg-primary-900 flex items-center justify-center text-white font-bold text-6xl uppercase font-display transition-transform duration-500 group-hover:scale-110">
+                              {candidate.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
                             </div>
                           )}
                           <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono font-bold">
@@ -450,7 +453,7 @@ export default function EventDetailClient({
                           </h3>
 
                           {/* Conditional Vote Count Display */}
-                          {event.showVoteCount && (
+                          {event.showVoteCount !== false && (
                             <div className="mb-4 text-slate-500 font-medium">
                               {(
                                 (candidate.voteCount || 0) as number

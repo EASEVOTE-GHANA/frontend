@@ -98,37 +98,9 @@ export function OrganizerOverview({ data }: OrganizerOverviewProps) {
                     </div>
                 ) : (
                     events.map((event) => {
-                        // 1. Robust Vote Count Calculation
-                        let eventVotes = Number(event.totalVotes ?? event.votes ?? event.stats?.votes) || 0;
-                        if (eventVotes === 0 && event.categories) {
-                          event.categories.forEach((cat: any) => {
-                            cat.candidates?.forEach((c: any) => {
-                              eventVotes += Number(c.votes ?? c.voteCount) || 0;
-                            });
-                          });
-                        }
-
-                        // 2. Robust Ticket Sales Calculation
-                        let eventTicketsSold = Number(event.totalTicketsSold ?? event.stats?.ticketsSold) || 0;
-                        if (eventTicketsSold === 0 && event.ticketTypes) {
-                          event.ticketTypes.forEach((tt: any) => {
-                            eventTicketsSold += Number(tt.sold ?? tt.soldCount) || 0;
-                          });
-                        }
-
-                        // 3. Robust Revenue Calculation
-                        let eventRevenue = Number(event.totalRevenue ?? event.revenue ?? event.stats?.revenue) || 0;
-                        if (eventRevenue === 0) {
-                          if (event.type === "VOTING") {
-                            eventRevenue = eventVotes * (Number(event.costPerVote) || 0);
-                          } else {
-                            if (event.ticketTypes) {
-                              event.ticketTypes.forEach((tt: any) => {
-                                eventRevenue += (Number(tt.sold ?? tt.soldCount) || 0) * (Number(tt.price) || 0);
-                              });
-                            }
-                          }
-                        }
+                        const eventRevenue = Number(event.totalRevenue ?? 0);
+                        const eventVotes = Number(event.totalPaidVotes ?? 0);
+                        const eventTickets = Number(event.totalTicketsSold ?? 0);
 
                         return (
                           <div key={event._id} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex items-center gap-6 hover:shadow-md transition-shadow group">
@@ -148,7 +120,7 @@ export function OrganizerOverview({ data }: OrganizerOverviewProps) {
                                   <p className="text-sm text-slate-500 font-medium">
                                     {event.type === "VOTING"
                                       ? `GHS ${eventRevenue.toLocaleString()} earned · ${eventVotes.toLocaleString()} votes`
-                                      : `GHS ${eventRevenue.toLocaleString()} earned · ${event.ticketTypes?.reduce((s: number, tt: any) => s + (Number(tt.sold) || 0), 0) || 0} tickets sold`
+                                      : `GHS ${eventRevenue.toLocaleString()} earned · ${eventTickets.toLocaleString()} tickets sold`
                                     }
                                   </p>
                               </div>

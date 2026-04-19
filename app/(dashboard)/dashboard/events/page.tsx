@@ -11,6 +11,7 @@ type Props = {
 
 export default async function AdminEventsPage(props: Props) {
   const session = await getServerSession(authOptions);
+  const role = session?.user?.role;
   const apiClient = createServerApiClient(session?.accessToken);
 
   const searchParams = await props.searchParams;
@@ -27,10 +28,14 @@ export default async function AdminEventsPage(props: Props) {
   if (type) queryParams.set("type", type);
   if (query) queryParams.set("query", query);
 
-  // Fetch all events using the administrative consolidated endpoint
-  const result = await apiClient
-    .get(`/events/admin/all?${queryParams.toString()}`)
-    .catch(() => ({ data: [] }));
+  // Determine endpoint based on role
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+  const endpoint = isAdmin 
+    ? `/events/admin/all?${queryParams.toString()}`
+    : `/events/my/events?${queryParams.toString()}`;
+
+  // Fetch events using appropriate endpoint
+  const result = await apiClient.get(endpoint).catch(() => ({ data: [] }));
 
   // Handle both { data: [...] } and direct array responses
   const rawEvents = result.data || result.events || (Array.isArray(result) ? result : []);
@@ -75,10 +80,10 @@ export default async function AdminEventsPage(props: Props) {
       title: e.title || "Untitled Event",
       organizer: {
         name:
-          e.organizerId?.businessName ||
-          e.organizerId?.fullName ||
-          "Unknown Organizer",
-        avatar: e.organizerId?.logo || "",
+          typeof e.organizerId === "object"
+            ? e.organizerId?.businessName || e.organizerId?.fullName || "Unspecified Organizer"
+            : role === "ORGANIZER" ? (session?.user?.name || "My Business") : "Unknown Organizer",
+        avatar: typeof e.organizerId === "object" ? e.organizerId?.logo || "" : "",
       },
       type: e.type || "UNKNOWN",
       status: e.status || "DRAFT",
@@ -97,10 +102,12 @@ export default async function AdminEventsPage(props: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Events Management
+            {isAdmin ? "Events Management" : "My Events"}
           </h1>
           <p className="text-slate-500">
-            Monitor and manage all events across the platform.
+            {isAdmin 
+              ? "Monitor and manage all events across the platform."
+              : "Manage and track the performance of your events."}
           </p>
         </div>
         <a

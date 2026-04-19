@@ -13,6 +13,7 @@ type Props = {
 
 export default async function AdminTicketingPage(props: Props) {
   const session = await getServerSession(authOptions);
+  const role = session?.user?.role;
   const apiClient = createServerApiClient(session?.accessToken);
 
   const searchParams = await props.searchParams;
@@ -28,10 +29,14 @@ export default async function AdminTicketingPage(props: Props) {
   if (query) eventsParams.set("query", query);
   if (status) eventsParams.set("status", status);
 
+  // Determine endpoint based on role
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+  const endpoint = isAdmin 
+    ? `/events/admin/all?${eventsParams.toString()}`
+    : `/events/my/events?${eventsParams.toString()}`;
+
   // Fetch ticketing events
-  const eventsRes = await apiClient
-    .get(`/events/admin/all?${eventsParams.toString()}`)
-    .catch(() => ({ data: [] }));
+  const eventsRes = await apiClient.get(endpoint).catch(() => ({ data: [] }));
 
   const rawEvents = eventsRes.data || eventsRes.events || (Array.isArray(eventsRes) ? eventsRes : []);
 
@@ -73,10 +78,10 @@ export default async function AdminTicketingPage(props: Props) {
       title: e.title || "Untitled Event",
       organizer: {
         name:
-          e.organizerId?.fullName ||
-          e.organizerId?.businessName ||
-          "Unknown Organizer",
-        avatar: e.organizerId?.logo || "",
+          typeof e.organizerId === "object"
+            ? e.organizerId?.fullName || e.organizerId?.businessName || "Unspecified Organizer"
+            : role === "ORGANIZER" ? (session?.user?.name || "My Business") : "Unknown Organizer",
+        avatar: typeof e.organizerId === "object" ? e.organizerId?.logo || "" : "",
       },
       type: e.type || "UNKNOWN",
       status: e.status || "DRAFT",
@@ -109,10 +114,12 @@ export default async function AdminTicketingPage(props: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
-            Ticketing Management
+            {isAdmin ? "Ticketing Management" : "My Ticketing Events"}
           </h1>
           <p className="text-slate-500">
-            Monitor ticket sales and manage ticketing events.
+            {isAdmin 
+              ? "Monitor ticket sales and manage ticketing events."
+              : "Track ticket sales and manage your events."}
           </p>
         </div>
         <Link

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Event as EventData, Candidate } from "@/types";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Share2, Check, Copy, Loader2 } from "lucide-react";
+import { ArrowLeft, Share2, Check, Copy, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { api } from "@/lib/api-client";
 import Image from "next/image";
 import toast from "react-hot-toast";
@@ -27,6 +27,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
   
   // Payment States
   const [isLoading, setIsLoading] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
 
   // Derived Data
   const minimalVotePrice = event.costPerVote || 1.0;
@@ -51,6 +52,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
     setValidationError("");
 
     setIsLoading(true);
+    setInitError(null);
     try {
       // Guide: POST /api/purchases/votes/initialize
       const eventId = event.id || (event as any)._id;
@@ -88,7 +90,13 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
       }
     } catch (error: any) {
       console.error("Payment error:", error);
-      toast.error(error.message || "An unexpected error occurred.");
+      // Extra resilience: Parse error message safely
+      let msg = error.message || "An unexpected error occurred.";
+      if (msg.includes("HTTP 500")) {
+        msg = "Payment server is currently unavailable. Please try again shortly.";
+      }
+      setInitError(msg);
+      toast.error(msg);
       setIsLoading(false);
     }
   };
@@ -122,14 +130,27 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
       <div className="bg-white rounded-3xl shadow-xl overflow-hidden max-w-5xl w-full flex flex-col md:flex-row">
         {/* LEFT COLUMN: Image */}
         <div className="md:w-1/2 h-96 md:h-auto relative bg-gray-100 overflow-hidden">
-          <Image
-            src={candidate.image || "/placeholder-avatar.png"}
-            alt={candidate.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            priority
-          />
+          {(() => {
+            const url = candidate.image;
+            const isValid = url && typeof url === 'string' && !url.includes('example/image/upload') && !url.includes('null') && !url.includes('undefined');
+            
+            return isValid ? (
+              <Image
+                src={url}
+                alt={candidate.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full min-h-[24rem] bg-primary-900 flex items-center justify-center">
+                <span className="text-[8rem] font-black text-white uppercase select-none leading-none">
+                  {candidate.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                </span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* RIGHT COLUMN: Form */}
@@ -249,6 +270,26 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
               <p className="text-red-500 text-sm font-bold text-center bg-red-50 py-2 rounded-lg border border-red-100 animate-in fade-in zoom-in-95">
                 {validationError}
               </p>
+            )}
+
+            {initError && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 animate-in border-l-4 border-l-red-500">
+                <div className="flex items-start gap-4">
+                  <div className="bg-red-100 p-2 rounded-xl text-red-600">
+                    <AlertCircle size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-red-900 leading-tight">Payment initialization failed</p>
+                    <p className="text-xs text-red-700 mt-1 font-medium">{initError}</p>
+                    <button 
+                      onClick={() => { setInitError(null); handlePayment(); }}
+                      className="mt-3 text-xs font-bold text-red-800 hover:text-red-900 flex items-center gap-1.5 bg-red-100 px-3 py-1.5 rounded-full transition-colors"
+                    >
+                      <RefreshCw size={12} /> Try again
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Submit Button */}

@@ -55,7 +55,7 @@ export default async function ResultsPage({
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 -mt-8 relative z-10 pb-8 space-y-8">
-        {!data.showVoteCount && (
+        {data.showVoteCount === false && (
           <div className="bg-amber-50 border border-amber-100 text-amber-800 p-4 rounded-2xl text-center font-medium shadow-sm">
             Vote counts are currently hidden by the organizer. Only rankings are shown.
           </div>
@@ -80,7 +80,7 @@ export default async function ResultsPage({
                   0
                 );
                 const percentage =
-                  totalVotesInCategory > 0
+                    totalVotesInCategory > 0
                     ? ((Number(candidate.votes) || 0) / totalVotesInCategory) * 100
                     : 0;
 
@@ -124,7 +124,7 @@ export default async function ResultsPage({
                             {candidate.name}
                           </h3>
                         </div>
-                        {data.showVoteCount && (
+                        {data.showVoteCount !== false && (
                           <div className="text-right">
                             <span className="block font-black text-xl text-slate-900">
                               {(Number(candidate.votes) || 0).toLocaleString()}

@@ -45,38 +45,11 @@ export default async function DashboardPage() {
     let derivedPlatformRevenue = 0;
 
     events.forEach((e) => {
-      // 1. Accumulate Votes
-      let evVotes = Number(e.totalVotes ?? e.votes ?? e.stats?.votes) || 0;
-      if (evVotes === 0 && e.categories) {
-        e.categories.forEach((cat: any) => {
-          cat.candidates?.forEach((c: any) => { evVotes += Number(c.votes ?? c.voteCount) || 0; });
-        });
-      }
-      totalVotes += evVotes;
+      totalVotes += Number(e.totalPaidVotes ?? 0);
+      ticketsSold += Number(e.totalTicketsSold ?? 0);
 
-      // 2. Accumulate Tickets
-      let evTickets = Number(e.totalTicketsSold ?? e.stats?.ticketsSold) || 0;
-      if (evTickets === 0 && e.ticketTypes) {
-        e.ticketTypes.forEach((tt: any) => {
-          evTickets += Number(tt.sold ?? tt.soldCount) || 0;
-        });
-      }
-      ticketsSold += evTickets;
-
-      // 3. Accumulate Derived Revenue
-      let evRevenue = Number(e.totalRevenue ?? e.revenue ?? e.stats?.revenue) || 0;
-      if (evRevenue === 0) {
-        if (e.type === "VOTING") {
-          evRevenue = evVotes * (Number(e.costPerVote ?? e.votePrice ?? e.price) || 0);
-        } else {
-          if (e.ticketTypes) {
-            e.ticketTypes.forEach((tt: any) => {
-              evRevenue += (Number(tt.sold ?? tt.soldCount) || 0) * (Number(tt.price) || 0);
-            });
-          }
-        }
-      }
-      derivedPlatformRevenue += evRevenue;
+      // 3. Accumulate Verified Revenue
+      derivedPlatformRevenue += Number(e.totalRevenue ?? 0);
     });
 
     // ── Transaction Stats (New Source of Truth) ──
@@ -112,20 +85,7 @@ export default async function DashboardPage() {
       if (!e.createdAt) return;
       const key = MONTH_NAMES[new Date(e.createdAt).getMonth()];
       if (key in revenueByMonth) {
-        let eventRevenue = 0;
-        if (e.type === "VOTING" && e.categories) {
-          let ev = 0;
-          e.categories.forEach((cat: any) => {
-            cat.candidates?.forEach((c: any) => { ev += Number(c.votes ?? c.voteCount) || 0; });
-          });
-          eventRevenue = ev * (Number(e.costPerVote) || 0);
-        }
-        if (e.ticketTypes) {
-          e.ticketTypes.forEach((tt: any) => {
-            eventRevenue += (Number(tt.sold) || 0) * (Number(tt.price) || 0);
-          });
-        }
-        revenueByMonth[key] += eventRevenue;
+        revenueByMonth[key] += Number(e.totalRevenue || 0);
       }
     });
     const revenueData = Object.entries(revenueByMonth).map(([name, revenue]) => ({
@@ -135,15 +95,7 @@ export default async function DashboardPage() {
 
     // ── Top events by votes ──
     const topEvents = [...events]
-      .map((e) => {
-        let evVotes = 0;
-        if (e.categories) {
-          e.categories.forEach((cat: any) => {
-            cat.candidates?.forEach((c: any) => { evVotes += Number(c.votes ?? c.voteCount) || 0; });
-          });
-        }
-        return { ...e, _computedVotes: evVotes };
-      })
+      .map((e) => ({ ...e, _computedVotes: Number(e.totalPaidVotes || 0) }))
       .sort((a, b) => b._computedVotes - a._computedVotes)
       .slice(0, 4);
 
@@ -196,19 +148,8 @@ export default async function DashboardPage() {
     let totalRevenue = 0;
     let totalVotes = 0;
     rawEvents.forEach((e: any) => {
-      if (e.type === "VOTING" && e.categories) {
-        let ev = 0;
-        e.categories.forEach((cat: any) => {
-          cat.candidates?.forEach((c: any) => { ev += Number(c.votes ?? c.voteCount) || 0; });
-        });
-        totalVotes += ev;
-        totalRevenue += ev * (Number(e.costPerVote) || 0);
-      }
-      if (e.ticketTypes) {
-        e.ticketTypes.forEach((tt: any) => {
-          totalRevenue += (Number(tt.sold) || 0) * (Number(tt.price) || 0);
-        });
-      }
+      totalVotes += Number(e.totalPaidVotes || 0);
+      totalRevenue += Number(e.totalRevenue || 0);
     });
 
     const activeEvents = rawEvents.filter((e: any) => e.status === "LIVE" || e.status === "PUBLISHED").length;
