@@ -83,8 +83,8 @@ export default function CreateEventPage() {
       n +
       (n > 0
         ? ["th", "st", "nd", "rd"][
-            (n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10
-          ]
+        (n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10
+        ]
         : "")
     );
   };
@@ -155,18 +155,18 @@ export default function CreateEventPage() {
     const now = new Date();
     // Add 15 minutes buffer
     now.setMinutes(now.getMinutes() + 15);
-    
+
     // YYYY-MM-DD
     const dateString = now.toISOString().split("T")[0];
     setMinDate(dateString);
 
     // If initial formData is empty, set some reasonable defaults
     setFormData(prev => ({
-        ...prev,
-        startDate: dateString,
-        endDate: dateString,
-        votingStartDate: dateString,
-        votingEndDate: dateString
+      ...prev,
+      startDate: dateString,
+      endDate: dateString,
+      votingStartDate: dateString,
+      votingEndDate: dateString
     }));
   }, []);
 
@@ -276,19 +276,19 @@ export default function CreateEventPage() {
       prev.map((c) =>
         c.id === categoryId
           ? {
-              ...c,
-              candidates: [
-                ...c.candidates,
-                {
-                  id: generateId(),
-                  code: generateCandidateCode(),
-                  name: "",
-                  bio: "",
-                  email: "",
-                  phone: "",
-                },
-              ],
-            }
+            ...c,
+            candidates: [
+              ...c.candidates,
+              {
+                id: generateId(),
+                code: generateCandidateCode(),
+                name: "",
+                bio: "",
+                email: "",
+                phone: "",
+              },
+            ],
+          }
           : c,
       ),
     );
@@ -304,11 +304,11 @@ export default function CreateEventPage() {
       prev.map((c) =>
         c.id === categoryId
           ? {
-              ...c,
-              candidates: c.candidates.map((cand) =>
-                cand.id === candidateId ? { ...cand, [field]: value } : cand,
-              ),
-            }
+            ...c,
+            candidates: c.candidates.map((cand) =>
+              cand.id === candidateId ? { ...cand, [field]: value } : cand,
+            ),
+          }
           : c,
       ),
     );
@@ -319,11 +319,11 @@ export default function CreateEventPage() {
       prev.map((c) =>
         c.id === categoryId
           ? {
-              ...c,
-              candidates: c.candidates.filter(
-                (cand) => cand.id !== candidateId,
-              ),
-            }
+            ...c,
+            candidates: c.candidates.filter(
+              (cand) => cand.id !== candidateId,
+            ),
+          }
           : c,
       ),
     );
@@ -341,7 +341,7 @@ export default function CreateEventPage() {
 
       const startString = formData.startDate;
       const endString = formData.endDate;
-      
+
       const today = new Date();
       const year = today.getFullYear();
       const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -1413,7 +1413,7 @@ export default function CreateEventPage() {
                               Add Candidate
                             </button>
                           </div>
-                          
+
                           {category.candidates.length === 0 ? (
                             <p className="text-sm text-slate-500 italic">
                               No candidates added yet. You can add them here now, or later from your dashboard.

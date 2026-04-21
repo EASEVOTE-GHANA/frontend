@@ -184,14 +184,14 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
     if (!dateString) return { date: "", time: "09:00" };
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return { date: "", time: "09:00" };
-    
+
     // Use local components for the UI to prevent UTC shifting in <input type="date">
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     return { date: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
   };
 
@@ -365,12 +365,12 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
 
       const startISO = formData.startDate ? new Date(`${formData.startDate}T${formData.startTime}:00`).toISOString() : undefined;
       const endISO = formData.endDate ? new Date(`${formData.endDate}T${formData.endTime}:00`).toISOString() : undefined;
-      
-      const votingStartISO = (formData.type === "VOTING" || formData.type === "HYBRID") && formData.votingStartDate 
-        ? new Date(`${formData.votingStartDate}T${formData.votingStartTime}:00`).toISOString() 
+
+      const votingStartISO = (formData.type === "VOTING" || formData.type === "HYBRID") && formData.votingStartDate
+        ? new Date(`${formData.votingStartDate}T${formData.votingStartTime}:00`).toISOString()
         : undefined;
-      const votingEndISO = (formData.type === "VOTING" || formData.type === "HYBRID") && formData.votingEndDate 
-        ? new Date(`${formData.votingEndDate}T${formData.votingEndTime}:00`).toISOString() 
+      const votingEndISO = (formData.type === "VOTING" || formData.type === "HYBRID") && formData.votingEndDate
+        ? new Date(`${formData.votingEndDate}T${formData.votingEndTime}:00`).toISOString()
         : undefined;
 
       // Validation
@@ -391,10 +391,10 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
         }
       }
 
-      const { 
+      const {
         startDate, startTime, endDate, endTime,
         votingStartDate, votingStartTime, votingEndDate, votingEndTime,
-        ...cleanedData 
+        ...cleanedData
       } = formData;
 
       const payload: Record<string, unknown> = {
@@ -432,7 +432,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
           };
 
           const ticketId = t.id || (t as any)._id;
-          
+
           if (!ticketId && !t.isNew) {
             console.warn("Skipping ticket update due to missing ID:", t.name);
             continue;
@@ -580,7 +580,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    
+
                     {/* Hover Overlay */}
                     <div className={clsx(
                       "absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-all duration-300 flex items-center justify-center gap-3",
@@ -786,9 +786,9 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
         {(formData.type === "VOTING" || formData.type === "HYBRID") && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 mt-6">
             <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-          <div className="p-1.5 bg-primary-50 rounded-lg">
-            <Clock className="h-5 w-5 text-primary-600" />
-          </div>
+              <div className="p-1.5 bg-primary-50 rounded-lg">
+                <Clock className="h-5 w-5 text-primary-600" />
+              </div>
               Voting Window (Required)
             </h3>
             <p className="text-xs text-slate-500 mb-4 -mt-2">
