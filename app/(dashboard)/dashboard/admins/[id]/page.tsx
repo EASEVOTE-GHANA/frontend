@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import AdminActions from "../AdminActions";
 import Link from "next/link"; // For breadcrumb if needed
+import UserAvatarUpload from "@/components/dashboard/UserAvatarUpload";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -56,17 +57,11 @@ export default async function AdminDetailsPage(props: Props) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-2xl font-bold text-white shadow-sm overflow-hidden">
-            {admin.avatar?.startsWith("http") ? (
-              <img
-                src={admin.avatar}
-                alt={admin.name || "Admin"}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              (admin.name || "A").substring(0, 1).toUpperCase()
-            )}
-          </div>
+          <UserAvatarUpload
+            userId={admin.id}
+            currentAvatar={admin.avatar}
+            name={admin.name}
+          />
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               {admin.name}

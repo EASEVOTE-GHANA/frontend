@@ -44,6 +44,7 @@ declare module "next-auth/jwt" {
     organizerId?: string;
     accessToken?: string;
     status?: string;
+    avatar?: string;
   }
 }
 
@@ -109,13 +110,18 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.organizerId = user.organizerId;
         token.accessToken = user.accessToken;
         token.status = user.status;
+        token.avatar = user.avatar;
+      }
+
+      if (trigger === "update" && session?.avatar) {
+        token.avatar = session.avatar;
       }
 
       return token;
@@ -126,6 +132,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.organizerId = token.organizerId;
         session.user.status = token.status;
+        session.user.avatar = token.avatar;
         session.accessToken = token.accessToken;
       }
 

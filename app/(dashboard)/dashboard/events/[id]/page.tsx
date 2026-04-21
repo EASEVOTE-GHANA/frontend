@@ -40,27 +40,33 @@ export default async function AdminEventDetailsPage(props: Props) {
     });
   }
 
-  // Manual summation fallback for tickets
-  let ticketsSold = Number(eventData.stats?.ticketsSold ?? eventData.totalTicketsSold) || 0;
-  if (ticketsSold === 0 && eventData.ticketTypes) {
+  // Calculate tickets sold - prefer summation of ticket types if they exist
+  let ticketsSoldFromTypes = 0;
+  if (eventData.ticketTypes && eventData.ticketTypes.length > 0) {
     eventData.ticketTypes.forEach((tt: any) => {
-      ticketsSold += Number(tt.sold ?? tt.soldCount) || 0;
+      ticketsSoldFromTypes += Number(tt.sold ?? tt.soldCount) || 0;
     });
   }
+  
+  let ticketsSold = ticketsSoldFromTypes > 0 
+    ? ticketsSoldFromTypes 
+    : (Number(eventData.stats?.ticketsSold ?? eventData.totalTicketsSold) || 0);
 
-  // Manual revenue calculation fallback
-  let totalRevenue = Number(eventData.stats?.revenue ?? eventData.totalRevenue ?? eventData.revenue) || 0;
-  if (totalRevenue === 0) {
-    if (eventData.type === "VOTING") {
-      totalRevenue = totalVotes * (Number(eventData.costPerVote ?? eventData.votePrice ?? eventData.price) || 0);
-    } else if (eventData.type === "TICKETING" || eventData.type === "HYBRID") {
-      if (eventData.ticketTypes) {
-        eventData.ticketTypes.forEach((tt: any) => {
-          totalRevenue += (Number(tt.sold ?? tt.soldCount) || 0) * (Number(tt.price) || 0);
-        });
-      }
+  // Calculate revenue - calculate from types if ticketing
+  let calculatedRevenue = 0;
+  if (eventData.type === "TICKETING" || eventData.type === "HYBRID") {
+    if (eventData.ticketTypes) {
+      eventData.ticketTypes.forEach((tt: any) => {
+        calculatedRevenue += (Number(tt.sold ?? tt.soldCount) || 0) * (Number(tt.price) || 0);
+      });
     }
+  } else if (eventData.type === "VOTING") {
+    calculatedRevenue = totalVotes * (Number(eventData.costPerVote ?? eventData.votePrice ?? eventData.price) || 0);
   }
+
+  let totalRevenue = calculatedRevenue > 0 
+    ? calculatedRevenue 
+    : (Number(eventData.stats?.revenue ?? eventData.totalRevenue ?? eventData.revenue) || 0);
 
   // Provide robust fallbacks for nested objects to prevent runtime errors
   const event = {

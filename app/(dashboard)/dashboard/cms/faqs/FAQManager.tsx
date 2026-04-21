@@ -179,25 +179,25 @@ export default function FAQManager({ initialFaqs }: FAQManagerProps) {
 
       {/* FAQs List */}
       <div className="grid gap-4">
-        {filteredFaqs.map((faq) => (
+        {filteredFaqs.map((faq, index) => (
           <div
-            key={faq.id}
+            key={faq.id || (faq as any)._id || index}
             className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-start gap-4"
           >
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-gray-100 text-gray-600">
-                  {faq.content.category}
+                  {faq.content?.category || (faq as any).category || "General"}
                 </span>
                 <span className="text-[10px] text-gray-400">
-                  Last updated: {new Date(faq.updatedAt).toLocaleDateString()}
+                  Last updated: {faq.updatedAt ? new Date(faq.updatedAt).toLocaleDateString() : "Never"}
                 </span>
               </div>
               <h3 className="font-bold text-gray-900 mb-1">
-                {(faq as any).content?.question || (faq as any).question}
+                {faq.content?.question || (faq as any).question || "Untitled Question"}
               </h3>
               <p className="text-sm text-gray-500 line-clamp-2">
-                {(faq as any).content?.answer || (faq as any).answer}
+                {faq.content?.answer || (faq as any).answer || "No answer provided."}
               </p>
             </div>
             <div className="flex items-center gap-1">

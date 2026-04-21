@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { User, Lock, Mail, Phone, Camera, Loader2, Save, CheckCircle2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useModal } from "@/components/providers/ModalProvider";
@@ -28,13 +29,15 @@ export default function AdminAccountClient({ user }: AdminAccountClientProps) {
 
 function AdminAccountContent({ user }: AdminAccountClientProps) {
   const router = useRouter();
+  const { update: updateSession } = useSession();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const modal = useModal();
   
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "security">(
-    tabParam === "security" ? "security" : "profile"
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<"profile" | "security">(    tabParam === "security" ? "security" : "profile"
   );
 
   // Profile Form State
@@ -74,6 +77,9 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
       });
 
       if (result.success !== false) {
+        // Update the next-auth session as well
+        await updateSession({ avatar: profileData.avatar });
+        
         await modal.alert({ title: "Profile Updated", message: "Profile updated successfully!", variant: "info" });
         router.refresh();
       } else {
@@ -84,6 +90,35 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
       modal.alert({ title: "Error", message: error.message || "An unexpected error occurred", variant: "danger" });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
+
+    setIsUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("folder", "avatars");
+      const res = await api.uploadFormData("/upload/image", formData);
+      const newUrl = res.url || res.imageUrl;
+      // Update user profile with new avatar
+      await api.put(`/users/${user.id}`, { ...profileData, avatar: newUrl });
+      
+      // Update the next-auth session as well
+      await updateSession({ avatar: newUrl });
+
+      setProfileData((prev) => ({ ...prev, avatar: newUrl }));
+      router.refresh();
+    } catch (err: any) {
+      alert(err.message || "Upload failed.");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
     }
   };
 
@@ -201,25 +236,25 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
                   </div>
                   <button
                     type="button"
-                    className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-sm border border-gray-200 text-gray-600 hover:text-primary-600 transition-colors"
-                    onClick={async () => {
-                      const url = await modal.prompt({
-                        title: "Update Avatar",
-                        message: "Enter the direct URL to your profile image:",
-                        placeholder: "https://example.com/photo.jpg",
-                        variant: "info",
-                        confirmText: "Update Photo"
-                      });
-                      if (url) setProfileData({ ...profileData, avatar: url });
-                    }}
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-sm border border-gray-200 text-gray-600 hover:text-primary-600 transition-colors disabled:opacity-50"
+                    title="Upload photo"
                   >
-                    <Camera size={16} />
+                    {isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
                   </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900">Profile Photo</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Click the camera icon to update your photo URL.
+                    Click the camera icon to upload a photo directly.
                   </p>
                 </div>
               </div>

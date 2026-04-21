@@ -445,7 +445,7 @@ export function AdminEventManager({
                           </div>
                           <div className="text-right">
                             <div className="font-bold text-slate-900">
-                              {ticket.soldCount || 0} / {ticket.quantity || 0}
+                              {(ticket.sold ?? ticket.soldCount ?? 0)} / {ticket.quantity || 0}
                             </div>
                             <div className="text-xs text-slate-500">sold</div>
                           </div>
@@ -456,7 +456,7 @@ export function AdminEventManager({
                             style={{
                               width: `${Math.min(
                                 100,
-                                (ticket.soldCount / ticket.quantity) * 100,
+                                ((ticket.sold ?? ticket.soldCount ?? 0) / (ticket.quantity || 1)) * 100,
                               )}%`,
                             }}
                           />

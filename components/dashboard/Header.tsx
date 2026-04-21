@@ -150,15 +150,7 @@ export function Header({
                   ))
                 )}
               </div>
-              <div className="px-4 py-2 border-t border-slate-100">
-                <Link 
-                  href="/dashboard/notifications"
-                  onClick={() => setIsNotificationsOpen(false)}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium inline-block"
-                >
-                  View all notifications
-                </Link>
-              </div>
+              
             </div>
           )}
         </div>
@@ -171,14 +163,14 @@ export function Header({
             }}
             className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden">
+            <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm ring-1 ring-slate-200">
               {user.image ? (
                 <Image
                   src={user.image}
                   alt={user.name || "User"}
-                  width={32}
-                  height={32}
-                  className="rounded-full object-cover"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-cover"
                 />
               ) : (
                 <User className="h-4 w-4 text-primary-600" />

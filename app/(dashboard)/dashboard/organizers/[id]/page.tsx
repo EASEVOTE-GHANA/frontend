@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { createServerApiClient } from "@/lib/api-client";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   Building2,
   Mail,
@@ -17,19 +18,28 @@ import {
 } from "lucide-react";
 import OrganizerActions from "../OrganizerActions";
 import EventsTable from "../../events/EventsTable";
+import UserAvatarUpload from "@/components/dashboard/UserAvatarUpload";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function OrganizerDetailsPage(props: Props) {
   const session = await getServerSession(authOptions);
   const apiClient = createServerApiClient(session?.accessToken);
 
   const params = await props.params;
-  const _rawUser = await apiClient.get(`/users/${params.id}`).catch(() => null);
+  const rawResponse = await apiClient.get(`/users/${params.id}`).catch(() => null);
 
-  if (!_rawUser) {
+  if (!rawResponse) {
+    notFound();
+  }
+
+  const _rawUser = rawResponse.data || rawResponse.user || rawResponse;
+
+  if (!_rawUser || !_rawUser._id) {
     notFound();
   }
 
@@ -80,17 +90,11 @@ export default async function OrganizerDetailsPage(props: Props) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 bg-slate-100 rounded-xl flex items-center justify-center text-xl font-bold text-slate-500 overflow-hidden">
-            {organizer.logo?.startsWith("http") ? (
-              <img
-                src={organizer.logo}
-                alt={organizer.businessName}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              organizer.businessName.substring(0, 2).toUpperCase()
-            )}
-          </div>
+          <UserAvatarUpload
+            userId={organizer.id}
+            currentAvatar={organizer.logo}
+            name={organizer.businessName}
+          />
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               {organizer.businessName}
@@ -270,24 +274,26 @@ export default async function OrganizerDetailsPage(props: Props) {
                     but `EventsTable` expects slightly formatted data (dates as strings). 
                     Let's quick format them. 
                 */}
-            <EventsTable
-              events={organizer.events.map((e: any) => ({
-                ...e,
-                startDate: e.startDate.toISOString(),
-                endDate: e.endDate.toISOString(),
-                votePrice: e.votePrice ? Number(e.votePrice) : null,
-                totalRevenue: Number(e.totalRevenue),
-                totalVotes: Number(e.totalVotes),
-                stats: {
-                  votes: e.totalVotes,
-                  revenue: Number(e.totalRevenue),
-                },
-                organizer: {
-                  name: organizer.businessName,
-                  avatar: organizer.logo || "",
-                },
-              }))}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading events...</div>}>
+              <EventsTable
+                events={(organizer.events || []).map((e: any) => ({
+                  ...e,
+                  startDate: new Date(e.startDate).toISOString(),
+                  endDate: new Date(e.endDate).toISOString(),
+                  votePrice: e.votePrice ? Number(e.votePrice) : null,
+                  totalRevenue: Number(e.totalRevenue),
+                  totalVotes: Number(e.totalVotes),
+                  stats: {
+                    votes: e.totalVotes,
+                    revenue: Number(e.totalRevenue),
+                  },
+                  organizer: {
+                    name: organizer.businessName,
+                    avatar: organizer.logo || "",
+                  },
+                }))}
+              />
+            </Suspense>
           </div>
 
           {/* Payouts History (Simplified List) */}
