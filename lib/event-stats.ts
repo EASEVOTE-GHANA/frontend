@@ -12,27 +12,16 @@ export function computeEventStats(event: any) {
     };
   }
 
-  // 1. Fallback to calculation from embedded counters (Drafts/Local State)
-  let totalVotes = 0;
-  let ticketsSold = 0;
-  let revenue = 0;
-
-  if (event.type === "VOTING") {
-    // Sum votes from each candidate across all categories
-    for (const cat of event.categories || []) {
-      for (const c of cat.candidates || []) {
-        totalVotes += Number(c.votes ?? 0);
-      }
-    }
-    revenue = totalVotes * (Number(event.costPerVote ?? event.votePrice ?? 0));
-  } else if (event.type === "TICKETING" || event.type === "HYBRID") {
-    // Sum sold counts and revenue from ticket types
-    for (const tt of event.ticketTypes || []) {
-      const sold = Number(tt.sold ?? 0);
-      ticketsSold += sold;
-      revenue += sold * Number(tt.price ?? 0);
-    }
-  }
+  // Fallback to calculation from embedded fields or ledger
+  const totalVotes = event.ledgerStats?.votes ?? 
+    (event.categories || []).reduce((sum: number, cat: any) => sum + (cat.votes || cat.totalVotes || 0), 0);
+  const ticketsSold = event.ledgerStats?.ticketsSold ?? 
+    (event.ticketTypes || []).reduce((sum: number, tt: any) => sum + (tt.sold || 0), 0);
+  const revenue = event.ledgerStats?.revenue ?? (
+    event.type === "VOTING" 
+      ? totalVotes * (Number(event.costPerVote ?? event.votePrice ?? 0))
+      : (event.ticketTypes || []).reduce((sum: number, tt: any) => sum + ((tt.sold || 0) * (tt.price || 0)), 0)
+  );
 
   return { votes: totalVotes, ticketsSold, revenue };
 }

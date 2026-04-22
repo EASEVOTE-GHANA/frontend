@@ -155,9 +155,7 @@ export default function EventDetailClient({
         c.code.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
-  const totalVotes =
-    event.totalVotes ||
-    allCandidates.reduce((sum: number, c: any) => sum + (c.voteCount || 0), 0);
+  const totalVotes = event.ledgerStats?.votes || event.totalVotes || event.totalPaidVotes || 0;
 
   /* ---------------------------------------------------------------------- */
 
@@ -601,12 +599,7 @@ export default function EventDetailClient({
 
                   if (sortedCandidates.length === 0) return null;
 
-                  const categoryTotalVotes =
-                    category.totalVotes ||
-                    sortedCandidates.reduce(
-                      (acc, c) => acc + (c.voteCount ?? c.votes ?? 0),
-                      0,
-                    );
+                  const categoryTotalVotes = category.totalVotes || 0;
 
                   return (
                     <div

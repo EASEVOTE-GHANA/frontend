@@ -721,7 +721,7 @@ function VotingToggle({
 
 function CategoryAccordion({ category }: { category: any }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const totalCategoryVotes = category.candidates.reduce((sum: number, c: any) => sum + (c.votes || c.voteCount || 0), 0);
+  const totalCategoryVotes = category.totalVotes || 0;
 
   return (
     <div className={clsx(
@@ -766,7 +766,7 @@ function CategoryAccordion({ category }: { category: any }) {
               <CandidateProfileCard 
                 key={candidate.id || idx} 
                 candidate={candidate} 
-                categoryMaxVotes={Math.max(...category.candidates.map((c: any) => c.votes || c.voteCount || 0))} 
+                categoryMaxVotes={category.maxVotes || 0} 
               />
             ))}
           </div>
@@ -825,7 +825,7 @@ function CandidateProfileCard({ candidate, categoryMaxVotes }: { candidate: any,
       <div className="mt-4 space-y-2">
         <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
           <span>Performance</span>
-          <span className="text-primary-600">{Math.round(progress)}% of leader</span>
+          <span className="text-primary-600">{Math.round(progress)}%</span>
         </div>
         <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
           <div 
