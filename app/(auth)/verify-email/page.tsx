@@ -134,7 +134,7 @@ function VerifyEmailContent() {
               <div className="flex flex-col gap-3 mt-4">
                 <Link
                   href="/sign-in"
-                  className="w-full bg-primary-800 hover:bg-primary-900 text-white py-3 rounded-xl font-bold transition-all text-center"
+                  className="w-full bg-primary-800 hover:bg-primary-900 text-white! py-3 rounded-xl font-bold transition-all text-center"
                 >
                   Go to Sign In
                 </Link>
