@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 
-type GatewayProvider = "paystack" | "flutterwave" | "appsmobile";
+type GatewayProvider = "paystack" | "appsmobile";
 type GatewayType = "WEB" | "USSD";
 
 type GatewayConfig = {
