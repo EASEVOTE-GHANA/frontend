@@ -259,11 +259,11 @@ export default function NominationWrapper({
 
                 <div className="flex flex-wrap items-center justify-center gap-10 mb-16 opacity-50">
                   <div className="flex items-center gap-3">
-                    <Calendar className="text-primary-500" size={20} />
+                    <Calendar className="text-white-500" size={20} />
                     <span className="text-sm font-bold tracking-tight">Active Phase</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <MapPin className="text-primary-500" size={20} />
+                    <MapPin className="text-white-500" size={20} />
                     <span className="text-sm font-bold uppercase tracking-widest">{event.location || "Public"}</span>
                   </div>
                 </div>

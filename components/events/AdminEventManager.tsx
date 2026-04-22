@@ -414,7 +414,7 @@ export function AdminEventManager({
                 </div>
                 <div className="text-2xl font-bold text-slate-900">
                   {event.type === "VOTING"
-                    ? event.stats?.candidatesCount || 0
+                    ? (event.categories?.reduce((sum, cat) => sum + (cat.candidates?.length || 0), 0) || event.stats?.candidatesCount || 0)
                     : event.stats?.ticketTypesCount || 0}
                 </div>
               </div>
@@ -638,6 +638,7 @@ export function AdminEventManager({
             </>
           )}
 
+          {event.status === "DRAFT" && (
           <div className="bg-white rounded-xl border border-red-200 p-6">
             <h3 className="text-lg font-semibold text-red-900 mb-2">
               Danger Zone
@@ -650,26 +651,19 @@ export function AdminEventManager({
               <div>
                 <h4 className="font-medium text-red-900">Delete Event</h4>
                 <p className="text-sm text-red-600">
-                  {["LIVE", "ENDED", "PAUSED", "PUBLISHED"].includes(event.status)
-                    ? "Live or published events cannot be deleted."
-                    : "Permanently remove this event"}
+                  Permanently remove this draft event
                 </p>
               </div>
               <button
                 onClick={handleDelete}
-                disabled={["LIVE", "ENDED", "PAUSED", "PUBLISHED"].includes(event.status)}
-                className={clsx(
-                  "px-4 py-2 rounded-lg flex items-center gap-2 transition-colors",
-                  ["LIVE", "ENDED", "PAUSED", "PUBLISHED"].includes(event.status)
-                    ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                    : "bg-red-600 hover:bg-red-700 text-white shadow-sm"
-                )}
+                className="px-4 py-2 rounded-lg flex items-center gap-2 transition-colors bg-red-600 hover:bg-red-700 text-white shadow-sm cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete Event
               </button>
             </div>
           </div>
+          )}
         </div>
       )}
     </div>
