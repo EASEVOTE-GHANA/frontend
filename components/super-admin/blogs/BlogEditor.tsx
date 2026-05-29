@@ -143,7 +143,7 @@ export default function BlogEditor({ blog }: { blog?: any }) {
                   <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
                       <ImageIcon size={14} /> Cover Appearance
                   </h4>
-                  <div className="aspect-video bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center group relative overflow-hidden transition-all hover:bg-slate-100">
+                  <div className="aspect-video bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center group relative overflow-hidden transition-all">
                       {formData.coverImage ? (
                           <>
                             <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
@@ -154,21 +154,21 @@ export default function BlogEditor({ blog }: { blog?: any }) {
                             </div>
                           </>
                       ) : (
-                        <>
-                            <div className="p-3 bg-white rounded-xl shadow-sm mb-2 text-slate-300">
+                        <div className="flex flex-col items-center gap-2 pointer-events-none">
+                            <div className="p-3 bg-white rounded-xl shadow-sm text-slate-300">
                                 <ImageIcon size={24} />
                             </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Upload Cover</span>
-                            {/* Simple URL input for now */}
-                            <input 
-                                type="text" 
-                                placeholder="Paste Image URL"
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                onChange={(e) => setFormData({...formData, coverImage: e.target.value})}
-                            />
-                        </>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cover Preview</span>
+                        </div>
                       )}
                   </div>
+                  <input
+                      type="url"
+                      placeholder="Paste image URL (https://...)"
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-primary-100 focus:border-primary-300 outline-none transition-colors"
+                      value={formData.coverImage}
+                      onChange={(e) => setFormData({...formData, coverImage: e.target.value})}
+                  />
                   <p className="text-[10px] text-slate-400 text-center italic">Supported: JPEG, PNG • Ratio: 16:9</p>
               </div>
 
