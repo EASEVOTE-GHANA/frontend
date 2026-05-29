@@ -28,6 +28,7 @@ import {
   Share2,
   ChevronDown,
   Percent,
+  Plus,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { EventForm } from "./EventForm";
@@ -193,6 +194,13 @@ export function AdminEventManager({
   const [isSavingCommission, setIsSavingCommission] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // Ticket type management state
+  const [localTicketTypes, setLocalTicketTypes] = useState<any[]>(event.ticketTypes || []);
+  const [isAddingTicket, setIsAddingTicket] = useState(false);
+  const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
+  const [ticketForm, setTicketForm] = useState({ name: "", description: "", price: "", quantity: "" });
+  const [isSavingTicket, setIsSavingTicket] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
 
@@ -282,6 +290,76 @@ export function AdminEventManager({
     const url = `${window.location.origin}/nominations/${event.eventCode}`;
     navigator.clipboard.writeText(url);
     toast.success("Nomination link copied to clipboard!");
+  };
+
+  const startEditTicket = (ticket: any) => {
+    const tid = ticket._id || ticket.id;
+    setEditingTicketId(tid);
+    setIsAddingTicket(false);
+    setTicketForm({
+      name: ticket.name || "",
+      description: ticket.description || "",
+      price: String(ticket.price ?? ""),
+      quantity: String(ticket.quantity ?? ""),
+    });
+  };
+
+  const cancelTicketEdit = () => {
+    setEditingTicketId(null);
+    setIsAddingTicket(false);
+    setTicketForm({ name: "", description: "", price: "", quantity: "" });
+  };
+
+  const handleSaveTicket = async () => {
+    if (!ticketForm.name.trim()) return toast.error("Ticket name is required");
+    if (!ticketForm.price || parseFloat(ticketForm.price) < 0) return toast.error("A valid price is required");
+    if (!ticketForm.quantity || parseInt(ticketForm.quantity) < 1) return toast.error("Quantity must be at least 1");
+
+    setIsSavingTicket(true);
+    try {
+      const payload = {
+        name: ticketForm.name.trim(),
+        description: ticketForm.description.trim() || null,
+        price: parseFloat(ticketForm.price),
+        quantity: parseInt(ticketForm.quantity),
+      };
+
+      if (editingTicketId) {
+        const res = await api.put(`/events/${event.id}/ticket-types/${editingTicketId}`, payload);
+        const updated = res.ticketType || res.data || { ...payload, _id: editingTicketId };
+        setLocalTicketTypes((prev) =>
+          prev.map((t) => (t._id || t.id) === editingTicketId ? { ...t, ...updated } : t)
+        );
+        toast.success("Ticket type updated");
+      } else {
+        const res = await api.post(`/events/${event.id}/ticket-types`, payload);
+        const created = res.ticketType || res.data || payload;
+        setLocalTicketTypes((prev) => [...prev, created]);
+        toast.success("Ticket type added");
+      }
+      cancelTicketEdit();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save ticket type");
+    } finally {
+      setIsSavingTicket(false);
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    const confirmed = await modal.confirm({
+      title: "Delete Ticket Type",
+      message: "Are you sure you want to delete this ticket type? This cannot be undone.",
+      variant: "danger",
+      confirmText: "Delete",
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete(`/events/${event.id}/ticket-types/${ticketId}`);
+      setLocalTicketTypes((prev) => prev.filter((t) => (t._id || t.id) !== ticketId));
+      toast.success("Ticket type deleted");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete ticket type");
+    }
   };
 
   function selectTab(tab: Tab) {
@@ -757,7 +835,8 @@ export function AdminEventManager({
 
       {activeTab === "settings" && (
         <div className="space-y-6 max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Voting Controls */}
+
+          {/* ── VOTING-specific settings ── */}
           {(event.type === "VOTING" || event.type === "HYBRID") && (
             <>
               <div className="bg-white rounded-xl border border-slate-200 p-6">
@@ -784,61 +863,10 @@ export function AdminEventManager({
                 </div>
               </div>
 
-              {role === "SUPER_ADMIN" && (
-                <div className="bg-white rounded-xl border border-slate-200 p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
-                      <Percent className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      Finance & Commission
-                    </h3>
-                  </div>
-
-                  <div className="bg-primary-50/50 rounded-xl p-5 border border-primary-100/50">
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-                      <div className="flex-1">
-                        <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2 ml-1">
-                          Custom Commission Rate (%)
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0"
-                            max="100"
-                            value={commissionRate}
-                            onChange={(e) => setCommissionRate(e.target.value)}
-                            placeholder="Global Default"
-                            className="w-full px-5 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-lg"
-                          />
-                          <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                            %
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleUpdateCommission}
-                        disabled={isSavingCommission}
-                        className="px-8 py-3.5 bg-primary-700 text-white rounded-xl font-bold hover:bg-primary-800 transition-all disabled:opacity-50 shadow-lg shadow-primary-100 shrink-0"
-                      >
-                        {isSavingCommission ? "Saving..." : "Update Rate"}
-                      </button>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-3 ml-1">
-                      This custom rate overrides the global platform commission
-                      for this specific event. Leave empty to revert to default.
-                    </p>
-                  </div>
-                </div>
-              )}
-
               <div className="bg-white rounded-xl border border-slate-200 p-6">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">
                   Voting Configuration
                 </h3>
-
                 <div className="flex items-center justify-between py-4 border-b border-slate-50">
                   <div>
                     <h4 className="font-medium text-slate-900">
@@ -858,6 +886,258 @@ export function AdminEventManager({
             </>
           )}
 
+          {/* ── TICKETING-specific settings ── */}
+          {(event.type === "TICKETING" || event.type === "HYBRID") && (
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Ticket Types</h3>
+                {!isAddingTicket && !editingTicketId && (
+                  <button
+                    type="button"
+                    onClick={() => { setIsAddingTicket(true); setTicketForm({ name: "", description: "", price: "", quantity: "" }); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-sm font-bold hover:bg-primary-100 transition-colors border border-primary-100"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Type
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {localTicketTypes.map((ticket: any) => {
+                  const tid = ticket._id || ticket.id;
+                  const isEditing = editingTicketId === tid;
+                  return (
+                    <div key={tid} className="border border-slate-100 rounded-lg overflow-hidden">
+                      {isEditing ? (
+                        <div className="p-4 space-y-3 bg-slate-50">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="col-span-2">
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">Name *</label>
+                              <input
+                                type="text"
+                                value={ticketForm.name}
+                                onChange={(e) => setTicketForm((f) => ({ ...f, name: e.target.value }))}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                                placeholder="e.g. VIP, Regular"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">Price (GHS) *</label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={ticketForm.price}
+                                onChange={(e) => setTicketForm((f) => ({ ...f, price: e.target.value }))}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                                placeholder="0.00"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">Quantity *</label>
+                              <input
+                                type="number"
+                                min="1"
+                                step="1"
+                                value={ticketForm.quantity}
+                                onChange={(e) => setTicketForm((f) => ({ ...f, quantity: e.target.value }))}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                                placeholder="100"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                              <input
+                                type="text"
+                                value={ticketForm.description}
+                                onChange={(e) => setTicketForm((f) => ({ ...f, description: e.target.value }))}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                                placeholder="Optional description"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={handleSaveTicket}
+                              disabled={isSavingTicket}
+                              className="px-4 py-2 bg-primary-700 text-white rounded-lg text-sm font-bold hover:bg-primary-800 transition-colors disabled:opacity-50"
+                            >
+                              {isSavingTicket ? "Saving..." : "Save Changes"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelTicketEdit}
+                              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-4 flex items-center justify-between">
+                          <div className="min-w-0">
+                            <div className="font-medium text-slate-900">{ticket.name}</div>
+                            <div className="text-sm text-slate-500 mt-0.5">
+                              {formatCurrency(Number(ticket.price))} &middot; {ticket.sold ?? ticket.soldCount ?? 0} / {ticket.quantity} sold
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0 ml-4">
+                            <button
+                              type="button"
+                              onClick={() => startEditTicket(ticket)}
+                              className="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTicket(tid)}
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {localTicketTypes.length === 0 && !isAddingTicket && (
+                  <p className="text-sm text-slate-400 text-center py-4">No ticket types yet. Add one above.</p>
+                )}
+
+                {/* Add new ticket type form */}
+                {isAddingTicket && (
+                  <div className="border border-primary-100 rounded-lg overflow-hidden">
+                    <div className="p-4 space-y-3 bg-primary-50/30">
+                      <p className="text-xs font-bold text-primary-700 uppercase tracking-widest">New Ticket Type</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="col-span-2">
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Name *</label>
+                          <input
+                            type="text"
+                            value={ticketForm.name}
+                            onChange={(e) => setTicketForm((f) => ({ ...f, name: e.target.value }))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white"
+                            placeholder="e.g. VIP, Regular"
+                            autoFocus
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Price (GHS) *</label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={ticketForm.price}
+                            onChange={(e) => setTicketForm((f) => ({ ...f, price: e.target.value }))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white"
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Quantity *</label>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={ticketForm.quantity}
+                            onChange={(e) => setTicketForm((f) => ({ ...f, quantity: e.target.value }))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white"
+                            placeholder="100"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                          <input
+                            type="text"
+                            value={ticketForm.description}
+                            onChange={(e) => setTicketForm((f) => ({ ...f, description: e.target.value }))}
+                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-white"
+                            placeholder="Optional description"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={handleSaveTicket}
+                          disabled={isSavingTicket}
+                          className="px-4 py-2 bg-primary-700 text-white rounded-lg text-sm font-bold hover:bg-primary-800 transition-colors disabled:opacity-50"
+                        >
+                          {isSavingTicket ? "Adding..." : "Add Ticket Type"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={cancelTicketEdit}
+                          className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Finance & Commission — all event types, SUPER_ADMIN only ── */}
+          {role === "SUPER_ADMIN" && (
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-primary-50 rounded-lg text-primary-600">
+                  <Percent className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Finance & Commission
+                </h3>
+              </div>
+              <div className="bg-primary-50/50 rounded-xl p-5 border border-primary-100/50">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+                  <div className="flex-1">
+                    <label className="block text-xs font-black text-slate-700 uppercase tracking-widest mb-2 ml-1">
+                      Custom Commission Rate (%)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        value={commissionRate}
+                        onChange={(e) => setCommissionRate(e.target.value)}
+                        placeholder="Global Default"
+                        className="w-full px-5 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none font-bold text-lg"
+                      />
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
+                        %
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleUpdateCommission}
+                    disabled={isSavingCommission}
+                    className="px-8 py-3.5 bg-primary-700 text-white rounded-xl font-bold hover:bg-primary-800 transition-all disabled:opacity-50 shadow-lg shadow-primary-100 shrink-0"
+                  >
+                    {isSavingCommission ? "Saving..." : "Update Rate"}
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 mt-3 ml-1">
+                  This custom rate overrides the global platform commission
+                  for this specific event. Leave empty to revert to default.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Danger Zone — DRAFT only ── */}
           {event.status === "DRAFT" && (
             <div className="bg-white rounded-xl border border-red-200 p-6">
               <h3 className="text-lg font-semibold text-red-900 mb-2">
