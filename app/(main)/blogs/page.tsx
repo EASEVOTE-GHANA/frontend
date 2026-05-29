@@ -29,7 +29,7 @@ export default async function BlogsIndexPage() {
             <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse"></span>
             Official Newsroom
           </div>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] text-primary-500">
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9] text-primary-500!">
             Platform insights <br />& global updates.
           </h1>
           <p className="max-w-xl mx-auto text-primary-100 text-lg font-medium opacity-80 leading-relaxed pt-2">
