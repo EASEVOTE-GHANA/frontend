@@ -69,11 +69,7 @@ export default function UnifiedDashboardLayout({
           };
         }
         if (item.name === "Organizers") {
-          return {
-            ...item,
-            badge:
-              pendingOrganizersCount > 0 ? pendingOrganizersCount : undefined,
-          };
+          return item;
         }
       }
 

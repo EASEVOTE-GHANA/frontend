@@ -94,12 +94,6 @@ export default function NominationWrapper({
   };
 
   const onSubmit = async (data: any) => {
-    if (!photoUrl) {
-      toast.error("Please upload a profile photo");
-      document.getElementById('photo-field')?.scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const customFields = customFieldsConfig.map((field: any) => ({
@@ -324,106 +318,111 @@ export default function NominationWrapper({
                    
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-10">
                      
-                     {/* 2. Personal Info - Row 1 */}
-                     <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Nominee Full Name *</label>
-                        <input
-                           {...register("fullName", { required: true })}
-                           placeholder="Full legal name of the candidate"
-                           className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all font-medium"
-                        />
-                        {errors.fullName && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Required</p>}
-                     </div>
+                      {/* Required: Full Name */}
+                      <div className="space-y-3">
+                         <label className="text-sm font-bold text-slate-700">Nominee Full Name <span className="text-primary-600">*</span></label>
+                         <input
+                            {...register("fullName", { required: true })}
+                            placeholder="Full legal name of the candidate"
+                            className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all font-medium"
+                         />
+                         {errors.fullName && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Required</p>}
+                      </div>
 
-                     <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Nominee Email Address *</label>
-                        <input
-                           type="email"
-                           {...register("email", { required: true })}
-                           placeholder="candidate@email.com"
-                           className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all font-medium"
-                        />
-                        {errors.email && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Required</p>}
-                     </div>
+                      {/* Required: Phone */}
+                      <div className="space-y-3">
+                         <label className="text-sm font-bold text-slate-700">Nominee Phone Number <span className="text-primary-600">*</span></label>
+                         <input
+                            type="tel"
+                            {...register("phone", { required: true })}
+                            placeholder="+233..."
+                            className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all font-medium"
+                         />
+                         {errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Required</p>}
+                      </div>
 
-                     {/* 2. Personal Info - Row 2 */}
-                     <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Nominee Phone Number *</label>
-                        <input
-                           type="tel"
-                           {...register("phone", { required: true })}
-                           placeholder="+233..."
-                           className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all font-medium"
-                        />
-                        {errors.phone && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Required</p>}
-                     </div>
+                      {/* Required: Category */}
+                      <div className="md:col-span-2 space-y-3">
+                         <label className="text-sm font-bold text-slate-700">Nomination Category <span className="text-primary-600">*</span></label>
+                         <div className="relative">
+                            <select
+                               {...register("categoryId", { required: true })}
+                               className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all appearance-none cursor-pointer font-medium"
+                            >
+                               <option value="">Select a category...</option>
+                               {(event.categories || []).map((cat: any) => (
+                                 <option key={cat.id || cat._id} value={cat.id || cat._id}>{cat.name}</option>
+                               ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                               <ChevronDown size={20} />
+                            </div>
+                         </div>
+                         {errors.categoryId && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Required</p>}
+                      </div>
 
-                     {/* 1. Category Selection */}
-                     <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Nomination Category *</label>
-                        <div className="relative">
-                           <select
-                              {...register("categoryId", { required: true })}
-                              className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all appearance-none cursor-pointer font-medium"
-                           >
-                              <option value="">Select a category...</option>
-                              {(event.categories || []).map((cat: any) => (
-                                <option key={cat.id || cat._id} value={cat.id || cat._id}>{cat.name}</option>
-                              ))}
-                           </select>
-                           <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                              <ChevronDown size={20} />
-                           </div>
-                        </div>
-                        {errors.categoryId && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1 text-red-500">Required</p>}
-                     </div>
+                      {/* Divider: Optional fields */}
+                      <div className="md:col-span-2 pt-2">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Optional Information</p>
+                      </div>
 
-                     {/* 3. Photo & Bio - Full Width */}
-                     <div className="md:col-span-2 space-y-3" id="photo-field">
-                        <label className="text-sm font-bold text-slate-700">Profile Photo *</label>
-                        <div className="relative group">
-                           <input
-                             type="file"
-                             accept="image/*"
-                             onChange={handleFileUpload}
-                             className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
-                           />
-                           {photoUrl ? (
-                             <div className="relative h-64 w-full rounded-2xl overflow-hidden group shadow-xl">
-                               <Image src={photoUrl} alt="Nominee" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-                               <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                 <p className="px-6 py-2 bg-white text-slate-950 rounded-full font-bold shadow-xl">Change Photo</p>
-                               </div>
-                             </div>
-                           ) : (
-                             <div className={clsx(
-                               "h-48 w-full border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center transition-all bg-slate-50 group-hover:border-primary-600 group-hover:bg-primary-50/10",
-                               isUploading ? "animate-pulse" : ""
-                             )}>
-                               {isUploading ? (
-                                 <Loader2 className="animate-spin text-primary-500 mb-2" size={32} />
-                               ) : (
-                                 <UploadCloud className="text-slate-400 mb-2 group-hover:scale-110 transition-transform" size={36} />
-                               )}
-                               <p className="text-sm font-bold text-slate-900">
-                                 {isUploading ? "Uploading Photo..." : "Upload Professional Photo"}
-                               </p>
-                               <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-widest">5MB MAX (JPG, PNG)</p>
-                             </div>
-                           )}
-                        </div>
-                     </div>
+                      {/* Optional: Profile Photo */}
+                      <div className="md:col-span-2 space-y-3" id="photo-field">
+                         <label className="text-sm font-bold text-slate-700">Profile Photo <span className="text-slate-400 font-medium">(Optional)</span></label>
+                         <div className="relative group">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileUpload}
+                              className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
+                            />
+                            {photoUrl ? (
+                              <div className="relative h-64 w-full rounded-2xl overflow-hidden group shadow-xl">
+                                <Image src={photoUrl} alt="Nominee" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                                <div className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <p className="px-6 py-2 bg-white text-slate-950 rounded-full font-bold shadow-xl">Change Photo</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className={clsx(
+                                "h-48 w-full border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center transition-all bg-slate-50 group-hover:border-primary-600 group-hover:bg-primary-50/10",
+                                isUploading ? "animate-pulse" : ""
+                              )}>
+                                {isUploading ? (
+                                  <Loader2 className="animate-spin text-primary-500 mb-2" size={32} />
+                                ) : (
+                                  <UploadCloud className="text-slate-400 mb-2 group-hover:scale-110 transition-transform" size={36} />
+                                )}
+                                <p className="text-sm font-bold text-slate-900">
+                                  {isUploading ? "Uploading Photo..." : "Upload Profile Photo"}
+                                </p>
+                                <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-widest">5MB MAX (JPG, PNG)</p>
+                              </div>
+                            )}
+                         </div>
+                      </div>
 
-                     <div className="md:col-span-2 space-y-3">
-                        <label className="text-sm font-bold text-slate-700">Bio / Achievement Story *</label>
-                        <textarea
-                           {...register("bio", { required: true })}
-                           rows={5}
-                           placeholder="Describe the nominee's achievements and why they should be nominated..."
-                           className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all resize-none font-medium"
-                        />
-                        {errors.bio && <p className="text-red-500 text-[10px] font-bold uppercase tracking-widest pl-1">Biography is required</p>}
-                     </div>
+                      {/* Optional: Email */}
+                      <div className="md:col-span-2 space-y-3">
+                         <label className="text-sm font-bold text-slate-700">Email Address <span className="text-slate-400 font-medium">(Optional)</span></label>
+                         <input
+                            type="email"
+                            {...register("email")}
+                            placeholder="candidate@email.com"
+                            className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all font-medium"
+                         />
+                      </div>
+
+                      {/* Optional: Bio */}
+                      <div className="md:col-span-2 space-y-3">
+                         <label className="text-sm font-bold text-slate-700">Bio / Achievement Story <span className="text-slate-400 font-medium">(Optional)</span></label>
+                         <textarea
+                            {...register("bio")}
+                            rows={5}
+                            placeholder="Describe the nominee's achievements and why they should be nominated..."
+                            className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-slate-900 text-base focus:ring-4 focus:ring-primary-50/50 focus:border-primary-600 outline-none transition-all resize-none font-medium"
+                         />
+                      </div>
 
                      {/* 4. Custom Questions */}
                      {customFieldsConfig.length > 0 && (

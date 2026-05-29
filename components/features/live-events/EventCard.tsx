@@ -10,7 +10,7 @@ export default function EventCard({ event }: { event: any }) {
   const statusInfo = getEventStatus(event);
 
   const buttonText = event.type === "TICKETING" ? "Buy Ticket" : "Vote Now";
-  const priceLabel = event.type === "TICKETING" 
+  const priceLabel = event.type === "TICKETING"
     ? (event.ticketTypes?.[0]?.price ? `GHS ${event.ticketTypes[0].price}.00` : "TBA")
     : (event.costPerVote || event.votePrice ? `GHS ${event.costPerVote || event.votePrice}/vote` : "GHS 1.00/vote");
 

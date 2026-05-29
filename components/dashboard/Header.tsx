@@ -48,7 +48,7 @@ export function Header({
   const { notifications, unreadCount, markAsRead, markAllAsRead, loading } =
     useNotifications({ enabled: isOrganizer });
 
-  const { pendingEvents, pendingOrgs, pendingCount } = useAdminAlerts({
+  const { pendingEvents, pendingOrgs, pendingCount, markAllAsRead: markAdminAlertsAsRead } = useAdminAlerts({
     enabled: isAdmin,
   });
 
@@ -268,17 +268,16 @@ export function Header({
                 )}
               </div>
               <div className="border-t border-slate-100 px-4 py-2">
-                <Link
-                  href={
-                    user.role === "ADMIN"
-                      ? "/dashboard/approvals"
-                      : "/dashboard/events"
-                  }
-                  onClick={() => setIsNotificationsOpen(false)}
+                <button
+                  type="button"
+                  onClick={() => {
+                    markAdminAlertsAsRead();
+                    setIsNotificationsOpen(false);
+                  }}
                   className="text-xs font-medium text-primary-600 hover:text-primary-700"
                 >
-                  View all pending →
-                </Link>
+                  Mark all as read
+                </button>
               </div>
             </div>
           )}

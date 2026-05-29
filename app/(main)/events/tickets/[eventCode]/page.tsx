@@ -25,29 +25,12 @@ export default async function TicketEventDetailPage({
   const apiClient = createServerApiClient();
   let event = null;
 
-  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
-
-  if (isObjectId) {
-    const res = await apiClient.get<any>(`/events/${eventCode}`).catch((err) => {
-      console.error(`[TicketEventPage] Error fetching ID ${eventCode}:`, err.message);
-      return null;
-    });
-    event = res?.data || res?.event || res;
-  } else {
-    // Lookup by short eventCode
-    // We explicitly request several statuses to ensure the lookup finds APPROVED or ENDED events 
-    const res = await apiClient.get<any>(`/events?eventCode=${eventCode}&status=APPROVED,PUBLISHED,LIVE,ENDED`).catch((err) => {
-      console.error(`[TicketEventPage] Error fetching code ${eventCode}:`, err.message);
-      return null;
-    });
-
-    if (res) {
-      const eventsList = res.data || res.events || (Array.isArray(res) ? res : []);
-      event = eventsList.find((e: any) => 
-        (e.eventCode || "").toUpperCase() === eventCode.toUpperCase()
-      );
-    }
-  }
+  // The backend's GET /events/:id supports both MongoDB ObjectIds and short 2-letter event codes.
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch((err) => {
+    console.error(`[TicketEventPage] Error fetching event ${eventCode}:`, err.message);
+    return null;
+  });
+  event = res?.data || res?.event || res;
 
   if (!event) return notFound();
 
@@ -114,25 +97,37 @@ export default async function TicketEventDetailPage({
             <BackButton fallback="/events/ticketing" />
           </div>
           <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-20">
-            <div className="max-w-7xl mx-auto">
-              <span className="inline-block px-3 py-1 bg-primary-700 text-white text-xs font-bold uppercase tracking-wide rounded-md mb-4">
-                {pageEvent.category}
-              </span>
-              <h1 className="text-4xl md:text-6xl font-display font-bold text-white! mb-4 leading-tight">
-                {pageEvent.title}
-              </h1>
-              <div className="flex flex-wrap gap-6 text-white/90 font-medium">
-                <span className="flex items-center gap-2">
-                  <Calendar size={18} className="text-primary-500" />
-                  {pageEvent.date}
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <div>
+                <span className="inline-block px-3 py-1 bg-primary-700 text-white text-xs font-bold uppercase tracking-wide rounded-md mb-4">
+                  {pageEvent.category}
                 </span>
-                <span className="flex items-center gap-2">
-                  <Clock size={18} className="text-primary-500" />{" "}
-                  {pageEvent.time}
+                <h1 className="text-4xl md:text-6xl font-display font-bold text-white! mb-4 leading-tight">
+                  {pageEvent.title}
+                </h1>
+                <div className="flex flex-wrap gap-6 text-white/90 font-medium">
+                  <span className="flex items-center gap-2">
+                    <Calendar size={18} className="text-primary-500" />
+                    {pageEvent.date}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Clock size={18} className="text-primary-500" />{" "}
+                    {pageEvent.time}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <MapPin size={18} className="text-primary-500" />
+                    {pageEvent.venue}
+                  </span>
+                </div>
+              </div>
+
+              {/* Event Code */}
+              <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-xl border border-white/20 text-center shrink-0">
+                <span className="block text-xs uppercase text-white/60 font-bold mb-1">
+                  Event Code
                 </span>
-                <span className="flex items-center gap-2">
-                  <MapPin size={18} className="text-primary-500" />
-                  {pageEvent.venue}
+                <span className="block text-2xl font-mono font-bold tracking-wider text-white">
+                  {pageEvent.eventCode}
                 </span>
               </div>
             </div>
@@ -189,7 +184,9 @@ export default async function TicketEventDetailPage({
                 className="w-full bg-white text-slate-700 border border-gray-200 py-3 rounded-xl font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
               />
 
-              <div className="mt-8 pt-6 border-t border-gray-100">
+
+
+              <div className="mt-4 pt-4 border-t border-gray-100">
                 <p className="text-xs text-slate-400 text-center">
                   Secured by EaseVote. 100% Buyer Guarantee.
                 </p>

@@ -63,8 +63,8 @@ export default function EventsBrowseClient({
       e.eventCode?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const statusInfo = getEventStatus(e as any);
-    const matchesStatus = 
-      statusFilter === "All" || 
+    const matchesStatus =
+      statusFilter === "All" ||
       statusFilter === statusInfo.label.toUpperCase() ||
       (statusFilter === "LIVE" && statusInfo.isActive);
 
@@ -141,11 +141,10 @@ export default function EventsBrowseClient({
               onClick={() => setViewMode("grid")}
               aria-label="Grid view"
               title="Grid view"
-              className={`p-3 rounded-xl transition-colors ${
-                viewMode === "grid"
+              className={`p-3 rounded-xl transition-colors ${viewMode === "grid"
                   ? "bg-primary-50 text-primary-600"
                   : "text-slate-400 hover:text-slate-600"
-              }`}
+                }`}
             >
               <Grid size={20} />
             </button>
@@ -153,11 +152,10 @@ export default function EventsBrowseClient({
               onClick={() => setViewMode("list")}
               aria-label="List view"
               title="List view"
-              className={`p-3 rounded-xl transition-colors ${
-                viewMode === "list"
+              className={`p-3 rounded-xl transition-colors ${viewMode === "list"
                   ? "bg-primary-50 text-primary-600"
                   : "text-slate-400 hover:text-slate-600"
-              }`}
+                }`}
             >
               <List size={20} />
             </button>
@@ -191,9 +189,8 @@ export default function EventsBrowseClient({
 
                     <div className="absolute top-3 left-3 flex gap-2">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm text-white ${
-                          getEventStatus(event as any).color
-                        } ${getEventStatus(event as any).isActive ? "animate-pulse" : ""}`}
+                        className={`px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm text-white ${getEventStatus(event as any).color
+                          } ${getEventStatus(event as any).isActive ? "animate-pulse" : ""}`}
                       >
                         {getEventStatus(event as any).label}
                       </span>

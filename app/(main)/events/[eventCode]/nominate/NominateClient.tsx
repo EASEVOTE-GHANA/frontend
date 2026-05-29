@@ -93,7 +93,7 @@ export default function NominateClient({ event }: { event: any }) {
       await api.post(`/nominations/events/${event.id}/submit`, {
         nomineeName: formData.nomineeName,
         nomineePhone: formData.nomineePhone,
-        nomineeEmail: formData.nomineeEmail || undefined,
+        email: formData.nomineeEmail || undefined,
         categoryId: formData.categoryId,
         bio: formData.bio || undefined,
         photoUrl: imageUrl,

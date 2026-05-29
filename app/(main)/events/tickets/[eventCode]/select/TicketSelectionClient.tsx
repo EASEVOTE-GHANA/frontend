@@ -135,7 +135,7 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <button
-            onClick={() => router.push(`/events/tickets/${event.id}`)}
+            onClick={() => router.push(`/events/tickets/${event.eventCode || event.id}`)}
             className="text-slate-500 font-bold hover:text-slate-900"
           >
             Cancel
@@ -217,7 +217,7 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-bold text-slate-700">
-                      Full Name
+                      Full Name <span className="text-red-500">*</span>
                     </label>
                     <div className="relative mt-1">
                       <User
@@ -237,7 +237,7 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
                   </div>
                   <div>
                     <label className="text-sm font-bold text-slate-700">
-                      Email Address (For Ticket Delivery)
+                      Email Address <span className="text-gray-400 font-normal">(optional)</span>
                     </label>
                     <div className="relative mt-1">
                       <Mail
@@ -257,7 +257,7 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
                   </div>
                   <div>
                     <label className="text-sm font-bold text-slate-700">
-                      Phone Number
+                      Phone Number <span className="text-red-500">*</span>
                     </label>
                     <div className="relative mt-1">
                       <Smartphone
@@ -329,7 +329,7 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
                   <button
                     onClick={handleCheckout}
                     disabled={
-                      !formData.email || !formData.phone || isProcessing
+                      !formData.name || !formData.phone || isProcessing
                     }
                     className="w-full bg-primary-600 disabled:bg-gray-300 text-white py-3 rounded-xl font-bold hover:bg-primary-700 transition-colors shadow-lg flex items-center justify-center gap-2"
                   >

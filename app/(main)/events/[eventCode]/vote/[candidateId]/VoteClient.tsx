@@ -195,7 +195,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
             {/* Full Name */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Full Name
+                Full Name <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
@@ -209,7 +209,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
             {/* Email Address */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Email Address
+                Email Address <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <input
                 type="email"
@@ -223,7 +223,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
             {/* Phone Number */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Phone Number
+                Phone Number <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <input
                 type="tel"
@@ -237,7 +237,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
             {/* Votes */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Number of Votes (GHS {minimalVotePrice.toFixed(2)})
+                Number of Votes (GHS {minimalVotePrice.toFixed(2)}) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"

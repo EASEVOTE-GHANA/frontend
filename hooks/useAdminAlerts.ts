@@ -104,11 +104,57 @@ export function useAdminAlerts({ enabled = true, showToasts = true }: { enabled?
     return () => clearInterval(interval);
   }, [enabled, fetchAlerts]);
 
+  const [readIds, setReadIds] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("adminAlertsReadIds");
+        if (stored) return new Set(JSON.parse(stored));
+      } catch (e) {}
+    }
+    return new Set();
+  });
+
+  // Sync to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("adminAlertsReadIds", JSON.stringify([...readIds]));
+    }
+  }, [readIds]);
+
+  // Clean up stale readIds (IDs that are no longer pending)
+  useEffect(() => {
+    if (pendingEvents.length === 0 && pendingOrgs.length === 0) return;
+    setReadIds((prev) => {
+      const currentIds = new Set([
+        ...pendingEvents.map(e => e.id),
+        ...pendingOrgs.map(o => o.id)
+      ]);
+      const next = new Set([...prev].filter(id => currentIds.has(id)));
+      if (next.size !== prev.size) {
+        return next;
+      }
+      return prev;
+    });
+  }, [pendingEvents, pendingOrgs]);
+
+  const markAllAsRead = useCallback(() => {
+    setReadIds((prev) => {
+      const next = new Set(prev);
+      pendingEvents.forEach((e) => next.add(e.id));
+      pendingOrgs.forEach((o) => next.add(o.id));
+      return next;
+    });
+  }, [pendingEvents, pendingOrgs]);
+
+  const visibleEvents = pendingEvents.filter((e) => !readIds.has(e.id));
+  const visibleOrgs = pendingOrgs.filter((o) => !readIds.has(o.id));
+
   return {
-    pendingEvents,
-    pendingOrgs,
-    pendingEventsCount: pendingEvents.length,
-    pendingOrganizersCount: pendingOrgs.length,
-    pendingCount: pendingEvents.length + pendingOrgs.length,
+    pendingEvents: visibleEvents,
+    pendingOrgs: visibleOrgs,
+    pendingEventsCount: visibleEvents.length,
+    pendingOrganizersCount: visibleOrgs.length,
+    pendingCount: visibleEvents.length + visibleOrgs.length,
+    markAllAsRead,
   };
 }

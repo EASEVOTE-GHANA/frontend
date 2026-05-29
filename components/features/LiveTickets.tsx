@@ -168,7 +168,7 @@ export default function LiveTickets({ events }: { events: any[] }) {
                   </div>
 
                   <Link
-                    href={`/events/tickets/${ticket._id || ticket.id}`}
+                    href={`/events/tickets/${ticket.eventCode || ticket._id || ticket.id}`}
                     className="w-full py-3 bg-primary-700 text-white! font-bold rounded-lg hover:bg-primary-800 transition-colors flex items-center justify-center group/btn"
                   >
                     Get Tickets

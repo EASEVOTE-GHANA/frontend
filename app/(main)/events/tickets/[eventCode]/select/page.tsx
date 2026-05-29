@@ -11,22 +11,9 @@ export default async function TicketSelectionPage({
 
   const apiClient = createServerApiClient();
   let event = null;
-  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
-
-  if (isObjectId) {
-    event = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
-  } else {
-    // Lookup by short eventCode
-    // We explicitly request several statuses to ensure the lookup finds APPROVED or ENDED events 
-    const res = await apiClient.get<any>(`/events?eventCode=${eventCode}&status=APPROVED,PUBLISHED,LIVE,ENDED`).catch(() => null);
-    const eventsList = res?.data || res?.events || (Array.isArray(res) ? res : []);
-    
-    if (Array.isArray(eventsList)) {
-      event = eventsList.find((e: any) => 
-        e.eventCode?.toUpperCase() === eventCode.toUpperCase()
-      );
-    }
-  }
+  // The backend's GET /events/:id supports both MongoDB ObjectIds and short 2-letter event codes.
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+  event = res?.data || res?.event || res;
 
   if (!event) return notFound();
 

@@ -186,7 +186,7 @@ export default function TicketingBrowseClient({
                   </div>
 
                   <Link
-                    href={`/events/tickets/${ticket.id}`}
+                    href={`/events/tickets/${ticket.eventCode}`}
                     className="w-full py-3 bg-primary-700 text-white! font-bold rounded-lg hover:bg-primary-800 transition-colors flex items-center justify-center gap-2"
                   >
                     Get Tickets <ArrowRight size={16} />
