@@ -92,13 +92,18 @@ export default async function AdminTransactionsPage({
     reference: tx.paymentReference,
     type: tx.type,
     amount: tx.amount,
+    currency: tx.currency || "GHS",
     status: tx.status === "PAID" ? "SUCCESS" : tx.status,
     payer: tx.customerName || tx.customerEmail || "Anonymous",
+    customerEmail: tx.customerEmail || "",
+    customerPhone: tx.customerPhone || "",
+    source: tx.source || "web",
     event: tx.eventId?.title || "Unknown Event",
+    eventType: tx.eventId?.type || "",
     date: tx.paidAt || tx.createdAt,
-    // New fields for the "Units" column
     voteCount: tx.voteCount || 0,
-    ticketQuantity: tx.ticketQuantity || 0
+    ticketQuantity: tx.ticketQuantity || 0,
+    ticketNumbers: (tx.ticketNumbers as string[]) || [],
   }));
 
   // Helper for compact GHS formatting
