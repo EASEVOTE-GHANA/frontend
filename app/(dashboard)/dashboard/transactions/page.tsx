@@ -87,28 +87,34 @@ export default async function AdminTransactionsPage({
   const rawTransactions = transactionsData.data || transactionsData.purchases || (Array.isArray(transactionsData) ? transactionsData : []);
   const pagination = transactionsData.pagination || { totalPages: 1, currentPage: 1, totalResults: rawTransactions.length };
 
-  // Resolve candidate and category names for VOTE purchases.
-  // candidateId and categoryId are embedded subdocument IDs inside the Event
+  // Resolve candidate and category names for VOTE purchases,
+  // and ticket type names for TICKET purchases.
+  // candidateId, categoryId, and ticketTypeId are subdocument IDs inside the Event
   // document — the backend does not populate them, so we fetch each unique
   // event once and build a cross-reference map client-side.
-  type EventLookup = { categories: Record<string, string>; candidates: Record<string, string> };
+  type EventLookup = {
+    categories: Record<string, string>;
+    candidates: Record<string, string>;
+    ticketTypes: Record<string, string>;
+  };
   const eventLookup: Record<string, EventLookup> = {};
 
-  const voteEventIds: string[] = [
+  const uniqueEventIds: string[] = [
     ...new Set<string>(
       (rawTransactions as any[])
-        .filter((tx: any) => tx.type === "VOTE" && tx.eventId)
+        .filter((tx: any) => tx.eventId)
         .map((tx: any): string => (tx.eventId._id || tx.eventId).toString())
     ),
   ];
 
   await Promise.allSettled(
-    voteEventIds.map(async (eid: string) => {
+    uniqueEventIds.map(async (eid: string) => {
       try {
         const res = await apiClient.get(`/events/${eid}`);
         const ev = res.data || res.event || res;
         const categories: Record<string, string> = {};
         const candidates: Record<string, string> = {};
+        const ticketTypes: Record<string, string> = {};
         for (const cat of ev.categories || []) {
           const catId = (cat._id || cat.id)?.toString();
           if (catId) categories[catId] = cat.name;
@@ -117,7 +123,11 @@ export default async function AdminTransactionsPage({
             if (candId) candidates[candId] = cand.name;
           }
         }
-        eventLookup[eid] = { categories, candidates };
+        for (const tt of ev.ticketTypes || []) {
+          const ttId = (tt._id || tt.id)?.toString();
+          if (ttId) ticketTypes[ttId] = tt.name;
+        }
+        eventLookup[eid] = { categories, candidates, ticketTypes };
       } catch {
         // event deleted or inaccessible — names stay blank
       }
@@ -129,6 +139,7 @@ export default async function AdminTransactionsPage({
     const lookup = eventLookup[eid];
     const candId = tx.candidateId?.toString();
     const catId  = tx.categoryId?.toString();
+    const ttId   = tx.ticketTypeId?.toString();
     return {
       id: tx._id,
       reference: tx.paymentReference,
@@ -148,6 +159,7 @@ export default async function AdminTransactionsPage({
       ticketNumbers: (tx.ticketNumbers as string[]) || [],
       candidateName: (candId && lookup?.candidates[candId]) || "",
       categoryName:  (catId  && lookup?.categories[catId])  || "",
+      ticketTypeName: (ttId  && lookup?.ticketTypes[ttId])  || "",
     };
   });
 
