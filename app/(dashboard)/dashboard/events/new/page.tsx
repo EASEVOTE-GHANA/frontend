@@ -1,4 +1,4 @@
-fronte"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -62,20 +62,23 @@ export default function CreateEventPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
+  const isAdmin =
+    session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [currentStep, setCurrentStep] = useState(searchParams.get("type") ? 2 : 1);
-  const [organizers, setOrganizers] = useState<{ id: string; name: string; email: string }[]>([]);
+  const [currentStep, setCurrentStep] = useState(
+    searchParams.get("type") ? 2 : 1,
+  );
+  const [organizers, setOrganizers] = useState<
+    { id: string; name: string; email: string }[]
+  >([]);
   const [selectedOrganizerId, setSelectedOrganizerId] = useState("");
 
   const getOrdinalNum = (n: number) => {
     return (
       n +
       (n > 0
-        ? ["th", "st", "nd", "rd"][
-        (n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10
-        ]
+        ? ["th", "st", "nd", "rd"][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10]
         : "")
     );
   };
@@ -126,18 +129,21 @@ export default function CreateEventPage() {
 
   useEffect(() => {
     if (isAdmin) {
-      api.get("/users").then((res) => {
-        const users = res.data || res.users || res;
-        setOrganizers(
-          (Array.isArray(users) ? users : [])
-            .filter((u: any) => u.role === "ORGANIZER")
-            .map((u: any) => ({
-              id: u.id || u._id,
-              name: u.name || u.fullName,
-              email: u.email,
-            }))
-        );
-      }).catch(console.error);
+      api
+        .get("/users")
+        .then((res) => {
+          const users = res.data || res.users || res;
+          setOrganizers(
+            (Array.isArray(users) ? users : [])
+              .filter((u: any) => u.role === "ORGANIZER")
+              .map((u: any) => ({
+                id: u.id || u._id,
+                name: u.name || u.fullName,
+                email: u.email,
+              })),
+          );
+        })
+        .catch(console.error);
     }
   }, [isAdmin]);
 
@@ -152,12 +158,12 @@ export default function CreateEventPage() {
     setMinDate(dateString);
 
     // If initial formData is empty, set some reasonable defaults
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       startDate: dateString,
       endDate: dateString,
       votingStartDate: dateString,
-      votingEndDate: dateString
+      votingEndDate: dateString,
     }));
   }, []);
 
@@ -173,7 +179,12 @@ export default function CreateEventPage() {
     } else {
       let newValue = value;
       // Strip leading zeros for numeric fields (but allow 0.5 etc)
-      if (type === "number" && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+      if (
+        type === "number" &&
+        newValue.length > 1 &&
+        newValue.startsWith("0") &&
+        newValue[1] !== "."
+      ) {
         newValue = newValue.replace(/^0+/, "");
       }
       setFormData((prev) => ({ ...prev, [name]: newValue }));
@@ -212,7 +223,12 @@ export default function CreateEventPage() {
   ) => {
     let newValue = value;
     // Strip leading zeros for numeric fields (but allow 0.5 etc)
-    if ((field === "price" || field === "quantity" || field === "maxPerOrder") && newValue.length > 1 && newValue.startsWith("0") && newValue[1] !== ".") {
+    if (
+      (field === "price" || field === "quantity" || field === "maxPerOrder") &&
+      newValue.length > 1 &&
+      newValue.startsWith("0") &&
+      newValue[1] !== "."
+    ) {
       newValue = newValue.replace(/^0+/, "");
     }
 
@@ -267,18 +283,18 @@ export default function CreateEventPage() {
       prev.map((c) =>
         c.id === categoryId
           ? {
-            ...c,
-            candidates: [
-              ...c.candidates,
-              {
-                id: generateId(),
-                name: "",
-                bio: "",
-                email: "",
-                phone: "",
-              },
-            ],
-          }
+              ...c,
+              candidates: [
+                ...c.candidates,
+                {
+                  id: generateId(),
+                  name: "",
+                  bio: "",
+                  email: "",
+                  phone: "",
+                },
+              ],
+            }
           : c,
       ),
     );
@@ -294,11 +310,11 @@ export default function CreateEventPage() {
       prev.map((c) =>
         c.id === categoryId
           ? {
-            ...c,
-            candidates: c.candidates.map((cand) =>
-              cand.id === candidateId ? { ...cand, [field]: value } : cand,
-            ),
-          }
+              ...c,
+              candidates: c.candidates.map((cand) =>
+                cand.id === candidateId ? { ...cand, [field]: value } : cand,
+              ),
+            }
           : c,
       ),
     );
@@ -309,11 +325,11 @@ export default function CreateEventPage() {
       prev.map((c) =>
         c.id === categoryId
           ? {
-            ...c,
-            candidates: c.candidates.filter(
-              (cand) => cand.id !== candidateId,
-            ),
-          }
+              ...c,
+              candidates: c.candidates.filter(
+                (cand) => cand.id !== candidateId,
+              ),
+            }
           : c,
       ),
     );
@@ -334,8 +350,8 @@ export default function CreateEventPage() {
 
       const today = new Date();
       const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
       const todayString = `${year}-${month}-${day}`;
 
       // Removed past-date validation entirely to avoid timezone conflicts and allow retrospective creation
@@ -383,7 +399,7 @@ export default function CreateEventPage() {
           if (!candidate.name.trim())
             return `All candidates in ${category.name} must have a name`;
           if (!candidate.phone.trim())
-            return `Candidate "${candidate.name || 'Unknown'}" in ${category.name} must have a phone number`;
+            return `Candidate "${candidate.name || "Unknown"}" in ${category.name} must have a phone number`;
         }
       }
     }
@@ -434,13 +450,41 @@ export default function CreateEventPage() {
         type: formData.type,
         imageUrl,
         imagePublicId,
-        ...(isAdmin && selectedOrganizerId ? { organizerId: selectedOrganizerId } : {}),
-        startDate: formData.startDate ? new Date(`${formData.startDate}T${formData.startTime}:00`).toISOString() : undefined,
-        endDate: formData.endDate ? new Date(`${formData.endDate}T${formData.endTime}:00`).toISOString() : undefined,
-        votingStartDate: (formData.type === "VOTING" && formData.votingStartDate) ? new Date(`${formData.votingStartDate}T${formData.votingStartTime}:00`).toISOString() : undefined,
-        votingEndDate: (formData.type === "VOTING" && formData.votingEndDate) ? new Date(`${formData.votingEndDate}T${formData.votingEndTime}:00`).toISOString() : undefined,
-        votingStartTime: (formData.type === "VOTING" && formData.votingStartDate) ? new Date(`${formData.votingStartDate}T${formData.votingStartTime}:00`).toISOString() : undefined,
-        votingEndTime: (formData.type === "VOTING" && formData.votingEndDate) ? new Date(`${formData.votingEndDate}T${formData.votingEndTime}:00`).toISOString() : undefined,
+        ...(isAdmin && selectedOrganizerId
+          ? { organizerId: selectedOrganizerId }
+          : {}),
+        startDate: formData.startDate
+          ? new Date(
+              `${formData.startDate}T${formData.startTime}:00`,
+            ).toISOString()
+          : undefined,
+        endDate: formData.endDate
+          ? new Date(`${formData.endDate}T${formData.endTime}:00`).toISOString()
+          : undefined,
+        votingStartDate:
+          formData.type === "VOTING" && formData.votingStartDate
+            ? new Date(
+                `${formData.votingStartDate}T${formData.votingStartTime}:00`,
+              ).toISOString()
+            : undefined,
+        votingEndDate:
+          formData.type === "VOTING" && formData.votingEndDate
+            ? new Date(
+                `${formData.votingEndDate}T${formData.votingEndTime}:00`,
+              ).toISOString()
+            : undefined,
+        votingStartTime:
+          formData.type === "VOTING" && formData.votingStartDate
+            ? new Date(
+                `${formData.votingStartDate}T${formData.votingStartTime}:00`,
+              ).toISOString()
+            : undefined,
+        votingEndTime:
+          formData.type === "VOTING" && formData.votingEndDate
+            ? new Date(
+                `${formData.votingEndDate}T${formData.votingEndTime}:00`,
+              ).toISOString()
+            : undefined,
         location: formData.location || null,
         venue: formData.venue || null,
         isPublic: formData.isPublic,
@@ -448,7 +492,9 @@ export default function CreateEventPage() {
         ...(formData.type === "VOTING" && {
           costPerVote: parseFloat(formData.votePrice),
           minVotesPerPurchase: parseInt(formData.minVotesPerPurchase) || 1,
-          maxVotesPerPurchase: formData.maxVotesPerPurchase ? parseInt(formData.maxVotesPerPurchase) : null,
+          maxVotesPerPurchase: formData.maxVotesPerPurchase
+            ? parseInt(formData.maxVotesPerPurchase)
+            : null,
           allowPublicNominations: formData.allowPublicNominations,
           ...(formData.allowPublicNominations && nominationSettings.whatsappLink
             ? { whatsappGroupLink: nominationSettings.whatsappLink }
@@ -459,8 +505,12 @@ export default function CreateEventPage() {
 
       // 1. Create Event
       const eventRes = await api.post("/events", eventPayload);
-      const eventId = eventRes.id || eventRes.data?.id || eventRes.event?.id || eventRes._id;
-      const eventCode = eventRes.eventCode || eventRes.data?.eventCode || eventRes.event?.eventCode;
+      const eventId =
+        eventRes.id || eventRes.data?.id || eventRes.event?.id || eventRes._id;
+      const eventCode =
+        eventRes.eventCode ||
+        eventRes.data?.eventCode ||
+        eventRes.event?.eventCode;
 
       if (!eventId) throw new Error("Event ID not returned from creation");
 
@@ -479,7 +529,9 @@ export default function CreateEventPage() {
             code: `${eventCode}${sequence++}`,
           })),
         }));
-        await api.put(`/events/${eventId}`, { categories: categoriesWithCodes });
+        await api.put(`/events/${eventId}`, {
+          categories: categoriesWithCodes,
+        });
       }
 
       // 3. Ticketing Event nested creations
@@ -508,8 +560,6 @@ export default function CreateEventPage() {
               order: index,
             })),
           });
-
-
         } catch (nomError) {
           console.error("Failed to save nomination settings:", nomError);
         }
@@ -689,7 +739,9 @@ export default function CreateEventPage() {
                     >
                       <option value="">Select an organizer</option>
                       {organizers.map((o) => (
-                        <option key={o.id} value={o.id}>{o.name} — {o.email}</option>
+                        <option key={o.id} value={o.id}>
+                          {o.name} — {o.email}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -751,8 +803,16 @@ export default function CreateEventPage() {
                             required
                           />
                           <div className="w-full h-full px-4 py-2.5 border border-slate-200 rounded-lg bg-white flex items-center transition-all peer-focus:ring-2 peer-focus:ring-primary-500 peer-focus:border-primary-500 peer-hover:border-primary-300">
-                            <span className={formData.startDate ? "text-slate-900" : "text-slate-400"}>
-                              {formData.startDate ? formatInputDate(formData.startDate) : "mm/dd/yyyy"}
+                            <span
+                              className={
+                                formData.startDate
+                                  ? "text-slate-900"
+                                  : "text-slate-400"
+                              }
+                            >
+                              {formData.startDate
+                                ? formatInputDate(formData.startDate)
+                                : "mm/dd/yyyy"}
                             </span>
                           </div>
                         </div>
@@ -785,8 +845,16 @@ export default function CreateEventPage() {
                             required
                           />
                           <div className="w-full h-full px-4 py-2.5 border border-slate-200 rounded-lg bg-white flex items-center transition-all peer-focus:ring-2 peer-focus:ring-primary-500 peer-focus:border-primary-500 peer-hover:border-primary-300">
-                            <span className={formData.endDate ? "text-slate-900" : "text-slate-400"}>
-                              {formData.endDate ? formatInputDate(formData.endDate) : "mm/dd/yyyy"}
+                            <span
+                              className={
+                                formData.endDate
+                                  ? "text-slate-900"
+                                  : "text-slate-400"
+                              }
+                            >
+                              {formData.endDate
+                                ? formatInputDate(formData.endDate)
+                                : "mm/dd/yyyy"}
                             </span>
                           </div>
                         </div>
@@ -1417,12 +1485,16 @@ export default function CreateEventPage() {
 
                           {category.candidates.length === 0 ? (
                             <p className="text-sm text-slate-500 italic">
-                              No candidates added yet. You can add them here now, or later from your dashboard.
+                              No candidates added yet. You can add them here
+                              now, or later from your dashboard.
                             </p>
                           ) : (
                             <div className="space-y-3">
                               {category.candidates.map((cand, candIndex) => (
-                                <div key={cand.id} className="flex gap-3 items-start bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                <div
+                                  key={cand.id}
+                                  className="flex gap-3 items-start bg-slate-50 p-3 rounded-lg border border-slate-100"
+                                >
                                   <div className="flex-1 space-y-3">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                       <div>
@@ -1430,7 +1502,14 @@ export default function CreateEventPage() {
                                           type="text"
                                           placeholder="Candidate Name *"
                                           value={cand.name}
-                                          onChange={(e) => updateCandidate(category.id, cand.id, "name", e.target.value)}
+                                          onChange={(e) =>
+                                            updateCandidate(
+                                              category.id,
+                                              cand.id,
+                                              "name",
+                                              e.target.value,
+                                            )
+                                          }
                                           className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                         />
                                       </div>
@@ -1441,7 +1520,14 @@ export default function CreateEventPage() {
                                           type="email"
                                           placeholder="Email Address"
                                           value={cand.email}
-                                          onChange={(e) => updateCandidate(category.id, cand.id, "email", e.target.value)}
+                                          onChange={(e) =>
+                                            updateCandidate(
+                                              category.id,
+                                              cand.id,
+                                              "email",
+                                              e.target.value,
+                                            )
+                                          }
                                           className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                         />
                                       </div>
@@ -1450,7 +1536,14 @@ export default function CreateEventPage() {
                                           type="tel"
                                           placeholder="Phone Number *"
                                           value={cand.phone}
-                                          onChange={(e) => updateCandidate(category.id, cand.id, "phone", e.target.value)}
+                                          onChange={(e) =>
+                                            updateCandidate(
+                                              category.id,
+                                              cand.id,
+                                              "phone",
+                                              e.target.value,
+                                            )
+                                          }
                                           className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                                         />
                                       </div>
@@ -1459,7 +1552,14 @@ export default function CreateEventPage() {
                                       <textarea
                                         placeholder="Brief bio or description (optional)"
                                         value={cand.bio}
-                                        onChange={(e) => updateCandidate(category.id, cand.id, "bio", e.target.value)}
+                                        onChange={(e) =>
+                                          updateCandidate(
+                                            category.id,
+                                            cand.id,
+                                            "bio",
+                                            e.target.value,
+                                          )
+                                        }
                                         rows={2}
                                         className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none bg-white"
                                       />
@@ -1467,7 +1567,9 @@ export default function CreateEventPage() {
                                   </div>
                                   <button
                                     type="button"
-                                    onClick={() => removeCandidate(category.id, cand.id)}
+                                    onClick={() =>
+                                      removeCandidate(category.id, cand.id)
+                                    }
                                     className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors shrink-0 mt-0.5"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -1531,9 +1633,14 @@ export default function CreateEventPage() {
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
                 <Calendar className="h-5 w-5 text-amber-500 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-amber-900">Configure Nomination Timelines Later</p>
+                  <p className="text-sm font-medium text-amber-900">
+                    Configure Nomination Timelines Later
+                  </p>
                   <p className="text-xs text-amber-700 mt-0.5">
-                    For now, you are only designing the nomination questions. You can set the specific start and end dates for the nomination phase in your event's <b>Nomination Settings</b> once the event is created.
+                    For now, you are only designing the nomination questions.
+                    You can set the specific start and end dates for the
+                    nomination phase in your event's <b>Nomination Settings</b>{" "}
+                    once the event is created.
                   </p>
                 </div>
               </div>
