@@ -589,7 +589,9 @@ export function CategoriesManager({
                       <button
                         type="button"
                         onClick={() => addCandidate(catIndex)}
-                        className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                        disabled={!eventCode}
+                        className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={!eventCode ? "Loading event code…" : undefined}
                       >
                         <Plus className="h-4 w-4" />
                         Add Candidate
@@ -606,15 +608,13 @@ export function CategoriesManager({
                             {candIndex + 1}
                           </div>
                           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {Boolean(candidate.code) && (
-                              <input
-                                type="text"
-                                value={candidate.code}
-                                readOnly
-                                className="px-3 py-2 border border-slate-200 bg-slate-100 text-slate-500 rounded-lg focus:outline-none cursor-not-allowed uppercase font-mono"
-                                placeholder="Code"
-                              />
-                            )}
+                            <input
+                              type="text"
+                              value={candidate.code ?? ""}
+                              readOnly
+                              className="px-3 py-2 border border-slate-200 bg-slate-100 text-slate-500 rounded-lg focus:outline-none cursor-not-allowed uppercase font-mono"
+                              placeholder="Auto-generated"
+                            />
                             <input
                               type="text"
                               value={candidate.name}

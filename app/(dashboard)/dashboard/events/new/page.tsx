@@ -453,16 +453,7 @@ export default function CreateEventPage() {
           ...(formData.allowPublicNominations && nominationSettings.whatsappLink
             ? { whatsappGroupLink: nominationSettings.whatsappLink }
             : {}),
-          categories: categories.map((cat) => ({
-            name: cat.name,
-            description: cat.description || "Category description",
-            candidates: cat.candidates.map((cand) => ({
-              name: cand.name,
-              description: cand.bio || "Candidate bio",
-              email: cand.email || null,
-              phone: cand.phone || "0000000000",
-            })),
-          })),
+          categories: [], // Populated in the next step once eventCode is known
         }),
       };
 
@@ -473,7 +464,23 @@ export default function CreateEventPage() {
 
       if (!eventId) throw new Error("Event ID not returned from creation");
 
-      // 2. Voting Event nested creations removed: Mongoose creates categories & candidates atomically from the root payload above
+      // 2. Add categories + candidates now that eventCode is known.
+      //    Codes are generated here as {eventCode}{n} (e.g. AB1, AB2, AB3).
+      if (formData.type === "VOTING" && categories.length > 0) {
+        let sequence = 1;
+        const categoriesWithCodes = categories.map((cat) => ({
+          name: cat.name,
+          description: cat.description || "Category description",
+          candidates: cat.candidates.map((cand) => ({
+            name: cand.name,
+            description: cand.bio || "Candidate bio",
+            email: cand.email || null,
+            phone: cand.phone || "0000000000",
+            code: `${eventCode}${sequence++}`,
+          })),
+        }));
+        await api.put(`/events/${eventId}`, { categories: categoriesWithCodes });
+      }
 
       // 3. Ticketing Event nested creations
       if (formData.type === "TICKETING") {
