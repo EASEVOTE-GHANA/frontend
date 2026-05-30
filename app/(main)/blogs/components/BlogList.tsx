@@ -32,8 +32,8 @@ export default function BlogList({ blogs }: BlogListProps) {
               The newsroom is quiet.
             </h2>
             <p className="text-slate-500 max-w-sm mx-auto font-medium">
-              Check back soon for our first editorial release. We&apos;re currently
-              crafting some great stories for you.
+              Check back soon for our first editorial release. We&apos;re
+              currently crafting some great stories for you.
             </p>
           </div>
         </div>
@@ -42,7 +42,7 @@ export default function BlogList({ blogs }: BlogListProps) {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-24">
+    <div className="bg-gray-50 pb-12 pt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {blogs.map((blog, idx) => (

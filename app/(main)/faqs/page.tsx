@@ -24,6 +24,18 @@ export default function FaqsPage() {
         <div className="mb-20 sm:mb-32">
           <VideoGuides />
         </div>
+        <div className="mt-20 text-center bg-secondary-50 rounded-3xl p-12">
+          <h3 className="text-2xl font-bold text-secondary-900 mb-3">
+            Still have questions?
+          </h3>
+          <p className="text-secondary-700 mb-8">
+            Can&apos;t find the answer you&apos;re looking for? Please chat to
+            our friendly team.
+          </p>
+          <button className="bg-secondary-600 text-white px-8 py-3 rounded-full font-bold hover:bg-secondary-700 transition-colors shadow-lg shadow-secondary-600/20">
+            Contact Support
+          </button>
+        </div>{" "}
       </div>
       <Newsletter />
     </main>
