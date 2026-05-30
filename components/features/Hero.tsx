@@ -104,7 +104,7 @@ const Hero = ({ banners }: HeroProps) => {
               </Link>
               <Link
                 href="/events/ticketing"
-                className="border-2 border-brand-deep text-primary-700! px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all hover:-translate-y-1 inline-block text-center"
+                className="border-2 border-brand-primary-600 text-primary-700! px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-50 transition-all hover:-translate-y-1 inline-block text-center"
               >
                 Buy Ticket
               </Link>
