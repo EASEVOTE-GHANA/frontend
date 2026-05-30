@@ -47,14 +47,18 @@ export default function EventDetailClient({
     "vote" | "tickets" | "overview" | "results" | "nominate"
   >(() => {
     const status = getEventStatus(event);
-    const resultsEnabled = event.liveResults !== false && event.showLiveResults !== false;
-    
+    const resultsEnabled =
+      event.liveResults !== false && event.showLiveResults !== false;
+
     if (status.phase === "ENDED" && resultsEnabled) return "results";
-    if (status.phase === "NOMINATION" || (event.isNominationOpen && !event.isVotingOpen)) return "nominate";
+    if (
+      status.phase === "NOMINATION" ||
+      (event.isNominationOpen && !event.isVotingOpen)
+    )
+      return "nominate";
     return event.type === "TICKETING" ? "tickets" : "vote";
   });
   const router = useRouter();
-
 
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
@@ -77,7 +81,12 @@ export default function EventDetailClient({
   // Polling for Results
   useEffect(() => {
     const status = getEventStatus(event);
-    if (activeTab !== "results" || !event.showLiveResults || status.phase === "ENDED") return;
+    if (
+      activeTab !== "results" ||
+      !event.showLiveResults ||
+      status.phase === "ENDED"
+    )
+      return;
 
     const fetchResults = async () => {
       try {
@@ -104,15 +113,24 @@ export default function EventDetailClient({
 
   const allCandidates = event.categories
     ? event.categories.flatMap((cat: any) =>
-      cat.candidates.map((c: any) => ({
-        ...c,
-        image: (c.imageUrl && c.imageUrl !== "null" && c.imageUrl !== "undefined" && !c.imageUrl.includes("cloudinary.com/example/")) ? c.imageUrl :
-          (c.image && c.image !== "null" && c.image !== "undefined" && !c.image.includes("cloudinary.com/example/")) ? c.image :
-            null,
-        category: cat.name, // Ensure category name is attached
-        voteCount: c.voteCount ?? c.votes ?? 0,
-      })),
-    )
+        cat.candidates.map((c: any) => ({
+          ...c,
+          image:
+            c.imageUrl &&
+            c.imageUrl !== "null" &&
+            c.imageUrl !== "undefined" &&
+            !c.imageUrl.includes("cloudinary.com/example/")
+              ? c.imageUrl
+              : c.image &&
+                  c.image !== "null" &&
+                  c.image !== "undefined" &&
+                  !c.image.includes("cloudinary.com/example/")
+                ? c.image
+                : null,
+          category: cat.name, // Ensure category name is attached
+          voteCount: c.voteCount ?? c.votes ?? 0,
+        })),
+      )
     : [];
 
   const categoriesMap = allCandidates.reduce(
@@ -135,7 +153,8 @@ export default function EventDetailClient({
         c.code.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
-  const totalVotes = event.ledgerStats?.votes || event.totalVotes || event.totalPaidVotes || 0;
+  const totalVotes =
+    event.ledgerStats?.votes || event.totalVotes || event.totalPaidVotes || 0;
 
   /* ---------------------------------------------------------------------- */
 
@@ -146,7 +165,12 @@ export default function EventDetailClient({
       <div className="bg-slate-900 text-white relative">
         <div className="absolute inset-0 overflow-hidden">
           <Image
-            src={event.imageUrl || event.coverImage || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"}
+            src={
+              event.imageUrl ||
+              event.coverImage ||
+              event.image ||
+              "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"
+            }
             alt="Hero Background"
             fill
             className="object-cover opacity-30 blur-sm"
@@ -157,7 +181,11 @@ export default function EventDetailClient({
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8 relative z-10">
           <button
-            onClick={() => window.history.length > 2 ? router.back() : router.push("/events/voting")}
+            onClick={() =>
+              window.history.length > 2
+                ? router.back()
+                : router.push("/events/voting")
+            }
             className="flex items-center gap-2 text-white/70 hover:text-white mb-8 transition-colors"
           >
             <ArrowLeft size={20} /> Back to Events
@@ -166,7 +194,12 @@ export default function EventDetailClient({
           <div className="flex flex-col md:flex-row gap-8 items-end">
             <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800 relative">
               <Image
-                src={event.imageUrl || event.coverImage || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"}
+                src={
+                  event.imageUrl ||
+                  event.coverImage ||
+                  event.image ||
+                  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"
+                }
                 alt="Event Logo"
                 fill
                 className="object-cover"
@@ -176,7 +209,9 @@ export default function EventDetailClient({
 
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white! ${getEventStatus(event).color}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white! ${getEventStatus(event).color}`}
+                >
                   {getEventStatus(event).label}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-white/10 text-xs font-bold uppercase tracking-wide">
@@ -189,26 +224,25 @@ export default function EventDetailClient({
 
               <div className="flex flex-wrap gap-6 text-sm md:text-base text-white/80 font-medium mb-6">
                 <div className="flex items-center gap-2">
-                  <Calendar size={18} className="text-primary-700" />
+                  <Calendar size={18} className="text-secondary-700" />
                   {formatEventDate(event.startDate || event.date)}
                 </div>
                 {event.location && (
                   <div className="flex items-center gap-2">
-                    <MapPin size={18} className="text-primary-700" />
+                    <MapPin size={18} className="text-secondary-700" />
                     {event.location}
                   </div>
                 )}
-                {(event.timelineEnd ||
-                  getEventStatus(event).isActive) && (
-                    <div className="flex items-center gap-2">
-                      <Clock size={18} className="text-primary-700" />
-                      {event.timelineEnd ? (
-                        <Countdown endTime={event.timelineEnd} />
-                      ) : (
-                        <span>Happening Now</span>
-                      )}
-                    </div>
-                  )}
+                {(event.timelineEnd || getEventStatus(event).isActive) && (
+                  <div className="flex items-center gap-2">
+                    <Clock size={18} className="text-secondary-700" />
+                    {event.timelineEnd ? (
+                      <Countdown endTime={event.timelineEnd} />
+                    ) : (
+                      <span>Happening Now</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Actions Bar */}
@@ -262,11 +296,11 @@ export default function EventDetailClient({
                 : []),
               // Show Results tab for Voting/Hybrid events only if enabled
               ...(event.type === "VOTING" || event.type === "HYBRID"
-                ? (event.liveResults !== false && event.showLiveResults !== false)
+                ? event.liveResults !== false && event.showLiveResults !== false
                   ? [{ id: "results", label: "Results", icon: Trophy }]
                   : []
                 : []),
-              ...(event.allowPublicNominations || event.isNominationOpen 
+              ...(event.allowPublicNominations || event.isNominationOpen
                 ? [{ id: "nominate", label: "Nominate", icon: PenTool }]
                 : []),
               { id: "overview", label: "About", icon: Info },
@@ -278,10 +312,11 @@ export default function EventDetailClient({
                     tab.id as "vote" | "tickets" | "overview" | "results",
                   )
                 }
-                className={`py-4 flex items-center gap-2 font-bold border-b-2 ${activeTab === tab.id
+                className={`py-4 flex items-center gap-2 font-bold border-b-2 ${
+                  activeTab === tab.id
                     ? "border-primary-200 text-primary-700"
                     : "border-transparent text-slate-500"
-                  }`}
+                }`}
               >
                 <tab.icon size={16} /> {tab.label}
               </button>
@@ -312,19 +347,32 @@ export default function EventDetailClient({
                   {(() => {
                     const status = getEventStatus(event);
                     return (
-                      <div className={`px-4 py-2 rounded-2xl border flex items-center gap-2 self-start sm:self-center ${status.isActive
-                          ? (status.phase === "VOTING" ? "bg-green-50 border-green-100 text-green-700" : "bg-blue-50 border-blue-100 text-blue-700")
-                          : "bg-slate-50 border-slate-100 text-slate-700"
-                        }`}>
-                        <span className={`w-2 h-2 rounded-full ${status.phase === "VOTING" ? "bg-green-500 animate-pulse" :
-                            status.phase === "NOMINATION" ? "bg-blue-500" :
-                              "bg-slate-400"
-                          }`}></span>
+                      <div
+                        className={`px-4 py-2 rounded-2xl border flex items-center gap-2 self-start sm:self-center ${
+                          status.isActive
+                            ? status.phase === "VOTING"
+                              ? "bg-green-50 border-green-100 text-green-700"
+                              : "bg-blue-50 border-blue-100 text-blue-700"
+                            : "bg-slate-50 border-slate-100 text-slate-700"
+                        }`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            status.phase === "VOTING"
+                              ? "bg-green-500 animate-pulse"
+                              : status.phase === "NOMINATION"
+                                ? "bg-blue-500"
+                                : "bg-slate-400"
+                          }`}
+                        ></span>
                         <span className="text-xs font-bold uppercase tracking-wider">
-                          {status.phase === "VOTING" ? "Voting is Live" :
-                            status.phase === "NOMINATION" ? "Nominations Open" :
-                              status.phase === "ENDED" ? "Voting Ended" :
-                                "Voting Starting Soon"}
+                          {status.phase === "VOTING"
+                            ? "Voting is Live"
+                            : status.phase === "NOMINATION"
+                              ? "Nominations Open"
+                              : status.phase === "ENDED"
+                                ? "Voting Ended"
+                                : "Voting Starting Soon"}
                         </span>
                       </div>
                     );
@@ -414,7 +462,11 @@ export default function EventDetailClient({
                             />
                           ) : (
                             <div className="w-full h-full bg-primary-900 flex items-center justify-center text-white! font-bold text-6xl uppercase font-display transition-transform duration-500 group-hover:scale-110">
-                              {candidate.name?.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
+                              {candidate.name
+                                ?.split(" ")
+                                .map((w: string) => w[0])
+                                .join("")
+                                .slice(0, 2)}
                             </div>
                           )}
                           <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-mono font-bold">
@@ -539,9 +591,12 @@ export default function EventDetailClient({
               {isResultsForbidden && getEventStatus(event).phase !== "ENDED" ? (
                 <div className="bg-amber-50 border border-amber-100 p-6 rounded-2xl">
                   <Trophy className="w-12 h-12 text-amber-500 mx-auto mb-4" />
-                  <h2 className="text-xl font-bold text-amber-900 mb-2">Results are Hidden</h2>
+                  <h2 className="text-xl font-bold text-amber-900 mb-2">
+                    Results are Hidden
+                  </h2>
                   <p className="text-amber-700 text-sm">
-                    The organizer has hidden live results. Final tallies will be revealed once voting ends.
+                    The organizer has hidden live results. Final tallies will be
+                    revealed once voting ends.
                   </p>
                 </div>
               ) : (
@@ -549,17 +604,20 @@ export default function EventDetailClient({
                   {getEventStatus(event).phase !== "ENDED" && (
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full mb-4">
                       <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
-                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">Refreshing Live</span>
+                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">
+                        Refreshing Live
+                      </span>
                     </div>
                   )}
                   <h2 className="text-3xl font-bold font-display text-slate-900 mb-2">
-                    {getEventStatus(event).phase === "ENDED" ? "Final Results" : "Live Results"}
+                    {getEventStatus(event).phase === "ENDED"
+                      ? "Final Results"
+                      : "Live Results"}
                   </h2>
                   <p className="text-slate-500">
                     {getEventStatus(event).phase === "ENDED"
                       ? "Official final tallies for all categories."
-                      : "Top performing candidates across all categories."
-                    }
+                      : "Top performing candidates across all categories."}
                   </p>
                 </>
               )}
@@ -567,109 +625,126 @@ export default function EventDetailClient({
 
             {!isResultsForbidden && (
               <div className="space-y-12">
-                {(resultsData?.categories || event.categories).map((category: any) => {
-                  const sortedCandidates = [...category.candidates].sort(
-                    (a: any, b: any) => (b.voteCount ?? b.votes ?? 0) - (a.voteCount ?? a.votes ?? 0),
-                  );
+                {(resultsData?.categories || event.categories).map(
+                  (category: any) => {
+                    const sortedCandidates = [...category.candidates].sort(
+                      (a: any, b: any) =>
+                        (b.voteCount ?? b.votes ?? 0) -
+                        (a.voteCount ?? a.votes ?? 0),
+                    );
 
-                  if (sortedCandidates.length === 0) return null;
+                    if (sortedCandidates.length === 0) return null;
 
-                  const categoryTotalVotes = category.totalVotes || 0;
+                    const categoryTotalVotes = category.totalVotes || 0;
 
-                  return (
-                    <div
-                      key={category.id}
-                      className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
-                    >
-                      <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-slate-900">
-                          {category.name}
-                        </h3>
-                        <span className="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-gray-200">
-                          {event.showVoteCount
-                            ? `${categoryTotalVotes.toLocaleString()} votes`
-                            : `${sortedCandidates.length} candidates`}
-                        </span>
-                      </div>
+                    return (
+                      <div
+                        key={category.id}
+                        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+                      >
+                        <div className="bg-gray-50/50 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                          <h3 className="text-xl font-bold text-slate-900">
+                            {category.name}
+                          </h3>
+                          <span className="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-gray-200">
+                            {event.showVoteCount
+                              ? `${categoryTotalVotes.toLocaleString()} votes`
+                              : `${sortedCandidates.length} candidates`}
+                          </span>
+                        </div>
 
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                          <thead>
-                            <tr className="bg-gray-50/30 text-slate-500 text-xs uppercase tracking-wider font-bold">
-                              <th className="px-6 py-4 w-16 text-center">Rank</th>
-                              <th className="px-6 py-4">Candidate</th>
-                              <th className="px-6 py-4 text-right">Votes</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {sortedCandidates.map((candidate, index) => (
-                              <tr
-                                key={candidate._id || candidate.id}
-                                className="hover:bg-gray-50/50 transition-colors"
-                              >
-                                <td className="px-6 py-4 text-center">
-                                  <div
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mx-auto ${index === 0
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : index === 1
-                                          ? "bg-gray-100 text-slate-600"
-                                          : index === 2
-                                            ? "bg-orange-100 text-orange-700"
-                                            : "bg-transparent text-slate-400"
-                                      }`}
-                                  >
-                                    {index + 1}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 relative shrink-0">
-                                      {(() => {
-                                        const url = candidate.imageUrl || candidate.image;
-                                        const isValid = url && typeof url === 'string' && !url.includes('example/image/upload') && !url.includes('null');
-                                        
-                                        return isValid ? (
-                                          <Image
-                                            src={url}
-                                            alt={candidate.name}
-                                            fill
-                                            className="object-cover"
-                                            sizes="40px"
-                                          />
-                                        ) : (
-                                          <div className="w-full h-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold uppercase text-xs">
-                                            {candidate.name.charAt(0)}
-                                          </div>
-                                        );
-                                      })()}
-                                    </div>
-                                    <div>
-                                      <div className="font-bold text-slate-900">
-                                        {candidate.name}
-                                      </div>
-                                      <div className="text-xs text-slate-500 font-mono">
-                                        {candidate.code}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                  <span className="font-bold text-slate-900">
-                                    {event.showVoteCount
-                                      ? (
-                                        candidate.voteCount ?? candidate.votes ?? 0
-                                      ).toLocaleString()
-                                      : "---"}
-                                  </span>
-                                </td>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left">
+                            <thead>
+                              <tr className="bg-gray-50/30 text-slate-500 text-xs uppercase tracking-wider font-bold">
+                                <th className="px-6 py-4 w-16 text-center">
+                                  Rank
+                                </th>
+                                <th className="px-6 py-4">Candidate</th>
+                                <th className="px-6 py-4 text-right">Votes</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                              {sortedCandidates.map((candidate, index) => (
+                                <tr
+                                  key={candidate._id || candidate.id}
+                                  className="hover:bg-gray-50/50 transition-colors"
+                                >
+                                  <td className="px-6 py-4 text-center">
+                                    <div
+                                      className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mx-auto ${
+                                        index === 0
+                                          ? "bg-yellow-100 text-yellow-700"
+                                          : index === 1
+                                            ? "bg-gray-100 text-slate-600"
+                                            : index === 2
+                                              ? "bg-orange-100 text-orange-700"
+                                              : "bg-transparent text-slate-400"
+                                      }`}
+                                    >
+                                      {index + 1}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 relative shrink-0">
+                                        {(() => {
+                                          const url =
+                                            candidate.imageUrl ||
+                                            candidate.image;
+                                          const isValid =
+                                            url &&
+                                            typeof url === "string" &&
+                                            !url.includes(
+                                              "example/image/upload",
+                                            ) &&
+                                            !url.includes("null");
+
+                                          return isValid ? (
+                                            <Image
+                                              src={url}
+                                              alt={candidate.name}
+                                              fill
+                                              className="object-cover"
+                                              sizes="40px"
+                                            />
+                                          ) : (
+                                            <div className="w-full h-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold uppercase text-xs">
+                                              {candidate.name.charAt(0)}
+                                            </div>
+                                          );
+                                        })()}
+                                      </div>
+                                      <div>
+                                        <div className="font-bold text-slate-900">
+                                          {candidate.name}
+                                        </div>
+                                        <div className="text-xs text-slate-500 font-mono">
+                                          {candidate.code}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 text-right">
+                                    <span className="font-bold text-slate-900">
+                                      {event.showVoteCount
+                                        ? (
+                                            candidate.voteCount ??
+                                            candidate.votes ??
+                                            0
+                                          ).toLocaleString()
+                                        : "---"}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  },
+                )}
               </div>
             )}
           </div>
@@ -679,24 +754,34 @@ export default function EventDetailClient({
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
             {!event.isNominationOpen ? (
               <div className="bg-white rounded-[2.5rem] p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 text-center">
-                 <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-400 mx-auto mb-6">
-                    <Clock size={40} />
-                 </div>
-                 <h2 className="text-3xl font-display font-bold text-slate-900 mb-2">Nominations are Inactive</h2>
-                 <p className="text-slate-500 max-w-md mx-auto mb-8">The nomination period for this event is either yet to start or has already concluded. Check back later or contact the organizer for details.</p>
-                 {event.nominationStartTime && (
-                   <div className="inline-flex items-center gap-2 px-6 py-2 bg-slate-50 rounded-full border border-slate-100 text-sm font-bold text-slate-600">
-                     <Calendar size={16} className="text-primary-600" />
-                     Opens: {formatEventDateTime(event.nominationStartTime)}
-                   </div>
-                 )}
+                <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-400 mx-auto mb-6">
+                  <Clock size={40} />
+                </div>
+                <h2 className="text-3xl font-display font-bold text-slate-900 mb-2">
+                  Nominations are Inactive
+                </h2>
+                <p className="text-slate-500 max-w-md mx-auto mb-8">
+                  The nomination period for this event is either yet to start or
+                  has already concluded. Check back later or contact the
+                  organizer for details.
+                </p>
+                {event.nominationStartTime && (
+                  <div className="inline-flex items-center gap-2 px-6 py-2 bg-slate-50 rounded-full border border-slate-100 text-sm font-bold text-slate-600">
+                    <Calendar size={16} className="text-primary-600" />
+                    Opens: {formatEventDateTime(event.nominationStartTime)}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-               <div className="relative h-64 bg-slate-900 flex items-center justify-center overflow-hidden">
+                <div className="relative h-64 bg-slate-900 flex items-center justify-center overflow-hidden">
                   <div className="absolute inset-0 opacity-40">
-                    <Image 
-                      src={event.imageUrl || event.coverImage || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"}
+                    <Image
+                      src={
+                        event.imageUrl ||
+                        event.coverImage ||
+                        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop"
+                      }
                       fill
                       className="object-cover"
                       alt="Banner"
@@ -704,58 +789,96 @@ export default function EventDetailClient({
                   </div>
                   <div className="absolute inset-0 bg-linear-to-b from-transparent to-slate-900/90"></div>
                   <div className="relative z-10 text-center px-6">
-                     <div className="w-20 h-20 bg-primary-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-2xl shadow-primary-600/30 rotate-3">
-                        <PenTool size={40} />
-                     </div>
-                     <h2 className="text-3xl font-display font-bold text-white! mb-2">Public Nominations Open</h2>
-                     <p className="text-white/70 max-w-lg mx-auto">Submit your application or nominate a worthy candidate for various categories in this event.</p>
+                    <div className="w-20 h-20 bg-primary-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-6 shadow-2xl shadow-primary-600/30 rotate-3">
+                      <PenTool size={40} />
+                    </div>
+                    <h2 className="text-3xl font-display font-bold text-white! mb-2">
+                      Public Nominations Open
+                    </h2>
+                    <p className="text-white/70 max-w-lg mx-auto">
+                      Submit your application or nominate a worthy candidate for
+                      various categories in this event.
+                    </p>
                   </div>
-               </div>
+                </div>
 
-               <div className="p-8 md:p-12">
+                <div className="p-8 md:p-12">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div className="space-y-6">
-                       <h3 className="text-xl font-bold text-slate-900">How it works</h3>
-                       <div className="space-y-4">
-                          {[
-                            { step: "1", title: "Select Category", desc: "Choose the category that best fits the nominee." },
-                            { step: "2", title: "Provide Details", desc: "Fill out the required information and upload a profile photo." },
-                            { step: "3", title: "Submission", desc: "Review and submit. The organizer will review your nomination." },
-                          ].map(s => (
-                            <div key={s.step} className="flex gap-4">
-                               <div className="w-8 h-8 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center font-bold text-xs shrink-0">{s.step}</div>
-                               <div>
-                                  <h4 className="font-bold text-slate-900 text-sm">{s.title}</h4>
-                                  <p className="text-slate-500 text-sm">{s.desc}</p>
-                               </div>
+                      <h3 className="text-xl font-bold text-slate-900">
+                        How it works
+                      </h3>
+                      <div className="space-y-4">
+                        {[
+                          {
+                            step: "1",
+                            title: "Select Category",
+                            desc: "Choose the category that best fits the nominee.",
+                          },
+                          {
+                            step: "2",
+                            title: "Provide Details",
+                            desc: "Fill out the required information and upload a profile photo.",
+                          },
+                          {
+                            step: "3",
+                            title: "Submission",
+                            desc: "Review and submit. The organizer will review your nomination.",
+                          },
+                        ].map((s) => (
+                          <div key={s.step} className="flex gap-4">
+                            <div className="w-8 h-8 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center font-bold text-xs shrink-0">
+                              {s.step}
                             </div>
-                          ))}
-                       </div>
+                            <div>
+                              <h4 className="font-bold text-slate-900 text-sm">
+                                {s.title}
+                              </h4>
+                              <p className="text-slate-500 text-sm">{s.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                     <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 flex flex-col items-center text-center">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Nomination Deadline</p>
-                        <div className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                           <Calendar className="text-primary-600" size={24} />
-                           {(() => {
-                             const deadline = event.nominationEndDate || event.votingEndTime || event.votingEndDate || event.endDate;
-                             return deadline
-                               ? formatEventDateTime(deadline)
-                               : "Not Specified";
-                           })()}
-                        </div>
-                        <button
-                          disabled={!event.hasNominationForm}
-                          onClick={() => router.push(`/events/nominate?eventCode=${event.eventCode}`)}
-                          className="w-full py-5 bg-primary-600 text-white rounded-2xl font-bold hover:bg-primary-700 transition-all shadow-xl shadow-primary-600/20 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none"
-                        >
-                          {event.hasNominationForm ? "Nominate Now" : "Form Pending Setup"}
-                        </button>
-                       <p className="mt-4 text-[10px] text-slate-400 font-medium">By nominating, you agree to the event&apos;s terms and privacy policy.</p>
+                    <div className="bg-slate-50 rounded-[2rem] p-8 border border-slate-100 flex flex-col items-center text-center">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+                        Nomination Deadline
+                      </p>
+                      <div className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <Calendar className="text-primary-600" size={24} />
+                        {(() => {
+                          const deadline =
+                            event.nominationEndDate ||
+                            event.votingEndTime ||
+                            event.votingEndDate ||
+                            event.endDate;
+                          return deadline
+                            ? formatEventDateTime(deadline)
+                            : "Not Specified";
+                        })()}
+                      </div>
+                      <button
+                        disabled={!event.hasNominationForm}
+                        onClick={() =>
+                          router.push(
+                            `/events/nominate?eventCode=${event.eventCode}`,
+                          )
+                        }
+                        className="w-full py-5 bg-primary-600 text-white rounded-2xl font-bold hover:bg-primary-700 transition-all shadow-xl shadow-primary-600/20 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none"
+                      >
+                        {event.hasNominationForm
+                          ? "Nominate Now"
+                          : "Form Pending Setup"}
+                      </button>
+                      <p className="mt-4 text-[10px] text-slate-400 font-medium">
+                        By nominating, you agree to the event&apos;s terms and
+                        privacy policy.
+                      </p>
                     </div>
                   </div>
-               </div>
-            </div>
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -804,7 +927,21 @@ function Countdown({ endTime }: { endTime: string }) {
 
   if (!time) return <span>Ended</span>;
 
-  if (time.d > 0) return <>Ends in {time.d}d {time.h}h {time.m}m</>;
-  if (time.h > 0) return <>Ends in {time.h}h {time.m}m {time.s}s</>;
-  return <>Ends in {time.m}m {time.s}s</>;
+  if (time.d > 0)
+    return (
+      <>
+        Ends in {time.d}d {time.h}h {time.m}m
+      </>
+    );
+  if (time.h > 0)
+    return (
+      <>
+        Ends in {time.h}h {time.m}m {time.s}s
+      </>
+    );
+  return (
+    <>
+      Ends in {time.m}m {time.s}s
+    </>
+  );
 }
