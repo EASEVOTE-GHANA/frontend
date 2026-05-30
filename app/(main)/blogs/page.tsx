@@ -20,7 +20,7 @@ export default async function BlogsIndexPage() {
           <div className="bg-slate-900 rounded-[3rem] p-12 md:p-20 text-white relative overflow-hidden text-center max-w-5xl mx-auto shadow-2xl shadow-slate-900/20">
             <TrendingUp className="absolute -right-10 -bottom-10 h-64 w-64 text-white/[0.03] -rotate-12" />
             <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-              <h3 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+              <h3 className="text-4xl text-secondary- md:text-5xl font-black tracking-tighter leading-none">
                 Subscribe for the <br />
                 latest intel.
               </h3>
