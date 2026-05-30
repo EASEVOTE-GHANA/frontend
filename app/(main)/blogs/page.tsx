@@ -15,10 +15,6 @@ export default async function BlogsIndexPage() {
       <PageHeader />
       <BlogList blogs={blogs} />
       <div className="bg-slate-50 pb-20">
-        <section className="container-custom -mt-10 relative z-20">
-          <BlogList blogs={blogs} />
-        </section>
-
         {/* NEWSLETTER MINI SEC */}
         <section className="container-custom mt-32 px-4">
           <div className="bg-slate-900 rounded-[3rem] p-12 md:p-20 text-white relative overflow-hidden text-center max-w-5xl mx-auto shadow-2xl shadow-slate-900/20">
