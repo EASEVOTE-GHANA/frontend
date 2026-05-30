@@ -22,7 +22,7 @@ interface BlogListProps {
 export default function BlogList({ blogs }: BlogListProps) {
   if (blogs.length === 0) {
     return (
-      <div className="bg-white rounded-[3rem] p-20 text-center border border-slate-200 shadow-xl shadow-slate-200/50">
+      <div className="bg-gray-50 min-h-screen pt-24 pb-24 rounded-[3rem] p-20 text-center border border-slate-200 shadow-xl shadow-slate-200/50">
         <div className="w-20 h-20 bg-slate-50 text-slate-200 rounded-full flex items-center justify-center mx-auto mb-6">
           <Newspaper size={40} />
         </div>
