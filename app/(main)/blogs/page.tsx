@@ -13,6 +13,7 @@ export default async function BlogsIndexPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <PageHeader />
+      <BlogList blogs={blogs} />
       <div className="bg-slate-50 pb-20">
         <section className="container-custom -mt-10 relative z-20">
           <BlogList blogs={blogs} />
