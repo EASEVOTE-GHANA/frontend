@@ -31,11 +31,12 @@ export default async function VotingEventsPage() {
     status: event.status,
     location: event.location || "Online",
     votePrice: event.costPerVote || event.votePrice || 0,
-    // Essential dates for status utility
-    votingStartsAt: event.votingStartsAt || event.votingStartTime,
-    votingEndsAt: event.votingEndsAt || event.votingEndTime,
-    nominationStartsAt: event.nominationStartsAt || event.nominationStartTime,
-    nominationEndsAt: event.nominationEndsAt || event.nominationEndTime,
+    allowPublicNominations: !!event.allowPublicNominations,
+    // Explicit properties for direct getEventStatus support
+    votingStartTime: event.votingStartsAt || event.votingStartTime,
+    votingEndTime: event.votingEndsAt || event.votingEndTime,
+    nominationStartTime: event.nominationStartsAt || event.nominationStartTime,
+    nominationEndTime: event.nominationEndsAt || event.nominationEndTime,
     startDate: event.startDate,
     endDate: event.endDate,
   }));

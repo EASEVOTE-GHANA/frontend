@@ -66,8 +66,9 @@ export default function EventsBrowseClient({
     const statusInfo = getEventStatus(e as any);
     const matchesStatus =
       statusFilter === "All" ||
-      statusFilter === statusInfo.label.toUpperCase() ||
-      (statusFilter === "LIVE" && statusInfo.isActive);
+      (statusFilter === "LIVE" && (statusInfo.phase === "VOTING" || statusInfo.phase === "NOMINATION" || statusInfo.isActive)) ||
+      (statusFilter === "UPCOMING" && statusInfo.phase === "UPCOMING") ||
+      (statusFilter === "CONCLUDED" && statusInfo.phase === "ENDED");
 
     const matchesCategory =
       categoryFilter === "All" || e.category === categoryFilter;
