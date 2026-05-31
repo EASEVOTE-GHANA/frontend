@@ -20,7 +20,9 @@ async function EventsContent() {
       ? votingRes.data
       : votingRes.events || [];
 
-    const ticketingRes = await apiClient.get("/events?type=TICKETING&status=LIVE");
+    const ticketingRes = await apiClient.get(
+      "/events?type=TICKETING&status=LIVE",
+    );
     ticketingEvents = Array.isArray(ticketingRes.data)
       ? ticketingRes.data
       : ticketingRes.events || [];
@@ -40,7 +42,7 @@ async function EventsContent() {
     <div className="flex flex-col min-h-screen bg-gray-50 pt-20">
       {/* Directory Header */}
       <section className="bg-primary-700 py-16 px-4 md:px-8 text-center text-white">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white!">
           Discover Live Events
         </h1>
         <p className="text-lg text-white/80 max-w-2xl mx-auto">

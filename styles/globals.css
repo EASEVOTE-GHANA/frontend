@@ -102,16 +102,13 @@
   /* ========================================
     TEXT COLORS
      ======================================== */
-  --color-text-primary: #5b0058;
+  --color-text-primary: #171717;
+  --color-text-brand: #5b0058;
   --color-text-secondary: #525252;
   --color-text-tertiary: #737373;
   --color-text-inverse: #ffffff;
   --color-text-link: #d3067d;
   --color-text-link-hover: #b10568;
-
-  /* Legacy aliases for backward compatibility */
-  --color-text-main: #1a1a1a;
-  --color-text-muted: #4a4a4a;
 
   /* ========================================
     BACKGROUND COLORS
@@ -161,34 +158,34 @@
   --font-weight-extrabold: 800;
 
   /* Font Sizes */
-  --font-size-xs: 0.75rem; /* 12px */
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1rem; /* 16px */
-  --font-size-lg: 1.125rem; /* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
-  --font-size-2xl: 1.5rem; /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-  --font-size-4xl: 2.25rem; /* 36px */
-  --font-size-5xl: 3rem; /* 48px */
-  --font-size-6xl: 3.75rem; /* 60px */
-  --font-size-7xl: 4.5rem; /* 72px */
-  --font-size-8xl: 6rem; /* 96px */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.75rem; /* 60px */
+  --text-7xl: 4.5rem; /* 72px */
+  --text-8xl: 6rem; /* 96px */
 
   /* Line Heights */
-  --line-height-none: 1;
-  --line-height-tight: 1.25;
-  --line-height-snug: 1.375;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  --line-height-loose: 2;
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
 
   /* Letter Spacing */
-  --letter-spacing-tighter: -0.05em;
-  --letter-spacing-tight: -0.025em;
-  --letter-spacing-normal: 0;
-  --letter-spacing-wide: 0.025em;
-  --letter-spacing-wider: 0.05em;
-  --letter-spacing-widest: 0.1em;
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
 
   /* ========================================
     SPACING SCALE
@@ -297,7 +294,6 @@
   /* ========================================
     BREAKPOINTS
      ======================================== */
-  --breakpoint-xs: 320px;
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
@@ -329,121 +325,120 @@
   --animate-slide-down: slideDown 0.3s ease-out forwards;
   --animate-scale-in: scaleIn 0.2s ease-out forwards;
 
-  /* ========================================
-    KEYFRAME ANIMATIONS
-     ======================================== */
-  @keyframes marquee {
-    0% {
-      transform: translateX(0%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
+}
 
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+/* ========================================
+  KEYFRAME ANIMATIONS
+   ======================================== */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
   }
+  100% {
+    transform: translateX(-100%);
+  }
+}
 
-  @keyframes slideUp {
-    0% {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
   }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  @keyframes slideDown {
-    0% {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  @keyframes scaleIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
   }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  @keyframes pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
   }
-  /* -------------------------------------------
-   EaseVote Advanced Preloader Animations
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* -------------------------------------------
+ EaseVote Advanced Preloader Animations
 ------------------------------------------- */
 
-  /* Soft rotate (aura ring rotates slowly) */
-  @keyframes easevote-rotate {
-    0% {
-      transform: rotate(0deg) scale(1);
-    }
-    100% {
-      transform: rotate(360deg) scale(1);
-    }
+@keyframes easevote-rotate {
+  0% {
+    transform: rotate(0deg) scale(1);
   }
-
-  /* Breathing (scale in/out smoothly) */
-  @keyframes easevote-breathe {
-    0%,
-    100% {
-      transform: scale(1);
-      box-shadow:
-        0 0 25px rgba(236, 72, 153, 0.7),
-        0 0 45px rgba(124, 58, 237, 0.5);
-    }
-    50% {
-      transform: scale(1.06);
-      box-shadow:
-        0 0 45px rgba(236, 72, 153, 1),
-        0 0 80px rgba(124, 58, 237, 0.8);
-    }
+  100% {
+    transform: rotate(360deg) scale(1);
   }
+}
 
-  /* Floating up & down (levitation) */
-  @keyframes easevote-float {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
+/* W5: brand colors — secondary-600 #d3067d + primary-700 #5b0058 */
+@keyframes easevote-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 25px rgba(211, 6, 125, 0.7),
+      0 0 45px rgba(91, 0, 88, 0.5);
   }
+  50% {
+    transform: scale(1.06);
+    box-shadow:
+      0 0 45px rgba(211, 6, 125, 1),
+      0 0 80px rgba(91, 0, 88, 0.8);
+  }
+}
 
-  /* Spinner Arc Loader */
-  @keyframes easevote-loader {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+@keyframes easevote-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes easevote-loader {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
@@ -472,7 +467,7 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-body);
   font-weight: var(--font-weight-regular);
-  line-height: var(--line-height-normal);
+  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -486,8 +481,8 @@ h5,
 h6 {
   font-family: var(--font-heading);
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-  color: var(--color-text-primary);
+  line-height: var(--leading-tight);
+  color: var(--color-text-brand);
 }
 
 /* Links */
@@ -610,15 +605,15 @@ button:not(:disabled):active,
 /* Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .glass-dark {
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -646,12 +641,6 @@ button:not(:disabled):active,
   margin-right: auto;
   padding-left: var(--spacing-4);
   padding-right: var(--spacing-4);
-}
-
-@media (min-width: 640px) {
-  .container-custom {
-    max-width: var(--breakpoint-sm);
-  }
 }
 
 @media (min-width: 768px) {
