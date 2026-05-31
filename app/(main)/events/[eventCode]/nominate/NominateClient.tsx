@@ -1,13 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowLeft, Upload, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, CheckCircle, AlertCircle, Save, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 
+function base64ToFile(base64: string, filename: string): File {
+  const [header, data] = base64.split(",");
+  const mimeType = header.match(/:(.*?);/)?.[1] || "image/jpeg";
+  const byteChars = atob(data);
+  const byteArray = new Uint8Array(Array.from({ length: byteChars.length }, (_, i) => byteChars.charCodeAt(i)));
+  return new File([byteArray], filename, { type: mimeType });
+}
+
 export default function NominateClient({ event }: { event: any }) {
   const router = useRouter();
+  const draftKey = `nomination_draft_${event.id}`;
 
   const [formData, setFormData] = useState({
     nomineeName: "",
@@ -26,6 +35,56 @@ export default function NominateClient({ event }: { event: any }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+
+  // Restore draft on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (draft.formData) setFormData(draft.formData);
+      if (draft.customAnswers) setCustomAnswers(draft.customAnswers);
+      if (draft.imagePreview) {
+        setImagePreview(draft.imagePreview);
+        setImageFile(base64ToFile(draft.imagePreview, "nominee-photo.jpg"));
+      }
+      setDraftRestored(true);
+    } catch {
+      // Corrupt draft — silently ignore
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Save draft on every meaningful change
+  useEffect(() => {
+    const hasContent =
+      formData.nomineeName ||
+      formData.nominatorName ||
+      formData.bio ||
+      Object.keys(customAnswers).length > 0 ||
+      imagePreview;
+    if (!hasContent) return;
+
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ formData, customAnswers, imagePreview }));
+      setDraftSaved(true);
+      const t = setTimeout(() => setDraftSaved(false), 1500);
+      return () => clearTimeout(t);
+    } catch {
+      // localStorage full or unavailable — fail silently
+    }
+  }, [formData, customAnswers, imagePreview, draftKey]);
+
+  const clearDraft = () => {
+    localStorage.removeItem(draftKey);
+    setFormData({ nomineeName: "", nomineePhone: "", nomineeEmail: "", categoryId: "", bio: "", nominatorName: "", nominatorPhone: "" });
+    setCustomAnswers({});
+    setImageFile(null);
+    setImagePreview("");
+    setDraftRestored(false);
+  };
 
   useEffect(() => {
     const fetchFormConfig = async () => {
@@ -46,18 +105,13 @@ export default function NominateClient({ event }: { event: any }) {
       const file = e.target.files[0];
       setImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
   const handleCustomFieldChange = (question: string, value: string) => {
-    setCustomAnswers((prev) => ({
-      ...prev,
-      [question]: value,
-    }));
+    setCustomAnswers((prev) => ({ ...prev, [question]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,12 +122,10 @@ export default function NominateClient({ event }: { event: any }) {
     try {
       let imageUrl = "";
 
-      // 1. Upload Image
       if (imageFile) {
         const uploadData = new FormData();
         uploadData.append("image", imageFile);
         uploadData.append("folder", "candidates");
-
         const uploadRes = await api.uploadFormData("/upload/image", uploadData);
         imageUrl = uploadRes.data.url;
       } else {
@@ -82,14 +134,8 @@ export default function NominateClient({ event }: { event: any }) {
         return;
       }
 
-      // 2. Format Custom Fields
-      const customFields = Object.entries(customAnswers).map(([question, answer]) => ({
-        question,
-        answer,
-      }));
+      const customFields = Object.entries(customAnswers).map(([question, answer]) => ({ question, answer }));
 
-      // 3. Submit Nomination
-      // Guide: POST /api/nominations/events/:eventId/submit
       await api.post(`/nominations/events/${event.id}/submit`, {
         nomineeName: formData.nomineeName,
         nomineePhone: formData.nomineePhone,
@@ -102,12 +148,11 @@ export default function NominateClient({ event }: { event: any }) {
         nominatorPhone: formData.nominatorPhone,
       });
 
+      localStorage.removeItem(draftKey);
       setIsSuccess(true);
     } catch (error: any) {
       console.error("Nomination failed:", error);
-      setErrorMsg(
-        error.message || "Failed to submit nomination. Please try again.",
-      );
+      setErrorMsg(error.message || "Failed to submit nomination. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -120,13 +165,9 @@ export default function NominateClient({ event }: { event: any }) {
           <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={40} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Nomination Submitted!
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Nomination Submitted!</h2>
           <p className="text-slate-500 mb-8">
-            Thank you for participating! The organizer will review your
-            nomination. If approved, the candidate will appear on the voting
-            page.
+            Thank you for participating! The organizer will review your nomination. If approved, the candidate will appear on the voting page.
           </p>
           {formConfig?.whatsappLink && (
             <a
@@ -143,7 +184,7 @@ export default function NominateClient({ event }: { event: any }) {
           )}
           <button
             onClick={() => router.push(`/events/${event.eventCode}`)}
-            className="w-full py-4 bg-primary-700 hover:bg-primary-700 text-white font-bold rounded-xl transition-all"
+            className="w-full py-4 bg-primary-700 hover:bg-primary-800 text-white font-bold rounded-xl transition-all"
           >
             Return to Event
           </button>
@@ -167,13 +208,10 @@ export default function NominateClient({ event }: { event: any }) {
           <div className="w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <AlertCircle size={40} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            Nominations are Closed
-          </h2>
-          <p className="text-slate-500 mb-8">
-            Public nominations for this event are currently not available.
-          </p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Nominations are Closed</h2>
+          <p className="text-slate-500 mb-8">Public nominations for this event are currently not available.</p>
           <button
+            type="button"
             onClick={() => router.push(`/events/${event.eventCode}`)}
             className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl transition-all"
           >
@@ -184,6 +222,8 @@ export default function NominateClient({ event }: { event: any }) {
     );
   }
 
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50";
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
@@ -192,7 +232,6 @@ export default function NominateClient({ event }: { event: any }) {
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-blob"></div>
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary-500 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
         </div>
-
         <div className="max-w-3xl mx-auto relative z-10">
           <Link
             href={`/events/${event.eventCode}`}
@@ -200,12 +239,9 @@ export default function NominateClient({ event }: { event: any }) {
           >
             <ArrowLeft size={16} /> Back to Event
           </Link>
-          <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-            File a Nomination
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">File a Nomination</h1>
           <p className="text-lg text-white/80 max-w-xl">
-            Submit a candidate you believe deserves recognition for{" "}
-            {event.title}.
+            Submit a candidate you believe deserves recognition for {event.title}.
           </p>
         </div>
       </div>
@@ -214,6 +250,24 @@ export default function NominateClient({ event }: { event: any }) {
       <div className="flex-1 max-w-3xl w-full mx-auto px-4 py-8 -mt-8 relative z-20">
         <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
+
+            {/* Draft restored banner */}
+            {draftRestored && (
+              <div className="bg-amber-50 border border-amber-100 text-amber-700 p-3 rounded-xl flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 font-medium">
+                  <Save size={14} />
+                  Draft restored from your last session.
+                </span>
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-800 transition-colors ml-4 shrink-0"
+                >
+                  <X size={12} /> Start fresh
+                </button>
+              </div>
+            )}
+
             {errorMsg && (
               <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-100">
                 {errorMsg}
@@ -223,20 +277,14 @@ export default function NominateClient({ event }: { event: any }) {
             {/* Section: Nominee Information */}
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Nominee Details</h3>
-              
+
               {/* Photo Upload */}
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Nominee Photo *
-                </label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Nominee Photo *</label>
                 <div className="flex items-center gap-6">
                   <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border-2 border-dashed border-gray-300 relative">
                     {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
                         <Upload size={24} />
@@ -245,24 +293,19 @@ export default function NominateClient({ event }: { event: any }) {
                     <input
                       type="file"
                       accept="image/*"
+                      aria-label="Upload nominee photo"
                       onChange={handleImageChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-900">
-                      Upload a clear photo
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      JPG, PNG or GIF (Max 2MB)
-                    </p>
+                    <p className="text-sm font-medium text-slate-900">Upload a clear photo</p>
+                    <p className="text-xs text-slate-500 mt-1">JPG, PNG or GIF (Max 2MB)</p>
                     <button
                       type="button"
                       className="mt-2 text-sm font-bold text-primary-600 hover:text-primary-800"
                       onClick={() => {
-                        const fileInput = document.querySelector(
-                          'input[type="file"]',
-                        ) as HTMLInputElement;
+                        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
                         if (fileInput) fileInput.click();
                       }}
                     >
@@ -274,89 +317,65 @@ export default function NominateClient({ event }: { event: any }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Nominee Full Name *
-                  </label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Nominee Full Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.nomineeName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nomineeName: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, nomineeName: e.target.value })}
                     placeholder="Enter full name"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50"
+                    className={inputClass}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Phone Number
-                  </label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
                   <input
                     type="tel"
                     value={formData.nomineePhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nomineePhone: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, nomineePhone: e.target.value })}
                     placeholder="e.g. 0244000000"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50"
+                    className={inputClass}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Award Category *
-                </label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Award Category *</label>
                 <div className="relative">
                   <select
                     required
+                    aria-label="Award Category"
                     value={formData.categoryId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, categoryId: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50 appearance-none"
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    className={`${inputClass} appearance-none`}
                   >
-                    <option value="" disabled>
-                      Select a category
-                    </option>
-                    {event.categories &&
-                      event.categories.map((cat: any) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
+                    <option value="" disabled>Select a category</option>
+                    {event.categories?.map((cat: any) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-500">
                     <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                      <path
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                        fillRule="evenodd"
-                      ></path>
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd" />
                     </svg>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
-                  Nominee Bio / Description
-                </label>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Nominee Bio / Description</label>
                 <textarea
                   rows={3}
                   value={formData.bio}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   placeholder="Tell us about the nominee..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50 resize-none"
-                ></textarea>
+                  className={`${inputClass} resize-none`}
+                />
               </div>
             </div>
 
             {/* Section: Custom Questions */}
-            {formConfig && formConfig.customFields && formConfig.customFields.length > 0 && (
+            {formConfig?.customFields?.length > 0 && (
               <div className="space-y-6 pt-4">
                 <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Additional Information</h3>
                 {formConfig.customFields.map((field: any, index: number) => (
@@ -368,14 +387,18 @@ export default function NominateClient({ event }: { event: any }) {
                       <textarea
                         required={field.required}
                         rows={3}
+                        aria-label={field.question}
+                        value={customAnswers[field.question] || ""}
                         onChange={(e) => handleCustomFieldChange(field.question, e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50 resize-none"
+                        className={`${inputClass} resize-none`}
                       />
                     ) : field.type === "select" ? (
                       <select
                         required={field.required}
+                        aria-label={field.question}
+                        value={customAnswers[field.question] || ""}
                         onChange={(e) => handleCustomFieldChange(field.question, e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50"
+                        className={inputClass}
                       >
                         <option value="">Select an option</option>
                         {field.options?.map((opt: string) => (
@@ -386,8 +409,10 @@ export default function NominateClient({ event }: { event: any }) {
                       <input
                         type={field.type}
                         required={field.required}
+                        aria-label={field.question}
+                        value={customAnswers[field.question] || ""}
                         onChange={(e) => handleCustomFieldChange(field.question, e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50"
+                        className={inputClass}
                       />
                     )}
                   </div>
@@ -400,53 +425,48 @@ export default function NominateClient({ event }: { event: any }) {
               <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Your Information (Nominator)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Your Name *
-                  </label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Your Name *</label>
                   <input
                     type="text"
                     required
                     value={formData.nominatorName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nominatorName: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, nominatorName: e.target.value })}
                     placeholder="Enter your name"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50"
+                    className={inputClass}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
-                    Your Phone Number *
-                  </label>
+                  <label className="block text-sm font-bold text-slate-700 mb-2">Your Phone Number *</label>
                   <input
                     type="tel"
                     required
                     value={formData.nominatorPhone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nominatorPhone: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, nominatorPhone: e.target.value })}
                     placeholder="e.g. 0244000000"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 outline-none transition-all font-medium text-slate-900 bg-gray-50/50"
+                    className={inputClass}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-4 border-t border-gray-100">
+            {/* Submit */}
+            <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center gap-2"
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" /> Submitting...
-                  </>
+                  <><Loader2 size={18} className="animate-spin" /> Submitting...</>
                 ) : (
                   "Submit Nomination"
                 )}
               </button>
+
+              {/* Draft saved indicator */}
+              <p className={`text-center text-xs text-slate-400 flex items-center justify-center gap-1.5 transition-opacity duration-300 ${draftSaved ? "opacity-100" : "opacity-0"}`}>
+                <Save size={11} /> Draft saved
+              </p>
             </div>
           </form>
         </div>
