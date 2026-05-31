@@ -19,8 +19,13 @@ export default function EventCard({ event }: { event: any }) {
   const rawImageSrc = event.imageUrl || event.coverImage || event.image || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
   const optimizedImageSrc = getCloudinaryOptimizedUrl(rawImageSrc, 475, 267);
 
+  const eventUrl = `/events/${event.eventCode || event.id || event._id}`;
+
   return (
-    <div className="snap-center shrink-0 w-[85vw] md:w-auto group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-2 border border-gray-100 flex flex-col h-full">
+    <Link
+      href={eventUrl}
+      className="snap-center shrink-0 w-[85vw] md:w-auto group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-2 border border-gray-100 flex flex-col h-full cursor-pointer"
+    >
       <div className="relative h-64 overflow-hidden">
         <Image
           src={optimizedImageSrc}
@@ -78,14 +83,13 @@ export default function EventCard({ event }: { event: any }) {
           </div>
         </div>
 
-        <Link
-          href={`/events/${event.eventCode || event.id || event._id}`}
+        <div
           className="mt-auto block w-full text-center py-3 rounded-xl bg-primary-800 text-white! font-bold hover:bg-primary-900 transition-all shadow-lg shadow-primary-900/10"
         >
           {buttonText}
-        </Link>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
