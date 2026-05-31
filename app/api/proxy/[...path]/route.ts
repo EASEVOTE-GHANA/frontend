@@ -77,23 +77,30 @@ async function handler(
       cache: "no-store",
     });
 
-    const contentType = backendRes.headers.get("content-type") ?? "";
-    let data: any;
-    if (contentType.includes("application/json")) {
-      data = await backendRes.json().catch(() => ({
-        success: false,
-        message: "Backend returned an unparseable response",
-      }));
-    } else {
-      const text = await backendRes.text().catch(() => "");
-      data = { success: false, message: text || `HTTP ${backendRes.status}` };
-    }
+    // Forward response headers
+    const resHeaders = new Headers();
+    backendRes.headers.forEach((value, key) => {
+      const lowerKey = key.toLowerCase();
+      if (
+        lowerKey !== "transfer-encoding" &&
+        lowerKey !== "connection" &&
+        lowerKey !== "keep-alive"
+      ) {
+        resHeaders.set(key, value);
+      }
+    });
+
+    // Read the raw body as an ArrayBuffer to preserve binary/plain formats (e.g. CSVs)
+    const bodyBuffer = await backendRes.arrayBuffer();
 
     if (!backendRes.ok) {
-      console.error(`[Proxy] Backend returned ${backendRes.status}:`, data);
+      console.error(`[Proxy] Backend returned error status ${backendRes.status}`);
     }
 
-    return NextResponse.json(data, { status: backendRes.status });
+    return new NextResponse(bodyBuffer, {
+      status: backendRes.status,
+      headers: resHeaders,
+    });
   } catch (err) {
     console.error(`[Proxy] Error forwarding to ${targetUrl}:`, err);
     return NextResponse.json(
