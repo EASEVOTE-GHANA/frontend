@@ -107,7 +107,7 @@ export default function Footer({ onOpenLegal }: FooterProps) {
                 0554440813 / 0559540992
               </li>
               <li>info@easevotegh.com</li>
-              <li className="pt-2">Mon â€“ Friday (8AM â€“ 5PM)</li>
+              <li className="pt-2">Mon - Friday (8AM – 5PM)</li>
               <li className="text-secondary-600 font-bold">
                 24/7 Technical Support
               </li>
@@ -172,4 +172,3 @@ export default function Footer({ onOpenLegal }: FooterProps) {
     </footer>
   );
 }
-

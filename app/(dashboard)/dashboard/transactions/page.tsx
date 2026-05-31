@@ -20,11 +20,10 @@ import AdminStatCard from "@/components/admin/AdminStatCard";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function AdminTransactionsPage({
-  searchParams,
-}: {
-  searchParams: { page?: string; eventId?: string; status?: string };
+export default async function AdminTransactionsPage(props: {
+  searchParams: Promise<{ page?: string; eventId?: string; status?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const session = await getServerSession(authOptions);
   const role = session?.user?.role;
   const isOrganizer = role === "ORGANIZER";
