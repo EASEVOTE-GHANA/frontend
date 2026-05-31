@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 import TicketConfirmClient from "./TicketConfirmClient";
 import { createServerApiClient } from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Confirming Your Ticket | EaseVote Ghana",
+  description: "Your ticket payment is being confirmed. Please wait.",
+  robots: { index: false, follow: false },
+};
 
 export default async function TicketConfirmPage({
   params,
@@ -41,9 +48,8 @@ export default async function TicketConfirmPage({
         initialData={transaction}
       />
     );
-  } catch (error) {
-    console.error("Serverside validation failed:", error);
-    // If the backend isn't ready or gateway hasn't sent webhook yet, default to pending state
+  } catch {
+    // Backend not ready yet — default to pending state
     return (
       <TicketConfirmClient reference={reference} initialStatus="PENDING" />
     );

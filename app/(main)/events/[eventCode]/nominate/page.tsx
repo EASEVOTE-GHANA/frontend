@@ -1,6 +1,24 @@
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import NominateClient from "./NominateClient";
 import { createServerApiClient } from "@/lib/api-client";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ eventCode: string }>;
+}): Promise<Metadata> {
+  const { eventCode } = await params;
+  const apiClient = createServerApiClient();
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+  const event = res?.data || res?.event || res;
+  const title = event?.title ? `Nominate for ${event.title} | EaseVote` : "File a Nomination | EaseVote";
+  return {
+    title,
+    description: event?.title ? `Submit your nomination for ${event.title}. Powered by EaseVote Ghana.` : "Submit a nomination on EaseVote.",
+    robots: { index: false },
+  };
+}
 
 export default async function NominatePage({
   params,

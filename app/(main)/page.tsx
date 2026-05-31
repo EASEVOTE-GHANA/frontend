@@ -51,8 +51,8 @@ export default async function Home() {
       );
     }
     
-  } catch (err) {
-    console.error("Failed to fetch public events frontpage data:", err);
+  } catch {
+    // Frontpage events failed — renders with empty state
   }
 
   return (

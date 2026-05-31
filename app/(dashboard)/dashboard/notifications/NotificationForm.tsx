@@ -49,7 +49,6 @@ export default function NotificationForm({ organizers }: { organizers: any[] }) 
       setTimeout(() => setSuccess(false), 5000);
       router.refresh();
     } catch (err) {
-      console.error(err);
       modal.alert({ title: "Send Failed", message: "Failed to send notification. Check console for details.", variant: "danger" });
     } finally {
       setLoading(false);

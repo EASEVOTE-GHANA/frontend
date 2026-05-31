@@ -91,8 +91,8 @@ export default function NominateClient({ event }: { event: any }) {
       try {
         const res = await api.get(`/nominations/events/${event.id}/form`);
         setFormConfig(res.data || res);
-      } catch (err) {
-        console.error("Failed to fetch nomination form config:", err);
+      } catch {
+        // Form config unavailable
       } finally {
         setIsLoadingForm(false);
       }
@@ -151,7 +151,6 @@ export default function NominateClient({ event }: { event: any }) {
       localStorage.removeItem(draftKey);
       setIsSuccess(true);
     } catch (error: any) {
-      console.error("Nomination failed:", error);
       setErrorMsg(error.message || "Failed to submit nomination. Please try again.");
     } finally {
       setIsSubmitting(false);

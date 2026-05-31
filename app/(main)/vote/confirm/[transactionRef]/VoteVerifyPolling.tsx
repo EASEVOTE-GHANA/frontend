@@ -25,8 +25,8 @@ export default function VoteVerifyPolling({
         if (status === "PAID" || status === "SUCCESS" || status === "COMPLETED" || status === "FAILED") {
           router.refresh();
         }
-      } catch (err) {
-        console.error("[Verify] Single check failed:", err);
+      } catch {
+        // Poll error — will retry on next interval
       }
     };
 

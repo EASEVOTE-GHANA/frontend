@@ -97,7 +97,6 @@ export default function EventDetailClient({
         if (err.message?.includes("403")) {
           setIsResultsForbidden(true);
         }
-        console.error("[ResultsPolling] Error:", err);
       }
     };
 

@@ -86,8 +86,7 @@ export default function FormBuilder({
     try {
       await api.put(`/events/${eventId}`, { allowPublicNominations: newState });
       toast.success(`Nominations ${newState ? "Enabled" : "Disabled"}`);
-    } catch (error: any) {
-      console.error("Status update failed:", error);
+    } catch {
       toast.error("Failed to update status");
       setIsActive(!newState);
     }

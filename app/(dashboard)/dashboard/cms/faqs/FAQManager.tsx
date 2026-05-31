@@ -100,7 +100,6 @@ export default function FAQManager({ initialFaqs }: FAQManagerProps) {
       window.location.reload();
     } catch (error) {
       toast.error("Failed to save FAQ");
-      console.error(error);
     } finally {
       setIsProcessing(false);
     }

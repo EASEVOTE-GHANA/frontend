@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { createServerApiClient } from "@/lib/api-client";
-
 import VoteVerifyPolling from "./VoteVerifyPolling";
+
+export const metadata: Metadata = {
+  title: "Vote Confirmed! | EaseVote Ghana",
+  description: "Your vote is being verified. Thank you for participating!",
+  robots: { index: false, follow: false },
+};
 
 export default async function VoteConfirmationPage({
   params,

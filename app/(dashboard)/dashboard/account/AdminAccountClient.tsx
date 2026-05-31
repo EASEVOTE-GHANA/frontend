@@ -87,7 +87,6 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
         modal.alert({ title: "Update Failed", message: result.message || result.error || "Failed to update profile", variant: "danger" });
       }
     } catch (error: any) {
-      console.error("Profile Update Error:", error);
       modal.alert({ title: "Error", message: error.message || "An unexpected error occurred", variant: "danger" });
     } finally {
       setIsLoading(false);
@@ -162,7 +161,6 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
         modal.alert({ title: "Change Failed", message: result.message || result.error || "Failed to change password", variant: "danger" });
       }
     } catch (error: any) {
-      console.error("Password Change Error:", error);
       modal.alert({ title: "Error", message: error.message || "An unexpected error occurred", variant: "danger" });
     } finally {
       setIsLoading(false);

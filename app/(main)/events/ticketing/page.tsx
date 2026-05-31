@@ -1,5 +1,17 @@
 import { createServerApiClient } from "@/lib/api-client";
+import { Metadata } from "next";
 import TicketingBrowseClient from "./TicketingBrowseClient";
+
+export const metadata: Metadata = {
+  title: "Buy Event Tickets | EaseVote Ghana",
+  description: "Secure your spot at Ghana's hottest concerts, shows, and events. Buy tickets easily and experience unforgettable live events.",
+  alternates: { canonical: "/events/ticketing" },
+  openGraph: {
+    title: "Buy Event Tickets | EaseVote Ghana",
+    description: "Secure your spot at Ghana's hottest concerts, shows, and events.",
+    url: "/events/ticketing",
+  },
+};
 
 async function getTicketingEvents() {
   const apiClient = createServerApiClient();
@@ -22,8 +34,8 @@ async function getTicketingEvents() {
       fetchEvents("HYBRID", "PUBLISHED"),
       fetchEvents("HYBRID", "APPROVED"),
     ]);
-  } catch (error) {
-    console.error("Failed to fetch ticketing events:", error);
+  } catch {
+    // Ticketing events fetch failed — renders empty state
   }
 
   // Deduplicate by eventCode

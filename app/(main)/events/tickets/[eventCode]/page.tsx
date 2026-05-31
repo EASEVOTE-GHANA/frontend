@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -7,6 +8,26 @@ import {
   MapPin,
   Ticket,
 } from "lucide-react";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ eventCode: string }>;
+}): Promise<Metadata> {
+  const { eventCode } = await params;
+  const { createServerApiClient } = await import("@/lib/api-client");
+  const apiClient = createServerApiClient();
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+  const event = res?.data || res?.event || res;
+  const title = event?.title ? `Tickets — ${event.title} | EaseVote` : "Buy Tickets | EaseVote Ghana";
+  const image = event?.imageUrl || event?.coverImage;
+  return {
+    title,
+    description: event?.title ? `Buy tickets for ${event.title}. Secure, fast, and easy ticketing powered by EaseVote Ghana.` : "Buy event tickets on EaseVote Ghana.",
+    alternates: { canonical: `/events/tickets/${eventCode}` },
+    openGraph: { title, url: `/events/tickets/${eventCode}`, images: image ? [{ url: image, alt: event.title }] : [] },
+  };
+}
 import { EventShareButton } from "@/components/features/events/EventShareButton";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -27,10 +48,7 @@ export default async function TicketEventDetailPage({
   let event = null;
 
   // The backend's GET /events/:id supports both MongoDB ObjectIds and short 2-letter event codes.
-  const res = await apiClient.get<any>(`/events/${eventCode}`).catch((err) => {
-    console.error(`[TicketEventPage] Error fetching event ${eventCode}:`, err.message);
-    return null;
-  });
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
   event = res?.data || res?.event || res;
 
   if (!event) return notFound();

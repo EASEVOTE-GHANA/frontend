@@ -316,12 +316,12 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
     if (confirmed) {
       try {
         if (formData.imagePublicId) {
-          await api.deleteImage(formData.imagePublicId).catch(console.error);
+          await api.deleteImage(formData.imagePublicId).catch(() => {});
         }
         setFormData((prev) => ({ ...prev, imageUrl: "", imagePublicId: "" }));
         toast.success("Image removed");
-      } catch (err) {
-        console.error("Delete failed:", err);
+      } catch {
+        toast.error("Failed to remove image.");
       }
     }
   };
@@ -347,7 +347,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
     try {
       setIsUploadingImage(true);
       if (formData.imagePublicId) {
-        await api.deleteImage(formData.imagePublicId).catch(console.error);
+        await api.deleteImage(formData.imagePublicId).catch(() => {});
       }
       const res = await api.uploadFormData("/upload/image", uploadForm);
       setFormData((prev) => ({
@@ -455,7 +455,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
           const ticketId = t.id || (t as any)._id;
 
           if (!ticketId && !t.isNew) {
-            console.warn("Skipping ticket update due to missing ID:", t.name);
+            // Ticket has no ID yet — skip update
             continue;
           }
 

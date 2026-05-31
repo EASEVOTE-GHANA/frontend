@@ -1,6 +1,13 @@
 import { createServerApiClient } from "@/lib/api-client";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TicketSelectionClient } from "./TicketSelectionClient";
+
+export const metadata: Metadata = {
+  title: "Select Tickets | EaseVote Ghana",
+  description: "Choose your ticket type and complete your purchase securely on EaseVote.",
+  robots: { index: false, follow: false },
+};
 
 export default async function TicketSelectionPage({
   params,

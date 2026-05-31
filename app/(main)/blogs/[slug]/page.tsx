@@ -1,11 +1,45 @@
 import { createServerApiClient } from "@/lib/api-client";
 import { Calendar, Clock, ArrowLeft, User as UserIcon } from "lucide-react";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ShareButtons from "./ShareButtons";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const apiClient = createServerApiClient();
+  const res = await apiClient.get(`/blogs/${slug}`).catch(() => null);
+  const blog = res?.data || res;
+  if (!blog) return { title: "Article Not Found | EaseVote" };
+
+  return {
+    title: `${blog.title} | EaseVote News`,
+    description: blog.excerpt || `Read "${blog.title}" on the EaseVote blog.`,
+    alternates: { canonical: `/blogs/${slug}` },
+    openGraph: {
+      title: blog.title,
+      description: blog.excerpt,
+      url: `/blogs/${slug}`,
+      type: "article",
+      publishedTime: blog.publishedAt,
+      authors: blog.author?.fullName ? [blog.author.fullName] : undefined,
+      images: blog.coverImage ? [{ url: blog.coverImage, alt: blog.title }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.title,
+      description: blog.excerpt,
+      images: blog.coverImage ? [blog.coverImage] : [],
+    },
+  };
+}
 
 export default async function SingleBlogPage({
   params,

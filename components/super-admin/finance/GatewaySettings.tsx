@@ -52,8 +52,8 @@ export default function GatewaySettings({
     try {
         await api.post("/admin/gateways/primary", { provider, type });
         router.refresh();
-    } catch (error) {
-        console.error("Failed to switch gateway:", error);
+    } catch {
+        // Gateway switch failed silently
     } finally {
         setLoadingObj(null);
     }
@@ -65,8 +65,8 @@ export default function GatewaySettings({
     try {
         await api.post("/admin/gateways/reset", { provider, type });
         router.refresh();
-    } catch (error) {
-        console.error("Failed to reset gateway stats:", error);
+    } catch {
+        // Gateway reset failed silently
     } finally {
         setLoadingObj(null);
     }

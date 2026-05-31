@@ -14,8 +14,8 @@ export default async function Stats() {
       const allEvents = res.data || res.events || (Array.isArray(res) ? res : []);
       liveCount = allEvents.filter((e: any) => getEventStatus(e).isActive).length;
     }
-  } catch (error) {
-    console.error("Failed to fetch platform live count:", error);
+  } catch {
+    // Live count fetch failed — liveCount stays 0
   }
 
   const stats = [

@@ -34,8 +34,8 @@ async function EventsContent() {
 
     votingEvents = [...votingEvents, ...hybridEvents];
     ticketingEvents = [...ticketingEvents, ...hybridEvents];
-  } catch (err) {
-    console.error("Failed to fetch all public events:", err);
+  } catch {
+    // Events fetch failed — renders empty state
   }
 
   return (

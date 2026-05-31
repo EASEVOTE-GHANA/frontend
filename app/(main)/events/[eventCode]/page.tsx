@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import EventDetailClient from "./EventDetailClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -9,6 +10,30 @@ import { getEventStatus } from "@/lib/utils/event-status";
 
 interface PageProps {
   params: Promise<{ eventCode: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { eventCode } = await params;
+  const apiClient = createServerApiClient();
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+  const event = res?.data || res?.event || res;
+  if (!event?.title) return { title: "Event | EaseVote Ghana" };
+
+  const description = event.description || `Vote, nominate, and participate in ${event.title} on EaseVote.`;
+  const image = event.imageUrl || event.coverImage;
+
+  return {
+    title: `${event.title} | EaseVote Ghana`,
+    description,
+    alternates: { canonical: `/events/${eventCode}` },
+    openGraph: {
+      title: event.title,
+      description,
+      url: `/events/${eventCode}`,
+      images: image ? [{ url: image, alt: event.title }] : [],
+    },
+    twitter: { card: "summary_large_image", title: event.title, description, images: image ? [image] : [] },
+  };
 }
 
 export default async function EventDetailPage({ params }: PageProps) {
@@ -22,37 +47,22 @@ export default async function EventDetailPage({ params }: PageProps) {
   const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
 
   if (isObjectId) {
-    const res = await apiClient.get<any>(`/events/${eventCode}`).catch((err) => {
-      console.error(`[EventPage] Error fetching ID ${eventCode}:`, err.message);
-      return null;
-    });
+    const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
     event = res?.data || res?.event || res;
   } else {
     // Lookup by short eventCode
     // The backend now handles natural filtering, so we just pass the code.
-    const res = await apiClient.get<any>(`/events?eventCode=${eventCode}`).catch((err) => {
-      console.error(`[EventPage] Error fetching code ${eventCode}:`, err.message);
-      return null;
-    });
+    const res = await apiClient.get<any>(`/events?eventCode=${eventCode}`).catch(() => null);
 
     if (res) {
       const eventsList = res.data || res.events || (Array.isArray(res) ? res : []);
-      console.log(`[EventPage] Lookup for ${eventCode} returned ${eventsList.length} items`);
-      
-      event = eventsList.find((e: any) => 
+      event = eventsList.find((e: any) =>
         (e.eventCode || "").toUpperCase() === eventCode.toUpperCase()
       );
-
-      if (event) {
-        console.log(`[EventPage] Matched event: ${event.title} (${event.eventCode})`);
-      }
     }
   }
 
-  if (!event) {
-    console.log(`[EventPage] Final result: Not Found for ${eventCode}`);
-    return notFound();
-  }
+  if (!event) return notFound();
 
   // Permissions Check for Visibility
   let isAuthorized = false;
@@ -110,9 +120,8 @@ export default async function EventDetailPage({ params }: PageProps) {
       const formRes = await apiClient.get<any>(`/nominations/events/${eventId}/form`);
       const form = formRes?.data || formRes;
       hasNominationForm = !!form;
-    } catch (err) {
-      // It's okay if the form doesn't exist or returns 404/400
-      console.log(`[EventPage] Nomination form not found or inaccessible for ${eventId}`);
+    } catch {
+      // Form may not exist — this is expected
     }
   }
 

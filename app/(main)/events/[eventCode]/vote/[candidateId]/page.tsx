@@ -1,6 +1,31 @@
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import VoteClient from "./VoteClient";
 import { createServerApiClient } from "@/lib/api-client";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ eventCode: string; candidateId: string }>;
+}): Promise<Metadata> {
+  const { eventCode, candidateId } = await params;
+  const apiClient = createServerApiClient();
+  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+  const event = res?.data || res?.event || res;
+  let candidateName = "";
+  for (const cat of event?.categories || []) {
+    const c = cat.candidates?.find((c: any) => (c._id || c.id) === candidateId);
+    if (c) { candidateName = c.name; break; }
+  }
+  const title = candidateName && event?.title
+    ? `Vote for ${candidateName} — ${event.title} | EaseVote`
+    : "Cast Your Vote | EaseVote Ghana";
+  return {
+    title,
+    description: candidateName ? `Support ${candidateName} by casting your vote on EaseVote Ghana.` : "Cast your vote securely on EaseVote.",
+    robots: { index: false },
+  };
+}
 
 export default async function VotePage({
   params,

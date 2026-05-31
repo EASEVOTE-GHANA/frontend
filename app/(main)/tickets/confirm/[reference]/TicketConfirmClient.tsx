@@ -35,8 +35,8 @@ export default function TicketConfirmClient({
         } else if (transaction.status === "FAILED") {
           setStatus("FAILED");
         }
-      } catch (error) {
-        console.error("Verification error:", error);
+      } catch {
+        // Verification poll failed — will retry
       }
     };
 

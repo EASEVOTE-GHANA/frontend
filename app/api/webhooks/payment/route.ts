@@ -27,8 +27,7 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json().catch(() => ({}));
     return NextResponse.json(data, { status: response.status });
-  } catch (error) {
-    console.error("[WEBHOOK PROXY] Error:", error);
+  } catch {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -80,8 +80,6 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
         quantity: cart[selectedTierId],
       };
 
-      console.log("[TicketSelectionClient] Initializing ticket purchase:", payload);
-
       const res = await api.post("/purchases/tickets/initialize", payload);
       
       // Handle both standard envelope {success, data} and direct responses {purchase, paymentUrl, ...}
@@ -114,7 +112,6 @@ export const TicketSelectionClient: React.FC<TicketSelectionProps> = ({
         throw new Error(resultData.message || res.message || "Failed to initiate purchase");
       }
     } catch (err: any) {
-      console.error("Ticket purchase error:", err);
       toast.error(err.message || "An unexpected error occurred");
     } finally {
       setIsProcessing(false);

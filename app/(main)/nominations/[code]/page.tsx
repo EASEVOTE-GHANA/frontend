@@ -1,6 +1,13 @@
 import { notFound, redirect } from "next/navigation";
+import { Metadata } from "next";
 import { createServerApiClient } from "@/lib/api-client";
 import NominationWrapper from "../../events/nominate/NominationWrapper";
+
+export const metadata: Metadata = {
+  title: "Submit a Nomination | EaseVote Ghana",
+  description: "Nominate your favourite candidate for an award event on EaseVote Ghana.",
+  robots: { index: false, follow: false },
+};
 
 interface PageProps {
   params: Promise<{

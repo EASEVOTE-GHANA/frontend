@@ -81,8 +81,8 @@ export function useNotifications({ enabled = true, showToasts = true }: { enable
           }
         });
       }
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+    } catch {
+      // Notifications fetch failed silently
     } finally {
       setLoading(false);
     }
@@ -95,8 +95,8 @@ export function useNotifications({ enabled = true, showToasts = true }: { enable
         prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error);
+    } catch {
+      // Mark as read failed silently
     }
   };
 
@@ -105,8 +105,8 @@ export function useNotifications({ enabled = true, showToasts = true }: { enable
       await api.post("/notifications/read-all");
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
+    } catch {
+      // Mark all as read failed silently
     }
   };
 

@@ -1,9 +1,21 @@
 import { createServerApiClient } from "@/lib/api-client";
 import { TrendingUp } from "lucide-react";
+import { Metadata } from "next";
 import PageHeader from "./components/PageHeader";
 import BlogList from "./components/BlogList";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "News & Blogs | EaseVote Ghana",
+  description: "Stay up to date with the latest news, platform updates, and event stories from EaseVote — Ghana's trusted voting and ticketing platform.",
+  alternates: { canonical: "/blogs" },
+  openGraph: {
+    title: "News & Blogs | EaseVote Ghana",
+    description: "The latest stories, updates, and editorials from EaseVote.",
+    url: "/blogs",
+  },
+};
 
 export default async function BlogsIndexPage() {
   const apiClient = createServerApiClient();

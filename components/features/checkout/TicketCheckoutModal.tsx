@@ -48,8 +48,6 @@ export function TicketCheckoutModal({
         quantity,
       };
 
-      console.log("[TicketCheckoutModal] Initializing unified ticket purchase:", payload);
-
       const res = await api.post("/purchases/tickets/initialize", payload);
       
       const result = res.data || res;
@@ -76,7 +74,6 @@ export function TicketCheckoutModal({
         }
       }
     } catch (error: any) {
-      console.error("Ticket purchase initialization error:", error);
       modal.alert({ title: "Purchase Error", message: error.message || "An unexpected error occurred while initiating the purchase.", variant: "danger" });
       setIsSubmitting(false);
     }

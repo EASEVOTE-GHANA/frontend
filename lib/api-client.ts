@@ -159,9 +159,6 @@ export function createServerApiClient(token?: string) {
         .catch(() => ({ message: "Request failed" }));
 
       if (!res.ok) {
-        console.error(`\n❌ [Server API] Request failed: ${res.status} ${res.statusText}`);
-        console.error(`   Endpoint: ${path}`);
-        console.error(`   Response: ${JSON.stringify(data).substring(0, 200)}`);
         throw new Error(data.message || data.error || `HTTP ${res.status}`);
       }
 

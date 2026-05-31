@@ -144,7 +144,7 @@ export default function CreateEventPage() {
               })),
           );
         })
-        .catch(console.error);
+        .catch(() => {});
     }
   }, [isAdmin]);
 
@@ -561,8 +561,8 @@ export default function CreateEventPage() {
               order: index,
             })),
           });
-        } catch (nomError) {
-          console.error("Failed to save nomination settings:", nomError);
+        } catch {
+          // Nomination settings save failed — non-fatal
         }
       }
 

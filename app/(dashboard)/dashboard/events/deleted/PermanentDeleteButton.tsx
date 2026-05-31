@@ -31,7 +31,6 @@ export default function PermanentDeleteButton({ eventId }: PermanentDeleteButton
           router.refresh();
         }
       } catch (error: any) {
-        console.error("Failed to delete event:", error);
         modal.alert({
           title: "Deletion Failed",
           message: error.message || "Failed to permanently delete event. Please try again.",

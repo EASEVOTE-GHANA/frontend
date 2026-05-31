@@ -139,7 +139,6 @@ export default function NominationsDashboardClient({
         router.refresh(); // Refresh server stats
       }
     } catch (error) {
-      console.error(error);
       modal.alert({
         title: "Update Failed",
         message: "Failed to update status. Please try again.",

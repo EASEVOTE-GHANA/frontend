@@ -75,8 +75,8 @@ export default function OrganizerPayoutsClient({
         const list = Array.isArray(historyRes.data) ? historyRes.data : [];
         setPayouts(list);
       }
-    } catch (err) {
-      console.error("Failed to fetch event data:", err);
+    } catch {
+      // Event data fetch failed
     } finally {
       setIsLoading(false);
     }
@@ -92,8 +92,8 @@ export default function OrganizerPayoutsClient({
     try {
       const res = await api.get(`/payouts/balance?eventId=${eventId}`);
       setEventBalance(res.data?.availableBalance || 0);
-    } catch (err) {
-      console.error("Failed to fetch event balance:", err);
+    } catch {
+      // Balance fetch failed
     } finally {
       setIsLoadingBalance(false);
     }

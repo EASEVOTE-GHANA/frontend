@@ -69,8 +69,6 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
         customerPhone: phoneNumber || undefined,
       };
 
-      console.log("[VoteClient] Initializing unified vote purchase:", payload);
-
       const res = await api.post("/purchases/votes/initialize", payload);
       
       const result = res.data || res;
@@ -84,12 +82,10 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
       } else if (reference) {
         router.push(`/vote/confirm/${reference}`);
       } else {
-        console.error("[VoteClient] No redirect information found in response:", res);
         toast.error("Initialization successful, but no payment link was found.");
         setIsLoading(false);
       }
     } catch (error: any) {
-      console.error("Payment error:", error);
       // Extra resilience: Parse error message safely
       let msg = error.message || "An unexpected error occurred.";
       if (msg.includes("HTTP 500")) {

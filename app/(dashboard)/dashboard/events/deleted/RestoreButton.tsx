@@ -31,7 +31,6 @@ export default function RestoreButton({ eventId }: RestoreButtonProps) {
           router.refresh();
         }
       } catch (error: any) {
-        console.error("Failed to restore event:", error);
         modal.alert({
           title: "Restore Failed",
           message: error.message || "Failed to restore event. Please try again.",

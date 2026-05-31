@@ -20,15 +20,12 @@ function CallbackHandler() {
 
   useEffect(() => {
     if (!reference) {
-      console.error("[PaymentCallback] No reference found in URL parameters.");
       router.replace("/");
       return;
     }
 
     const resolveAndRedirect = async () => {
       try {
-        console.log(`[PaymentCallback] Found reference: ${reference}. Resolving type...`);
-        
         // Use the verify endpoint to get the purchase type
         const res = await api.get(`/purchases/verify/${reference}`);
         const transaction = res.data || res.purchase || res;
@@ -39,9 +36,8 @@ function CallbackHandler() {
           // Default to vote confirmation
           router.replace(`/vote/confirm/${reference}`);
         }
-      } catch (err: any) {
-        console.error("[PaymentCallback] Error resolving purchase type:", err);
-        // Fallback to home if we can't resolve it, but show an error first
+      } catch {
+        // Fallback to home if we can't resolve it
         setError("We couldn't determine your purchase details. Redirecting home in a few seconds...");
         setTimeout(() => router.replace("/"), 3000);
       }

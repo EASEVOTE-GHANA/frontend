@@ -72,7 +72,6 @@ export default function TicketManagementClient({ events }: Props) {
   const fetchTickets = useCallback(async (page: number = 1) => {
     if (!selectedEventId) return;
     setLoading(true);
-    console.log(`[TicketManagement] Fetching tickets for event: ${selectedEventId}, page: ${page}`);
     try {
       const res = await api.get(`/tickets/events/${selectedEventId}`, {
         params: {
@@ -83,17 +82,13 @@ export default function TicketManagementClient({ events }: Props) {
         }
       });
       
-      console.log("[TicketManagement] API Response:", res);
-
       if (res && res.pagination) {
         setTickets(res.data || []);
         setPagination(res.pagination);
       } else {
-        console.warn("[TicketManagement] Response missing pagination metadata, using raw array:", res);
         setTickets(Array.isArray(res) ? res : []);
       }
     } catch (error: any) {
-      console.error("[TicketManagement] Fetch Error:", error);
       toast.error(error.message || "Failed to load tickets");
     } finally {
       setLoading(false);
@@ -116,8 +111,7 @@ export default function TicketManagementClient({ events }: Props) {
         )
       );
       toast.success(currentStatus ? "Ticket marked as unused" : "Ticket check-in successful");
-    } catch (error) {
-      console.error("Toggle failed:", error);
+    } catch {
       toast.error("Failed to update ticket status");
     } finally {
       setTogglingId(null);
@@ -133,7 +127,6 @@ export default function TicketManagementClient({ events }: Props) {
       // Optional: Refresh the page to show new aggregate stats in the parent component
       window.location.reload();
     } catch (error: any) {
-      console.error("Sync failed:", error);
       toast.error(error.message || "Failed to sync statistics");
     } finally {
       setSyncing(false);

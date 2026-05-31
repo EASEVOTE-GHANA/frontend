@@ -49,7 +49,7 @@ export default function TicketScannerPage() {
     return () => {
       clearTimeout(timer);
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+        scannerRef.current.clear().catch(() => {});
       }
     };
   }, []);
@@ -77,8 +77,7 @@ export default function TicketScannerPage() {
           },
         );
       }
-    } catch (err) {
-      console.error("Scanner init error:", err);
+    } catch {
       setCameraError(
         "Failed to initialize camera. Please explicitly allow camera access.",
       );

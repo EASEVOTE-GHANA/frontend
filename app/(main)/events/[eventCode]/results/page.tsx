@@ -1,8 +1,26 @@
 import { createServerApiClient } from "@/lib/api-client";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { BarChart, Trophy, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ eventCode: string }>;
+}): Promise<Metadata> {
+  const { eventCode } = await params;
+  const apiClient = createServerApiClient();
+  const data = await apiClient.get(`/votes/results/${eventCode}`).catch(() => null);
+  const eventTitle = (data as any)?.event?.title;
+  const title = eventTitle ? `${eventTitle} — Live Results | EaseVote` : "Live Results | EaseVote";
+  return {
+    title,
+    description: eventTitle ? `See the live voting results for ${eventTitle} on EaseVote Ghana.` : "Live voting results on EaseVote.",
+    openGraph: { title, url: `/events/${eventCode}/results` },
+  };
+}
 
 export default async function ResultsPage({
   params,

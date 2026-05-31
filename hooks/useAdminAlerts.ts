@@ -92,8 +92,8 @@ export function useAdminAlerts({ enabled = true, showToasts = true }: { enabled?
           }
         });
       }
-    } catch (error) {
-      console.error("Failed to fetch admin alerts:", error);
+    } catch {
+      // Admin alerts fetch failed silently
     }
   }, []);
 

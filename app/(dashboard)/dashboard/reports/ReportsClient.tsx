@@ -53,8 +53,8 @@ export default function ReportsClient() {
           const list = Array.isArray(data) ? data : data.data || [];
           setEvents(list);
         }
-      } catch (err) {
-        console.error("[ReportsClient] Failed to load events:", err);
+      } catch {
+        // Event list load failed — filter stays empty
       }
     };
 
@@ -199,7 +199,6 @@ export default function ReportsClient() {
 
       toast.success(`${report.title} downloaded successfully!`, { id: loadingToast });
     } catch (error: any) {
-      console.error("[Report Download Error]:", error);
       toast.error(error.message || "An error occurred during download.", { id: loadingToast });
     } finally {
       setDownloadingId(null);

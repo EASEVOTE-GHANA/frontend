@@ -1,6 +1,13 @@
 import { createServerApiClient } from "@/lib/api-client";
+import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Ticket Confirmed! | EaseVote Ghana",
+  description: "Your ticket has been confirmed. Save or print your QR code for entry.",
+  robots: { index: false, follow: false },
+};
 import {
   CheckCircle,
   Calendar,

@@ -258,7 +258,7 @@ export function CategoriesManager({
 
     // Cleanup orphaned image if it exists
     if (candidate.imagePublicId) {
-      api.deleteImage(candidate.imagePublicId).catch(console.error);
+      api.deleteImage(candidate.imagePublicId).catch(() => {});
     }
 
     const categoryId = categories[catIdx].id;
@@ -316,7 +316,7 @@ export function CategoriesManager({
     try {
       // 1. If candidate already has an image, delete the old one first
       if (candidate.imagePublicId) {
-        await api.deleteImage(candidate.imagePublicId).catch(console.error);
+        await api.deleteImage(candidate.imagePublicId).catch(() => {});
       }
 
       // 2. Upload new image

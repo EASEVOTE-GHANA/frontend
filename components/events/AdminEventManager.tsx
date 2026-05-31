@@ -262,7 +262,6 @@ export function AdminEventManager({
       });
       router.push(backUrl);
     } catch (err: any) {
-      console.error(err);
       modal.alert({
         title: "Delete Failed",
         message: err.message || "An error occurred",
@@ -1190,9 +1189,8 @@ function VotingToggle({
     try {
       await api.patch(`/events/${eventId}/toggle-vote-count`, {});
       setEnabled(newValue);
-    } catch (e) {
-      console.error(e);
-      console.error("Failed to update setting");
+    } catch {
+      // Setting toggle failed silently
     } finally {
       setLoading(false);
     }
