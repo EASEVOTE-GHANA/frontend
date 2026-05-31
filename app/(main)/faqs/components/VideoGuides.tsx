@@ -38,7 +38,7 @@ export default function VideoGuides() {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-magenta-600 shadow-lg group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center text-primary-600 shadow-lg group-hover:scale-110 transition-transform">
                   <Play size={20} className="fill-current ml-1" />
                 </div>
               </div>
@@ -46,7 +46,7 @@ export default function VideoGuides() {
                 {video.duration}
               </span>
             </div>
-            <h4 className="font-bold text-slate-800 group-hover:text-magenta-600 transition-colors">
+            <h4 className="font-bold text-slate-800 group-hover:text-primary-600 transition-colors">
               {video.title}
             </h4>
           </div>

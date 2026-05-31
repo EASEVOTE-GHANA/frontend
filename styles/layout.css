@@ -6,9 +6,6 @@
   --color-text-main: #1a1a1a;
   --color-text-muted: #4a4a4a;
 
-  /* --- ADDED: Magenta Color (Aliased to Fuchsia-500) --- */
-  --color-primary-500: #d946ef;
-
   /* --- ADDED: Slow Pulse Animation --- */
   --animate-pulse-slow: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
@@ -47,4 +44,3 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-

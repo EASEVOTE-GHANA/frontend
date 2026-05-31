@@ -1307,7 +1307,7 @@ function CandidateProfileCard({
               />
             </div>
           ) : (
-            <div className="w-full h-full rounded-2xl bg-linear-to-br from-primary-500 to-magenta-600 flex items-center justify-center text-white font-bold text-xl ring-2 ring-white">
+            <div className="w-full h-full rounded-2xl bg-linear-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-xl ring-2 ring-white">
               {candidate.name.substring(0, 1).toUpperCase()}
             </div>
           )}
@@ -1343,7 +1343,7 @@ function CandidateProfileCard({
         </div>
         <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-linear-to-r from-primary-500 to-magenta-500 transition-all duration-1000 ease-out"
+            className="h-full bg-linear-to-r from-primary-500 to-primary-500 transition-all duration-1000 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>

@@ -215,7 +215,7 @@ export default function TicketsDashboardClient({ events }: DashboardProps) {
                   <div
                     className={clsx(
                         "h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden",
-                        percentage > 90 ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-600 to-magenta-600"
+                        percentage > 90 ? "bg-gradient-to-r from-red-500 to-orange-500" : "bg-gradient-to-r from-primary-600 to-primary-600"
                     )}
                     style={{ width: `${percentage}%` }}
                   >
