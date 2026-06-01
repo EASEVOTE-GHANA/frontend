@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { clsx } from "clsx";
+import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export default async function BlogsIndexPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse"></span>
                   Official Newsroom
               </div>
-              <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
+              <h1 className="text-5xl md:text-7xl font-black !text-white tracking-tighter leading-[0.9]">
                   Platform insights <br />& global updates.
               </h1>
               <p className="max-w-xl mx-auto text-primary-100 text-lg font-medium opacity-80 leading-relaxed pt-2">
@@ -50,58 +51,50 @@ export default async function BlogsIndexPage() {
                   </p>
               </div>
           ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {blogs.map((blog: any, idx: number) => (
+              <div className="space-y-8">
+                  {/* Featured Post */}
+                  {blogs[0] && (
                       <Link 
-                        href={`/blogs/${blog.slug}`} 
-                        key={blog._id}
-                        className={clsx(
-                            "group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 flex flex-col hover:-translate-y-2",
-                            idx === 0 && "md:col-span-2 lg:col-span-2 md:flex-row"
-                        )}
+                        href={`/blogs/${blogs[0].slug}`} 
+                        className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 flex flex-col md:flex-row hover:-translate-y-2 max-w-5xl mx-auto"
                       >
-                          <div className={clsx(
-                              "relative overflow-hidden",
-                              idx === 0 ? "md:w-1/2" : "aspect-[16/10]"
-                          )}>
+                          <div className="relative overflow-hidden md:w-1/2 min-h-[300px]">
                               <img 
-                                src={blog.coverImage || "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=2938"} 
-                                alt={blog.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                src={blogs[0].coverImage || "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=2938"} 
+                                alt={blogs[0].title}
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                               />
                               <div className="absolute top-6 left-6 flex flex-wrap gap-2">
                                   <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-slate-900 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm">
-                                      {blog.category || "News"}
+                                      {blogs[0].category || "News"}
                                   </span>
                               </div>
                           </div>
 
-                          <div className={clsx(
-                              "p-8 md:p-10 flex flex-col justify-between flex-1",
-                              idx === 0 && "md:w-1/2"
-                          )}>
+                          <div className="p-8 md:p-12 flex flex-col justify-between flex-1 md:w-1/2">
                               <div>
                                   <div className="flex items-center gap-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">
-                                      <span className="flex items-center gap-1.5"><Calendar size={12} /> {new Date(blog.publishedAt).toLocaleDateString()}</span>
-                                      <span className="flex items-center gap-1.5"><Clock size={12} /> {blog.readTime || 5} min read</span>
+                                      <span className="flex items-center gap-1.5"><Calendar size={12} /> {format(new Date(blogs[0].publishedAt), "MMM d, yyyy")}</span>
+                                      <span className="flex items-center gap-1.5"><Clock size={12} /> {blogs[0].readTime || 5} min read</span>
                                   </div>
-                                  <h2 className={clsx(
-                                      "font-black text-slate-900 leading-[1] mb-6 tracking-tight group-hover:text-primary-700 transition-colors",
-                                      idx === 0 ? "text-4xl" : "text-2xl"
-                                  )}>
-                                      {blog.title}
+                                  <h2 className="font-black text-slate-900 leading-[1.1] mb-6 tracking-tight group-hover:text-primary-700 transition-colors text-4xl">
+                                      {blogs[0].title}
                                   </h2>
                                   <p className="text-slate-500 text-sm font-medium leading-relaxed line-clamp-3 mb-8">
-                                      {blog.excerpt}
+                                      {blogs[0].excerpt}
                                   </p>
                               </div>
 
                               <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                                   <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-[10px] font-black uppercase">
-                                          {blog.author?.fullName?.charAt(0)}
+                                      <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-[10px] font-black uppercase overflow-hidden">
+                                          {blogs[0].author?.avatar ? (
+                                              <img src={blogs[0].author.avatar} alt={blogs[0].author.fullName} className="w-full h-full object-cover" />
+                                          ) : (
+                                              blogs[0].author?.fullName?.charAt(0) || "A"
+                                          )}
                                       </div>
-                                      <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{blog.author?.fullName}</span>
+                                      <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{blogs[0].author?.fullName || "Admin"}</span>
                                   </div>
                                   <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-900 group-hover:bg-primary-700 group-hover:text-white transition-all">
                                       <ChevronRight size={18} />
@@ -109,7 +102,64 @@ export default async function BlogsIndexPage() {
                               </div>
                           </div>
                       </Link>
-                  ))}
+                  )}
+
+                  {/* Remaining Posts Grid */}
+                  {blogs.length > 1 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-8">
+                          {blogs.slice(1).map((blog: any) => (
+                              <Link 
+                                href={`/blogs/${blog.slug}`} 
+                                key={blog._id}
+                                className="group bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 flex flex-col hover:-translate-y-2"
+                              >
+                                  <div className="relative overflow-hidden aspect-[16/10]">
+                                      <img 
+                                        src={blog.coverImage || "https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=2938"} 
+                                        alt={blog.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                      />
+                                      <div className="absolute top-6 left-6 flex flex-wrap gap-2">
+                                          <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-slate-900 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm">
+                                              {blog.category || "News"}
+                                          </span>
+                                      </div>
+                                  </div>
+
+                                  <div className="p-8 flex flex-col justify-between flex-1">
+                                      <div>
+                                          <div className="flex items-center gap-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">
+                                              <span className="flex items-center gap-1.5"><Calendar size={12} /> {format(new Date(blog.publishedAt), "MMM d, yyyy")}</span>
+                                              <span className="flex items-center gap-1.5"><Clock size={12} /> {blog.readTime || 5} min read</span>
+                                          </div>
+                                          <h2 className="font-black text-slate-900 leading-[1.2] mb-4 tracking-tight group-hover:text-primary-700 transition-colors text-2xl">
+                                              {blog.title}
+                                          </h2>
+                                          <p className="text-slate-500 text-sm font-medium leading-relaxed line-clamp-3 mb-8">
+                                              {blog.excerpt}
+                                          </p>
+                                      </div>
+
+                                      <div className="flex items-center justify-between pt-6 border-t border-slate-50">
+                                          <div className="flex items-center gap-3">
+                                              <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-[10px] font-black uppercase overflow-hidden">
+                                                  {blog.author?.avatar ? (
+                                                      <img src={blog.author.avatar} alt={blog.author.fullName} className="w-full h-full object-cover" />
+                                                  ) : (
+                                                      blog.author?.fullName?.charAt(0) || "A"
+                                                  )}
+                                              </div>
+                                              <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{blog.author?.fullName || "Admin"}</span>
+                                          </div>
+                                          <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-900 group-hover:bg-primary-700 group-hover:text-white transition-all">
+                                              <ChevronRight size={18} />
+                                          </div>
+                                      </div>
+                                  </div>
+                              </Link>
+                          ))}
+                      </div>
+                  )}
               </div>
           )}
       </section>

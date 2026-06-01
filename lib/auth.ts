@@ -121,8 +121,9 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (trigger === "update") {
-        if (session?.avatar) token.avatar = session.avatar;
-        if (session?.status) token.status = session.status;
+        if (session?.avatar !== undefined) token.avatar = session.avatar;
+        if (session?.status !== undefined) token.status = session.status;
+        if (session?.name !== undefined) token.name = session.name;
       }
 
       return token;
@@ -134,6 +135,7 @@ export const authOptions: NextAuthOptions = {
         session.user.organizerId = token.organizerId;
         session.user.status = token.status;
         session.user.avatar = token.avatar;
+        if (token.name) session.user.name = token.name as string;
         session.accessToken = token.accessToken;
       }
 

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { User, Lock, Mail, Phone, Camera, Loader2, Save, CheckCircle2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useModal } from "@/components/providers/ModalProvider";
+import toast from "react-hot-toast";
 
 interface AdminAccountClientProps {
   user: {
@@ -78,16 +79,16 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
 
       if (result.success !== false) {
         // Update the next-auth session as well
-        await updateSession({ avatar: profileData.avatar });
+        await updateSession({ avatar: profileData.avatar, name: profileData.fullName });
 
-        await modal.alert({ title: "Profile Updated", message: "Profile updated successfully!", variant: "info" });
+        toast.success("Profile updated successfully!");
         router.refresh();
       } else {
-        modal.alert({ title: "Update Failed", message: result.message || result.error || "Failed to update profile", variant: "danger" });
+        toast.error(result.message || result.error || "Failed to update profile");
       }
     } catch (error: any) {
       console.error("Profile Update Error:", error);
-      modal.alert({ title: "Error", message: error.message || "An unexpected error occurred", variant: "danger" });
+      toast.error(error.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -96,8 +97,8 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { alert("Please select an image file."); return; }
-    if (file.size > 5 * 1024 * 1024) { alert("Image must be under 5MB."); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB."); return; }
 
     setIsUploadingAvatar(true);
     try {
@@ -115,7 +116,7 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
       setProfileData((prev) => ({ ...prev, avatar: newUrl }));
       router.refresh();
     } catch (err: any) {
-      alert(err.message || "Upload failed.");
+      toast.error(err.message || "Upload failed.");
     } finally {
       setIsUploadingAvatar(false);
       if (avatarInputRef.current) avatarInputRef.current.value = "";
@@ -125,7 +126,7 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      modal.alert({ title: "Passwords Don't Match", message: "New passwords do not match. Please try again.", variant: "warning" });
+      toast.error("New passwords do not match. Please try again.");
       return;
     }
 
@@ -141,7 +142,7 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
       const hasSpecial = /[^A-Za-z0-9]/.test(passwordData.newPassword);
 
       if (passwordData.newPassword.length < 8 || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-        modal.alert({ title: "Weak Password", message: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.", variant: "warning" });
+        toast.error("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
         setIsLoading(false);
         return;
       }
@@ -151,18 +152,18 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
       });
 
       if (result.success !== false) {
-        await modal.alert({ title: "Password Changed", message: "Password changed successfully!", variant: "info" });
+        toast.success("Password changed successfully!");
         setPasswordData({
           currentPassword: "",
           newPassword: "",
           confirmPassword: "",
         });
       } else {
-        modal.alert({ title: "Change Failed", message: result.message || result.error || "Failed to change password", variant: "danger" });
+        toast.error(result.message || result.error || "Failed to change password");
       }
     } catch (error: any) {
       console.error("Password Change Error:", error);
-      modal.alert({ title: "Error", message: error.message || "An unexpected error occurred", variant: "danger" });
+      toast.error(error.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }

@@ -20,6 +20,7 @@ type Transaction = {
   amount: number;
   status: string;
   payer: string;
+  phone?: string;
   event: string;
   date: Date;
   voteCount?: number;
@@ -75,9 +76,9 @@ const statusConfig: Record<
 };
 
 const typeLabelMap: Record<string, string> = {
-  VOTE: "Vote Cast",
-  TICKET: "Ticket Sale",
-  NOMINATION_FEE: "Nomination Fee",
+  VOTE: "Vote",
+  TICKET: "Ticket",
+  NOMINATION_FEE: "Nomination",
 };
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -123,6 +124,7 @@ export default function TransactionsTable({
         return (
           tx.reference.toLowerCase().includes(query) ||
           tx.payer.toLowerCase().includes(query) ||
+          (tx.phone && tx.phone.toLowerCase().includes(query)) ||
           tx.event.toLowerCase().includes(query)
         );
       })
@@ -133,15 +135,27 @@ export default function TransactionsTable({
       key: "reference",
       header: "Reference",
       render: (tx: Transaction) => (
-        <div className="font-mono text-xs text-slate-500">{tx.reference}</div>
+        <div className="font-mono text-[10px] text-slate-500 max-w-[80px] truncate" title={tx.reference}>{tx.reference}</div>
       ),
       sortable: true,
     },
     {
       key: "payer",
-      header: "User / Payer",
+      header: "Payer",
       render: (tx: Transaction) => (
-        <div className="text-sm font-medium text-slate-900">{tx.payer}</div>
+        <div className="text-sm font-medium text-slate-900 max-w-[120px] truncate" title={tx.payer}>
+          {tx.payer}
+        </div>
+      ),
+      sortable: true,
+    },
+    {
+      key: "phone",
+      header: "Phone",
+      render: (tx: Transaction) => (
+        <span className="text-sm font-medium text-slate-900">
+          {tx.phone && tx.phone !== "N/A" ? tx.phone : "-"}
+        </span>
       ),
       sortable: true,
     },
@@ -149,7 +163,7 @@ export default function TransactionsTable({
       key: "type",
       header: "Type",
       render: (tx: Transaction) => (
-        <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wide">
           {typeLabelMap[tx.type] || tx.type}
         </span>
       ),
@@ -157,12 +171,12 @@ export default function TransactionsTable({
     },
     {
       key: "amount",
-      header: "Amount",
+      header: "Amount (GHS)",
       render: (tx: Transaction) => (
-        <span className="font-medium text-slate-900">
+        <span className="text-sm font-medium text-slate-900">
           {new Intl.NumberFormat("en-GH", {
-            style: "currency",
-            currency: "GHS",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           }).format(tx.amount)}
         </span>
       ),
@@ -172,11 +186,11 @@ export default function TransactionsTable({
       key: "units",
       header: "Units",
       render: (tx: Transaction) => (
-        <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+        <span className="text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
           {tx.type === "VOTE" 
-            ? `${tx.voteCount || 0} Votes` 
+            ? tx.voteCount || 0 
             : tx.type === "TICKET" 
-              ? `${tx.ticketQuantity || 0} Tickets` 
+              ? tx.ticketQuantity || 0 
               : "-"}
         </span>
       ),
@@ -186,7 +200,7 @@ export default function TransactionsTable({
       header: "Event Context",
       render: (tx: Transaction) => (
         <div
-          className="text-xs text-slate-500 max-w-[150px] truncate font-medium"
+          className="text-xs text-slate-500 max-w-[120px] truncate font-medium"
           title={tx.event}
         >
           {tx.event}
@@ -208,13 +222,13 @@ export default function TransactionsTable({
         return (
           <span
             className={clsx(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+              "inline-flex items-center justify-center w-6 h-6 rounded-full",
               config.bg,
               config.color
             )}
+            title={config.label}
           >
             <Icon className="w-3.5 h-3.5" />
-            {config.label}
           </span>
         );
       },
@@ -224,8 +238,14 @@ export default function TransactionsTable({
       key: "date",
       header: "Date",
       render: (tx: Transaction) => (
-        <span className="text-xs text-slate-500">
-          {new Date(tx.date).toLocaleString()}
+        <span className="text-[11px] text-slate-500 whitespace-nowrap">
+          {new Date(tx.date).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          })}
         </span>
       ),
       sortable: true,

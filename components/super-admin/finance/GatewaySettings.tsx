@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 
-type GatewayProvider = "paystack" | "appsmobile";
+type GatewayProvider = "paystack" | "appsmobile" | "nalo";
 type GatewayType = "WEB" | "USSD";
 
 type GatewayConfig = {
@@ -72,8 +72,14 @@ export default function GatewaySettings({
     }
   }
 
-  const webGateways = configs.filter(c => c.type === "WEB");
-  const ussdGateways = configs.filter(c => c.type === "USSD");
+  const webGateways = configs.filter(c => c.type === "WEB" && (c.provider as string) !== "moolre");
+  const ussdGateways = configs.filter(c => c.type === "USSD" && (c.provider as string) !== "moolre");
+
+  const providerLogos: Record<string, string> = {
+    paystack: "/images/logos/paystack.png",
+    appsmobile: "/images/logos/appsandmobile.png",
+    nalo: "/images/logos/nalo.webp",
+  };
 
   const GatewayCard = ({ config }: { config: GatewayConfig }) => {
     const isLoading = loadingObj === `${config.provider}-${config.type}`;
@@ -99,10 +105,20 @@ export default function GatewaySettings({
             <div className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                     <div className={clsx(
-                        "w-12 h-12 rounded-xl flex items-center justify-center transition-colors",
-                        config.isPrimary ? "bg-primary-900 text-white" : "bg-slate-50 text-slate-500 group-hover:bg-slate-100"
+                        "w-12 h-12 rounded-xl flex items-center justify-center transition-colors overflow-hidden",
+                        providerLogos[config.provider]
+                          ? "bg-white border border-slate-100 shadow-sm p-1"
+                          : config.isPrimary ? "bg-primary-900 text-white" : "bg-slate-50 text-slate-500 group-hover:bg-slate-100"
                     )}>
-                        <Zap size={20} />
+                        {providerLogos[config.provider] ? (
+                          <img
+                            src={providerLogos[config.provider]}
+                            alt={config.provider}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <Zap size={20} />
+                        )}
                     </div>
                     <div>
                         <h4 className="font-black text-slate-900 uppercase tracking-tight text-sm">

@@ -20,11 +20,10 @@ import AdminStatCard from "@/components/admin/AdminStatCard";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function AdminTransactionsPage({
-  searchParams,
-}: {
-  searchParams: { page?: string; eventId?: string; status?: string };
+export default async function AdminTransactionsPage(props: {
+  searchParams: Promise<{ page?: string; eventId?: string; status?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   const session = await getServerSession(authOptions);
   const role = session?.user?.role;
   const isOrganizer = role === "ORGANIZER";
@@ -64,18 +63,26 @@ export default async function AdminTransactionsPage({
     eventsList = (eventsRes.data || eventsRes || []).map((e: any) => ({ id: e._id, title: e.title }));
   } else {
     // Admin-specific data
-    const [statsRes, transactionsRes, eventsRes] = await Promise.all([
+    const [statsRes, platformRes, transactionsRes, eventsRes] = await Promise.all([
       apiClient.get("/admin/stats/revenue").catch(() => ({
         data: { totalVolume: 0, netRevenue: 0, successRate: 0, pendingCount: 0 },
+      })),
+      apiClient.get("/admin/stats/platform").catch(() => ({
+        data: { overview: {} },
       })),
       apiClient.get(`/admin/transactions?${queryStr}`).catch(() => ({ data: [], pagination: {} })),
       apiClient.get("/events/admin/all?limit=500").catch(() => ({ data: [] })),
     ]);
 
     const rawStats = statsRes.data || statsRes || {};
+    const pulseData = platformRes.data || platformRes || {};
+    const overview = pulseData.overview || {};
+
     stats = {
       totalVolume: rawStats.totalVolume || rawStats.totalRevenue || 0,
       netRevenue: rawStats.netRevenue || rawStats.netCommission || 0,
+      totalVotes: overview.totalVotesCast || rawStats.totalVotes || 0,
+      totalTickets: overview.ticketsSold || rawStats.totalTickets || 0,
       successRate: rawStats.successRate || 0,
       pendingCount: rawStats.pendingCount || 0,
     };
@@ -85,7 +92,12 @@ export default async function AdminTransactionsPage({
   }
 
   const rawTransactions = transactionsData.data || transactionsData.purchases || (Array.isArray(transactionsData) ? transactionsData : []);
-  const pagination = transactionsData.pagination || { totalPages: 1, currentPage: 1, totalResults: rawTransactions.length };
+  const rawPagination = transactionsData.pagination || {};
+  const pagination = {
+    totalPages: rawPagination.totalPages || 1,
+    currentPage: rawPagination.currentPage || 1,
+    totalResults: rawPagination.totalItems ?? rawPagination.totalResults ?? rawTransactions.length,
+  };
 
   const transactions = rawTransactions.map((tx: any) => ({
     id: tx._id,
@@ -94,6 +106,7 @@ export default async function AdminTransactionsPage({
     amount: tx.amount,
     status: tx.status === "PAID" ? "SUCCESS" : tx.status,
     payer: tx.customerName || tx.customerEmail || "Anonymous",
+    phone: tx.customerPhone || "N/A",
     event: tx.eventId?.title || "Unknown Event",
     date: tx.paidAt || tx.createdAt,
     // New fields for the "Units" column
@@ -109,10 +122,11 @@ export default async function AdminTransactionsPage({
   };
 
   // Helper for compact count formatting
-  const fmtCount = (count: number) => {
-    if (count >= 1_000_000) return `${parseFloat((count / 1_000_000).toFixed(2))}M`;
-    if (count >= 1_000) return `${parseFloat((count / 1_000).toFixed(2))}K`;
-    return count.toLocaleString();
+  const fmtCount = (count: number = 0) => {
+    const validCount = Number(count) || 0;
+    if (validCount >= 1_000_000) return `${parseFloat((validCount / 1_000_000).toFixed(2))}M`;
+    if (validCount >= 1_000) return `${parseFloat((validCount / 1_000).toFixed(2))}K`;
+    return validCount.toLocaleString();
   };
 
   return (

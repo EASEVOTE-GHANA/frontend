@@ -6,15 +6,28 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditBlogPage({ params }: { params: { id: string } }) {
+export default async function EditBlogPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   const apiClient = createServerApiClient(session?.accessToken);
   
-  const res = await apiClient.get(`/blogs/admin/${params.id}`).catch(() => null);
-  const blog = res?.data;
+  let blog = null;
+  let errorMsg = "";
+  try {
+    const res = await apiClient.get(`/blogs/admin/${params.id}`);
+    blog = res.data || res;
+  } catch (err: any) {
+    errorMsg = err.message || "Unknown error occurred";
+  }
 
   if (!blog) {
-    return notFound();
+    return (
+      <div className="p-10 text-center">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Failed to load blog</h2>
+        <p className="text-slate-600">ID requested: {params.id}</p>
+        <p className="text-slate-600 font-mono mt-2 bg-slate-100 p-2 rounded">Error: {errorMsg}</p>
+      </div>
+    );
   }
 
   return (

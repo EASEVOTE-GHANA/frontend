@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { clsx } from "clsx";
+import BlogActions from "@/components/super-admin/blogs/BlogActions";
 
 export const dynamic = "force-dynamic";
 
@@ -144,17 +145,7 @@ export default async function AdminBlogsPage() {
                                       </div>
                                   </td>
                                   <td className="px-8 py-6 text-right">
-                                      <div className="flex items-center justify-end gap-2">
-                                          <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all">
-                                              <Eye size={18} />
-                                          </button>
-                                          <Link href={`/dashboard/cms/blogs/edit/${blog._id}`} className="p-2 text-slate-400 hover:text-primary-600 hover:bg-white rounded-lg transition-all border border-transparent hover:border-primary-100">
-                                              <Edit3 size={18} />
-                                          </Link>
-                                          <button className="p-2 text-slate-400 hover:text-error-600 hover:bg-white rounded-lg transition-all">
-                                              <Trash2 size={18} />
-                                          </button>
-                                      </div>
+                                      <BlogActions blogId={blog._id} slug={blog.slug} status={blog.status} />
                                   </td>
                               </tr>
                           ))

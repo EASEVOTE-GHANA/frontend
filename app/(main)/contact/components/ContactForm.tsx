@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
 import toast from "react-hot-toast";
+import { api } from "@/lib/api-client";
 
 export default function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,13 +19,9 @@ export default function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast.success("Thank you! Your message has been sent successfully.");
-      
-      // Clear form
+      const res = await api.post("/inquiries", formData);
+      toast.success(res.message || "Thank you! Your message has been sent successfully.");
       setFormData({
         firstName: "",
         lastName: "",
@@ -32,8 +29,8 @@ export default function ContactForm() {
         subject: "General Enquiry",
         message: ""
       });
-    } catch (error) {
-      toast.error("Something went wrong. Please try again later.");
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
