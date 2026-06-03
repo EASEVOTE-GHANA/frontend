@@ -299,16 +299,8 @@ export function CategoriesManager({
       toast.error("Invalid format. Please use JPG, PNG, WebP or GIF.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image is too large. Max size is 5MB.");
-      return;
-    }
 
     const candidate = categories[catIndex].candidates[candIndex];
-
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("folder", "candidates");
 
     setUploadingImageCandIdx({ cat: catIndex, cand: candIndex });
     setError("");
@@ -320,7 +312,7 @@ export function CategoriesManager({
       }
 
       // 2. Upload new image
-      const data = await api.uploadFormData("/upload/image", formData);
+      const data = await api.uploadImage(file, "candidates");
       const imageUrl = data.url || data.imageUrl;
       const publicId = data.publicId;
 

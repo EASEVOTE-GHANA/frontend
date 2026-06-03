@@ -316,7 +316,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
     if (confirmed) {
       try {
         if (formData.imagePublicId) {
-          await api.deleteImage(formData.imagePublicId).catch(() => {});
+          await api.deleteImage(formData.imagePublicId).catch(() => { });
         }
         setFormData((prev) => ({ ...prev, imageUrl: "", imagePublicId: "" }));
         toast.success("Image removed");
@@ -335,21 +335,13 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
       toast.error("Invalid file type. Please upload a JPEG, PNG, or WEBP image.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File is too large. Maximum size allowed is 5MB.");
-      return;
-    }
 
-    const uploadForm = new FormData();
-    uploadForm.append("image", file);
-    uploadForm.append("folder", "events");
-
+    setIsUploadingImage(true);
     try {
-      setIsUploadingImage(true);
       if (formData.imagePublicId) {
-        await api.deleteImage(formData.imagePublicId).catch(() => {});
+        await api.deleteImage(formData.imagePublicId).catch(() => { });
       }
-      const res = await api.uploadFormData("/upload/image", uploadForm);
+      const res = await api.uploadImage(file, "events");
       setFormData((prev) => ({
         ...prev,
         imageUrl: res.url || res.imageUrl,
@@ -1002,7 +994,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
                   <p className="text-xs text-slate-500 mb-4 -mt-2">
                     Define the exact period when public nominations are accepted for this event.
                   </p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1">
                       <label className="block text-sm font-medium text-slate-700">

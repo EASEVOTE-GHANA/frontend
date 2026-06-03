@@ -123,10 +123,7 @@ export default function NominateClient({ event }: { event: any }) {
       let imageUrl = "";
 
       if (imageFile) {
-        const uploadData = new FormData();
-        uploadData.append("image", imageFile);
-        uploadData.append("folder", "candidates");
-        const uploadRes = await api.uploadFormData("/upload/image", uploadData);
+        const uploadRes = await api.uploadImage(imageFile, "candidates");
         imageUrl = uploadRes.data.url;
       } else {
         setErrorMsg("Please provide a photo of the nominee.");

@@ -32,18 +32,10 @@ export default function UserAvatarUpload({
       toast.error("Please select an image file.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5MB.");
-      return;
-    }
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("folder", "avatars");
-
-      const res = await api.uploadFormData("/upload/image", formData);
+      const res = await api.uploadImage(file, "avatars");
       const newUrl = res.url || res.imageUrl;
 
       // Update user profile with new avatar

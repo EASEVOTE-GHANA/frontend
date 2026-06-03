@@ -66,21 +66,9 @@ export default function NominationWrapper({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size is too large (max 5MB)");
-      return;
-    }
-
     setIsUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("image", file);
-      fd.append("folder", `nominations/${event.id}`);
-
-      const response = await api.uploadFormData<{ url: string; success: boolean }>(
-        "/upload/public",
-        fd
-      );
+      const response = await api.uploadImage(file, `nominations/${event.id}`, "/upload/public");
 
       if (response.success || response.url) {
         setPhotoUrl(response.url);

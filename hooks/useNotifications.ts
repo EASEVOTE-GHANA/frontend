@@ -50,7 +50,7 @@ export function useNotifications({ enabled = true, showToasts = true }: { enable
         title: n.title || "Notification",
         message: n.message || "",
         time: n.createdAt || new Date().toISOString(),
-        read: n.read || false,
+        read: n.isRead ?? n.read ?? false,
         type: n.type || "INFO",
       }));
 

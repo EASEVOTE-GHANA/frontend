@@ -98,37 +98,25 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Please select an image file."); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB."); return; }
-
+    
     setIsUploadingAvatar(true);
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("folder", "avatars");
-      const res = await api.uploadFormData("/upload/image", formData);
+      const res = await api.uploadImage(file, "avatars");
       const newUrl = res.url || res.imageUrl;
       // Update user profile with new avatar
       await api.put(`/users/${user.id}`, { ...profileData, avatar: newUrl });
-
-      // Update the next-auth session as well
-      await updateSession({ avatar: newUrl });
-
-      setProfileData((prev) => ({ ...prev, avatar: newUrl }));
+      toast.success("Avatar updated successfully!");
       router.refresh();
     } catch (err: any) {
-      toast.error(err.message || "Upload failed.");
+      toast.error(err.message || "Failed to upload avatar.");
     } finally {
       setIsUploadingAvatar(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = "";
     }
   };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("New passwords do not match. Please try again.");
-      return;
-    }
+    setIsLoading(true);
 
     try {
       if (!user.id) {

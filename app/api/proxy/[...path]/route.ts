@@ -78,7 +78,9 @@ async function handler(
       if (
         lowerKey !== "transfer-encoding" &&
         lowerKey !== "connection" &&
-        lowerKey !== "keep-alive"
+        lowerKey !== "keep-alive" &&
+        lowerKey !== "content-encoding" &&
+        lowerKey !== "content-length"
       ) {
         resHeaders.set(key, value);
       }

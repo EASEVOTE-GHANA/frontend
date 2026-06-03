@@ -437,10 +437,7 @@ export default function CreateEventPage() {
 
       // Upload image if a new file was selected
       if (formData.coverImageFile) {
-        const uploadForm = new FormData();
-        uploadForm.append("image", formData.coverImageFile);
-        uploadForm.append("folder", "events");
-        const uploadRes = await api.uploadFormData("/upload/image", uploadForm);
+        const uploadRes = await api.uploadImage(formData.coverImageFile, "events");
         imageUrl = uploadRes.imageUrl || uploadRes.url || imageUrl;
         imagePublicId = uploadRes.publicId || null;
       }

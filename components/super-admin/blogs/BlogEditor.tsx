@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { useModal } from "@/components/providers/ModalProvider";
-import { 
-  Save, 
-  Send, 
-  Image as ImageIcon, 
-  X, 
-  Type, 
-  Layout, 
-  Tag, 
+import {
+  Save,
+  Send,
+  Image as ImageIcon,
+  X,
+  Type,
+  Layout,
+  Tag,
   Eye,
   CheckCircle2,
   AlertCircle,
@@ -29,7 +29,7 @@ export default function BlogEditor({ blog }: { blog?: any }) {
   const [loadingAction, setLoadingAction] = useState<"DRAFT" | "PUBLISHED" | "DELETE" | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     title: blog?.title || "",
     content: blog?.content || "",
@@ -52,11 +52,7 @@ export default function BlogEditor({ blog }: { blog?: any }) {
 
     setUploadingImage(true);
     try {
-      const form = new FormData();
-      form.append("image", file);
-      form.append("folder", "blogs");
-
-      const res = await api.uploadFormData("/upload/image", form);
+      const res = await api.uploadImage(file, "blogs");
       const newUrl = res.url || res.imageUrl || res.data?.url || res.data?.imageUrl || "";
       setFormData(prev => ({ ...prev, coverImage: newUrl }));
       toast.success("Cover image uploaded");
@@ -128,221 +124,221 @@ export default function BlogEditor({ blog }: { blog?: any }) {
       {/* HEADER ACTIONS */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
         <div className="flex items-center gap-4">
-            <button 
-                onClick={() => router.back()} 
-                className="p-2 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-            >
-                <ArrowLeft size={18} />
-            </button>
-            <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
-                <Layout size={14} />
-                <span>Editorial Studio</span>
-                <span>•</span>
-                <span className={clsx(formData.status === "PUBLISHED" ? "text-emerald-600" : "text-amber-600")}>
-                    {formData.status}
-                </span>
-            </div>
+          <button
+            onClick={() => router.back()}
+            className="p-2 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-widest">
+            <Layout size={14} />
+            <span>Editorial Studio</span>
+            <span>•</span>
+            <span className={clsx(formData.status === "PUBLISHED" ? "text-emerald-600" : "text-amber-600")}>
+              {formData.status}
+            </span>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-3">
-            <button 
-                onClick={() => setPreviewMode(!previewMode)}
-                className="px-4 py-2 text-slate-600 font-bold text-sm flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
-            >
-                <Eye size={16} />
-                {previewMode ? "Exit Preview" : "Live Preview"}
-            </button>
 
-            {formData.status === "PUBLISHED" ? (
-                <>
-                    <button 
-                        disabled={loadingAction !== null}
-                        onClick={handleDelete}
-                        className="px-4 py-2 text-error-600 font-bold text-sm flex items-center gap-2 hover:bg-error-50 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    >
-                        {loadingAction === "DELETE" ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                        Delete
-                    </button>
-                    <button 
-                        disabled={loadingAction !== null}
-                        onClick={() => handleSubmit("PUBLISHED")}
-                        className="px-6 py-2 bg-primary-700 !text-white font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:bg-primary-800 rounded-xl transition-all shadow-md shadow-primary-50 cursor-pointer disabled:cursor-not-allowed"
-                    >
-                        {loadingAction === "PUBLISHED" ? <Loader2 size={16} className="animate-spin" /> : <Edit3 size={16} />}
-                        Save Changes
-                    </button>
-                </>
-            ) : (
-                <>
-                    <button 
-                        disabled={loadingAction !== null}
-                        onClick={() => handleSubmit("DRAFT")}
-                        className="px-4 py-2 border border-slate-200 text-slate-900 font-bold text-sm flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    >
-                        {loadingAction === "DRAFT" ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                        Save Draft
-                    </button>
-                    <button 
-                        disabled={loadingAction !== null}
-                        onClick={() => handleSubmit("PUBLISHED")}
-                        className="px-6 py-2 bg-primary-700 !text-white font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:bg-primary-800 rounded-xl transition-all shadow-md shadow-primary-50 cursor-pointer disabled:cursor-not-allowed"
-                    >
-                        {loadingAction === "PUBLISHED" ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                        Publish Now
-                    </button>
-                </>
-            )}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setPreviewMode(!previewMode)}
+            className="px-4 py-2 text-slate-600 font-bold text-sm flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
+          >
+            <Eye size={16} />
+            {previewMode ? "Exit Preview" : "Live Preview"}
+          </button>
+
+          {formData.status === "PUBLISHED" ? (
+            <>
+              <button
+                disabled={loadingAction !== null}
+                onClick={handleDelete}
+                className="px-4 py-2 text-error-600 font-bold text-sm flex items-center gap-2 hover:bg-error-50 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
+              >
+                {loadingAction === "DELETE" ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                Delete
+              </button>
+              <button
+                disabled={loadingAction !== null}
+                onClick={() => handleSubmit("PUBLISHED")}
+                className="px-6 py-2 bg-primary-700 !text-white font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:bg-primary-800 rounded-xl transition-all shadow-md shadow-primary-50 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {loadingAction === "PUBLISHED" ? <Loader2 size={16} className="animate-spin" /> : <Edit3 size={16} />}
+                Save Changes
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                disabled={loadingAction !== null}
+                onClick={() => handleSubmit("DRAFT")}
+                className="px-4 py-2 border border-slate-200 text-slate-900 font-bold text-sm flex items-center gap-2 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
+              >
+                {loadingAction === "DRAFT" ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Save Draft
+              </button>
+              <button
+                disabled={loadingAction !== null}
+                onClick={() => handleSubmit("PUBLISHED")}
+                className="px-6 py-2 bg-primary-700 !text-white font-black text-sm uppercase tracking-widest flex items-center gap-2 hover:bg-primary-800 rounded-xl transition-all shadow-md shadow-primary-50 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {loadingAction === "PUBLISHED" ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                Publish Now
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* MAIN FORM */}
-          <div className="lg:col-span-2 space-y-6">
-              {previewMode ? (
-                  <div className="prose prose-slate max-w-none bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
-                      {formData.coverImage && (
-                          <div className="w-full h-[300px] sm:h-[400px]">
-                              <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
-                          </div>
-                      )}
-                      <div className="p-8 sm:p-12">
-                          <div className="flex items-center gap-3 mb-6">
-                              <span className="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                  {formData.category}
-                              </span>
-                              <span className="text-xs text-slate-400 font-medium">{new Date().toLocaleDateString()}</span>
-                          </div>
-                          
-                          <h1 className="text-4xl font-black text-slate-900 mb-8 leading-tight">{formData.title || "Your compelling headline"}</h1>
-                          
-                          <div className="whitespace-pre-wrap text-lg leading-relaxed text-slate-700 mb-10 font-medium">
-                              {formData.content || "Your article content will appear here..."}
-                          </div>
-
-                          {formData.tags && (
-                              <div className="flex items-center gap-2 pt-6 border-t border-slate-100">
-                                  <Tag size={16} className="text-slate-400" />
-                                  <div className="flex flex-wrap gap-2">
-                                      {formData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean).map((tag: string) => (
-                                          <span key={tag} className="text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                              #{tag}
-                                          </span>
-                                      ))}
-                                  </div>
-                              </div>
-                          )}
-                      </div>
-                  </div>
-              ) : (
-                  <>
-                      <div className="space-y-4">
-                          <input 
-                            type="text"
-                            placeholder="Enter a compelling headline..."
-                            className="w-full text-4xl font-black text-slate-900 border-none outline-none focus:ring-0 placeholder:text-slate-200 bg-transparent"
-                            value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
-                          />
-                          <div className="h-px w-full bg-slate-100"></div>
-                      </div>
-                      <textarea 
-                        placeholder="Tell your story... (Markdown supported)"
-                        className="w-full min-h-[600px] text-lg leading-relaxed text-slate-700 border-none outline-none focus:ring-0 placeholder:text-slate-300 resize-none font-medium bg-transparent"
-                        value={formData.content}
-                        onChange={(e) => setFormData({...formData, content: e.target.value})}
-                      />
-                  </>
+        {/* MAIN FORM */}
+        <div className="lg:col-span-2 space-y-6">
+          {previewMode ? (
+            <div className="prose prose-slate max-w-none bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
+              {formData.coverImage && (
+                <div className="w-full h-[300px] sm:h-[400px]">
+                  <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                </div>
               )}
-          </div>
-
-          {/* SIDEBAR SETTINGS */}
-          <div className="space-y-6">
-              {/* COVER IMAGE */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                  <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      <ImageIcon size={14} /> Cover Appearance
-                  </h4>
-                  <div className="aspect-video bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center group relative overflow-hidden transition-all hover:bg-slate-100">
-                      {formData.coverImage ? (
-                          <>
-                            <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <button onClick={() => setFormData({...formData, coverImage: ""})} className="p-2 bg-white rounded-full text-error-600 shadow-lg">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                          </>
-                      ) : (
-                        <>
-                            <div className="p-3 bg-white rounded-xl shadow-sm mb-2 text-slate-300">
-                                {uploadingImage ? <Loader2 size={24} className="animate-spin" /> : <ImageIcon size={24} />}
-                            </div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                {uploadingImage ? "Uploading..." : "Upload Cover"}
-                            </span>
-                            <input 
-                                type="file" 
-                                accept="image/*"
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                onChange={handleImageUpload}
-                                disabled={uploadingImage}
-                            />
-                        </>
-                      )}
-                  </div>
-                  <p className="text-[10px] text-slate-400 text-center italic">Supported: JPEG, PNG • Ratio: 16:9</p>
-              </div>
-
-              {/* CLASSIFICATION */}
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                <div className="space-y-3">
-                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        <Tag size={14} /> Category
-                    </h4>
-                    <select 
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary-100 outline-none"
-                        value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                    >
-                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+              <div className="p-8 sm:p-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="px-3 py-1 bg-primary-50 text-primary-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                    {formData.category}
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium">{new Date().toLocaleDateString()}</span>
                 </div>
 
-                <div className="space-y-3">
-                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        <Type size={14} /> Tags (Comma separated)
-                    </h4>
-                    <input 
-                        type="text"
-                        placeholder="e.g. news, voting, guide"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary-100 outline-none"
-                        value={formData.tags}
-                        onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                    />
-                </div>
-              </div>
+                <h1 className="text-4xl font-black text-slate-900 mb-8 leading-tight">{formData.title || "Your compelling headline"}</h1>
 
-              {/* SEO PREVIEW CARD */}
-              <div className="bg-slate-900 rounded-3xl p-6 text-white overflow-hidden relative group">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl"></div>
-                  <div className="relative z-10 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary-400">Search Engine View</span>
-                        <CheckCircle2 size={14} className="text-emerald-400" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-bold truncate">{formData.title || "Your Page Title"}</p>
-                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                            {formData.content || "This is how your article will look on Google and social media feeds."}
-                        </p>
-                      </div>
-                      <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase tracking-tighter text-slate-500">Slug: {formData.title.toLowerCase().replace(/\s+/g, '-').slice(0, 20)}...</span>
-                          <AlertCircle size={14} className="text-slate-500" />
-                      </div>
+                <div className="whitespace-pre-wrap text-lg leading-relaxed text-slate-700 mb-10 font-medium">
+                  {formData.content || "Your article content will appear here..."}
+                </div>
+
+                {formData.tags && (
+                  <div className="flex items-center gap-2 pt-6 border-t border-slate-100">
+                    <Tag size={16} className="text-slate-400" />
+                    <div className="flex flex-wrap gap-2">
+                      {formData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean).map((tag: string) => (
+                        <span key={tag} className="text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+                )}
               </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Enter a compelling headline..."
+                  className="w-full text-4xl font-black text-slate-900 border-none outline-none focus:ring-0 placeholder:text-slate-200 bg-transparent"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
+                <div className="h-px w-full bg-slate-100"></div>
+              </div>
+              <textarea
+                placeholder="Tell your story... (Markdown supported)"
+                className="w-full min-h-[600px] text-lg leading-relaxed text-slate-700 border-none outline-none focus:ring-0 placeholder:text-slate-300 resize-none font-medium bg-transparent"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              />
+            </>
+          )}
+        </div>
+
+        {/* SIDEBAR SETTINGS */}
+        <div className="space-y-6">
+          {/* COVER IMAGE */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+              <ImageIcon size={14} /> Cover Appearance
+            </h4>
+            <div className="aspect-video bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center group relative overflow-hidden transition-all hover:bg-slate-100">
+              {formData.coverImage ? (
+                <>
+                  <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button onClick={() => setFormData({ ...formData, coverImage: "" })} className="p-2 bg-white rounded-full text-error-600 shadow-lg">
+                      <X size={20} />
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-3 bg-white rounded-xl shadow-sm mb-2 text-slate-300">
+                    {uploadingImage ? <Loader2 size={24} className="animate-spin" /> : <ImageIcon size={24} />}
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {uploadingImage ? "Uploading..." : "Upload Cover"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImage}
+                  />
+                </>
+              )}
+            </div>
+            <p className="text-[10px] text-slate-400 text-center italic">Supported: JPEG, PNG • Ratio: 16:9</p>
           </div>
+
+          {/* CLASSIFICATION */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <div className="space-y-3">
+              <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <Tag size={14} /> Category
+              </h4>
+              <select
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary-100 outline-none"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              >
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <Type size={14} /> Tags (Comma separated)
+              </h4>
+              <input
+                type="text"
+                placeholder="e.g. news, voting, guide"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary-100 outline-none"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {/* SEO PREVIEW CARD */}
+          <div className="bg-slate-900 rounded-3xl p-6 text-white overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl"></div>
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-primary-400">Search Engine View</span>
+                <CheckCircle2 size={14} className="text-emerald-400" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-bold truncate">{formData.title || "Your Page Title"}</p>
+                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                  {formData.content || "This is how your article will look on Google and social media feeds."}
+                </p>
+              </div>
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                <span className="text-[9px] font-black uppercase tracking-tighter text-slate-500">Slug: {formData.title.toLowerCase().replace(/\s+/g, '-').slice(0, 20)}...</span>
+                <AlertCircle size={14} className="text-slate-500" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

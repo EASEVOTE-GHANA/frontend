@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { api } from "@/lib/api-client";
@@ -76,12 +76,8 @@ export default function BannerManager({ initialBanners }: BannerManagerProps) {
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("folder", "banners");
-
     try {
-      const res = await api.uploadFormData("/upload/image", formData);
+      const res = await api.uploadImage(file, "banners");
       setFormData((prev) => ({ ...prev, imageUrl: res.url }));
       toast.success("Image uploaded successfully");
     } catch (error) {

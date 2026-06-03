@@ -71,6 +71,36 @@ class ApiClient {
     return data;
   }
 
+
+
+  /**
+   * Helper to upload an image. Automatically compresses it client-side to save bandwidth.
+   */
+  async uploadImage(file: File, folder: string = "general", path: string = "/upload/image"): Promise<any> {
+    let fileToUpload = file;
+    
+    // Only compress on the client side if it's an image
+    if (file.type.startsWith("image/") && typeof window !== "undefined") {
+      try {
+        const imageCompression = (await import("browser-image-compression")).default;
+        const options = {
+          maxSizeMB: 1.5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        };
+        fileToUpload = await imageCompression(file, options);
+      } catch (error) {
+        console.warn("Client-side image compression failed, using original file", error);
+      }
+    }
+
+    const formData = new FormData();
+    formData.append("image", fileToUpload, fileToUpload.name);
+    formData.append("folder", folder);
+
+    return this.uploadFormData(path, formData);
+  }
+
   /**
    * Specific helper for deleting images as it requires a JSON body.
    */
