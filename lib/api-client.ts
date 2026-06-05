@@ -33,7 +33,17 @@ class ApiClient {
       if (res.status === 401 && typeof window !== "undefined") {
         window.location.href = "/sign-in?callbackUrl=" + window.location.pathname;
       }
-      throw new Error(data.message || data.error || `HTTP ${res.status}`);
+      
+      let errorMessage = data.message || data.error || `HTTP ${res.status}`;
+      
+      // Sanitize ugly unhandled server errors into friendly ones
+      if (typeof errorMessage === 'string') {
+        if (errorMessage.includes("AxiosError") || errorMessage.includes("ETIMEDOUT") || errorMessage.includes("ECONNREFUSED") || res.status === 500) {
+          errorMessage = "Our services are currently experiencing a brief hiccup. Please try again in a few moments.";
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
 
     return data;
@@ -65,7 +75,13 @@ class ApiClient {
         window.location.href =
           "/sign-in?callbackUrl=" + window.location.pathname;
       }
-      throw new Error(data.message || data.error || `HTTP ${res.status}`);
+      let errorMessage = data.message || data.error || `HTTP ${res.status}`;
+      if (typeof errorMessage === 'string') {
+        if (errorMessage.includes("AxiosError") || errorMessage.includes("ETIMEDOUT") || errorMessage.includes("ECONNREFUSED") || res.status === 500) {
+          errorMessage = "Upload encountered a brief network hiccup. Please try again.";
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     return data;
@@ -189,7 +205,13 @@ export function createServerApiClient(token?: string) {
         .catch(() => ({ message: "Request failed" }));
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || `HTTP ${res.status}`);
+        let errorMessage = data.message || data.error || `HTTP ${res.status}`;
+        if (typeof errorMessage === 'string') {
+          if (errorMessage.includes("AxiosError") || errorMessage.includes("ETIMEDOUT") || errorMessage.includes("ECONNREFUSED") || res.status === 500) {
+            errorMessage = "Our services are currently experiencing a brief hiccup. Please try again in a few moments.";
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       return data;

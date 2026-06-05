@@ -132,10 +132,16 @@ export default function TicketScannerPage() {
           },
         });
       } else {
+        let errorMsg = data.error || data.message || "Unknown error";
+        if (typeof errorMsg === 'string') {
+          if (errorMsg.includes("AxiosError") || errorMsg.includes("ETIMEDOUT") || errorMsg.includes("ECONNREFUSED") || response.status === 500) {
+            errorMsg = "Network hiccup. Please try again.";
+          }
+        }
         setResult({
           status: "error",
           title: "Invalid Ticket",
-          message: data.error || "Unknown error",
+          message: errorMsg,
         });
       }
     } catch (error) {

@@ -76,12 +76,16 @@ export default function SignUpPage() {
             "Account created! Please check your email to verify your account.",
         });
       } else {
+        let errorMsg = result.message || result.error || "Registration failed. Please try again.";
+        if (typeof errorMsg === 'string') {
+          if (errorMsg.includes("AxiosError") || errorMsg.includes("ETIMEDOUT") || errorMsg.includes("ECONNREFUSED") || res.status === 500) {
+            errorMsg = "We are experiencing a temporary network hiccup. Please try again shortly.";
+          }
+        }
+
         setState({
           success: false,
-          message:
-            result.message ||
-            result.error ||
-            "Registration failed. Please try again.",
+          message: errorMsg,
           errors: result.errors,
         });
       }

@@ -60,9 +60,15 @@ export default function SettingsForm({
       } else {
         // Rollback on error
         setValue(item.value);
+        let errorMsg = res.message || res.error || "Failed to save setting. Rolled back to previous value.";
+        if (typeof errorMsg === 'string') {
+          if (errorMsg.includes("AxiosError") || errorMsg.includes("ETIMEDOUT") || errorMsg.includes("ECONNREFUSED") || response.status === 500) {
+            errorMsg = "We are experiencing a temporary network hiccup. Please try again shortly.";
+          }
+        }
         modal.alert({
           title: "Save Failed",
-          message: res.message || res.error || "Failed to save setting. Rolled back to previous value.",
+          message: errorMsg,
           variant: "danger"
         });
       }

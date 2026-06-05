@@ -148,6 +148,11 @@ export default function ReportsClient() {
           const jsonErr = await res.json();
           errorMessage = jsonErr.message || errorMessage;
         } catch {}
+        if (typeof errorMessage === 'string') {
+          if (errorMessage.includes("AxiosError") || errorMessage.includes("ETIMEDOUT") || errorMessage.includes("ECONNREFUSED") || res.status === 500) {
+            errorMessage = "We are experiencing a temporary network hiccup. Please try again shortly.";
+          }
+        }
         throw new Error(errorMessage);
       }
 

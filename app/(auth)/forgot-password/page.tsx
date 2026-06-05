@@ -26,9 +26,13 @@ export default function ForgotPasswordPage() {
       if (res.ok) {
         setSuccess(true);
       } else {
-        setError(
-          data.message || data.error || "Request failed. Please try again.",
-        );
+        let errorMsg = data.message || data.error || "Request failed. Please try again.";
+        if (typeof errorMsg === 'string') {
+          if (errorMsg.includes("AxiosError") || errorMsg.includes("ETIMEDOUT") || errorMsg.includes("ECONNREFUSED") || res.status === 500) {
+            errorMsg = "We are experiencing a temporary network hiccup. Please try again shortly.";
+          }
+        }
+        setError(errorMsg);
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");

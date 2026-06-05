@@ -44,11 +44,13 @@ function VerifyEmailContent() {
         setTimeout(() => router.push("/sign-in"), 3000);
       } else {
         setStatus("error");
-        setMessage(
-          data.message ||
-            data.error ||
-            "Verification failed. The link may have expired.",
-        );
+        let errorMsg = data.message || data.error || "Verification failed. The link may have expired.";
+        if (typeof errorMsg === 'string') {
+          if (errorMsg.includes("AxiosError") || errorMsg.includes("ETIMEDOUT") || errorMsg.includes("ECONNREFUSED") || res.status === 500) {
+            errorMsg = "We are experiencing a temporary network hiccup. Please try again shortly.";
+          }
+        }
+        setMessage(errorMsg);
       }
     } catch {
       setStatus("error");
