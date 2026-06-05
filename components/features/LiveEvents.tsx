@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -73,7 +73,7 @@ export default function LiveEvents({ events }: { events: any[] }) {
   return (
     <section id="voting" className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 gap-6 w-full">
           <LiveEventsHeader />
 
           <EventFilters

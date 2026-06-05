@@ -35,7 +35,7 @@ export default async function DeletedEventsPage() {
             Deleted Events (Trash)
           </h1>
           <p className="text-slate-500">
-            View and restore soft-deleted events.
+            View and restore removed events.
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 export default function LiveEventsHeader() {
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-2">
+    <div className="flex flex-col items-center md:items-start text-center md:text-left">
+      <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
         <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
         <span className="text-secondary-600 font-bold uppercase text-sm tracking-wide">
           Events Happening Now

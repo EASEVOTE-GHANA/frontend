@@ -6,9 +6,19 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  RefreshCcw,
+  Trash2,
+  Mail,
+  Eye,
+  ArchiveRestore,
+  Trash,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
+import { useTransition, useState } from "react";
+import toast from "react-hot-toast";
+import { useModal } from "@/components/providers/ModalProvider";
+import { api } from "@/lib/api-client";
 
 // Updated Type
 type Organizer = {
@@ -62,6 +72,93 @@ export default function OrganizersTable({
   organizers: Organizer[];
 }) {
   const router = useRouter();
+  const modal = useModal();
+  const [isPending, startTransition] = useTransition();
+  const [activeTab, setActiveTab] = useState<"ACTIVE" | "DELETED">("ACTIVE");
+
+  const filteredOrganizers = organizers.filter(org =>
+    activeTab === "ACTIVE" ? !org.isDeleted : org.isDeleted
+  );
+
+  const handleDelete = async (orgId: string, name: string) => {
+    const confirmed = await modal.confirm({
+      title: "Remove Organizer",
+      message: `Are you sure you want to remove organizer "${name}"?`,
+      variant: "danger",
+      confirmText: "Remove Organizer",
+    });
+    if (!confirmed) return;
+
+    try {
+      await toast.promise(api.delete(`/users/${orgId}`), {
+        loading: "Removing organizer...",
+        success: "Organizer removed successfully",
+        error: (err: any) => err.message || "Failed to delete organizer",
+      });
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      // Error is handled by toast
+    }
+  };
+
+  const handlePermanentDelete = async (orgId: string, name: string) => {
+    const confirmed = await modal.confirm({
+      title: "Permanently Delete Organizer",
+      message: `Are you sure you want to PERMANENTLY delete organizer "${name}"? This action absolutely cannot be undone.`,
+      variant: "danger",
+      confirmText: "Delete Permanently",
+    });
+    if (!confirmed) return;
+
+    try {
+      await toast.promise(api.delete(`/users/${orgId}/permanent`), {
+        loading: "Permanently deleting organizer...",
+        success: "Organizer permanently deleted",
+        error: (err: any) => err.message || "Failed to permanently delete organizer",
+      });
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      // Error is handled by toast
+    }
+  };
+
+  const handleRestore = async (orgId: string, name: string) => {
+    const confirmed = await modal.confirm({
+      title: "Restore Organizer",
+      message: `Are you sure you want to restore organizer "${name}"?`,
+      confirmText: "Restore Organizer",
+    });
+    if (!confirmed) return;
+
+    try {
+      await toast.promise(api.patch(`/users/${orgId}/restore`), {
+        loading: "Restoring organizer...",
+        success: "Organizer restored successfully",
+        error: (err: any) => err.message || "Failed to restore organizer",
+      });
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch (err) {
+      // Error is handled by toast
+    }
+  };
+
+  const handleResendVerification = async (orgId: string) => {
+    try {
+      await toast.promise(api.post(`/users/${orgId}/resend-verification`), {
+        loading: "Sending email...",
+        success: "Verification email resent successfully",
+        error: (err: any) => err.message || "Failed to resend verification",
+      });
+    } catch (err) {
+      // Error is handled by toast
+    }
+  };
 
   const columns = [
     {
@@ -176,40 +273,128 @@ export default function OrganizersTable({
   ];
 
   return (
-    <DataTable
-      data={organizers}
-      columns={columns}
-      searchable={true}
-      searchPlaceholder="Search organizers..."
-      filters={[
-        {
-          label: "Status",
-          key: "userStatus",
-          options: [
-            { label: "Active", value: "ACTIVE" },
-            { label: "Pending", value: "PENDING" },
-            { label: "Disabled", value: "DISABLED" },
-          ],
-        },
-        {
-          label: "Archived",
-          key: "isDeleted",
-          options: [
-            { label: "Active Only", value: "false" },
-            { label: "Deleted Only", value: "true" },
-          ],
-        },
-        {
-          label: "Verification",
-          key: "verificationStatus",
-          options: [
-            { label: "Verified", value: "VERIFIED" },
-            { label: "Pending", value: "PENDING" },
-            { label: "Rejected", value: "REJECTED" },
-          ],
-        },
-      ]}
-      onRowClick={(org) => router.push(`/dashboard/organizers/${org.id}`)}
-    />
+    <div>
+      <div className="flex border-b border-slate-200">
+        <button
+          onClick={() => setActiveTab("ACTIVE")}
+          className={clsx(
+            "px-6 py-3 text-sm font-medium border-b-2 transition-colors",
+            activeTab === "ACTIVE"
+              ? "border-primary-600 text-primary-600 bg-primary-50/50"
+              : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+          )}
+        >
+          Active Organizers
+        </button>
+        <button
+          onClick={() => setActiveTab("DELETED")}
+          className={clsx(
+            "px-6 py-3 text-sm font-medium border-b-2 transition-colors",
+            activeTab === "DELETED"
+              ? "border-red-600 text-red-600 bg-red-50/50"
+              : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+          )}
+        >
+          Deleted Organizers
+        </button>
+      </div>
+      <DataTable
+        data={filteredOrganizers}
+        columns={columns}
+        searchable={true}
+        searchPlaceholder="Search organizers..."
+        filters={[
+          {
+            label: "Status",
+            key: "userStatus",
+            options: [
+              { label: "Active", value: "ACTIVE" },
+              { label: "Pending", value: "PENDING" },
+              { label: "Disabled", value: "DISABLED" },
+            ],
+          },
+          {
+            label: "Verification",
+            key: "verificationStatus",
+            options: [
+              { label: "Verified", value: "VERIFIED" },
+              { label: "Pending", value: "PENDING" },
+              { label: "Rejected", value: "REJECTED" },
+            ],
+          },
+        ]}
+        actions={(org) => (
+          <div className="flex items-center gap-1">
+            {!org.isDeleted && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/dashboard/organizers/${org.id}`);
+                }}
+                className="p-2 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all duration-150"
+                title="View Details"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+            )}
+
+            {!org.isDeleted && org.verificationStatus !== "VERIFIED" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleResendVerification(org.id);
+                }}
+                disabled={isPending}
+                className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                title="Resend Verification Email"
+              >
+                <Mail className="w-4 h-4" />
+              </button>
+            )}
+
+            {org.isDeleted ? (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRestore(org.id, org.name);
+                  }}
+                  disabled={isPending}
+                  className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                  title="Restore Organizer"
+                >
+                  <ArchiveRestore className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePermanentDelete(org.id, org.name);
+                  }}
+                  disabled={isPending}
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Permanently Delete"
+                >
+                  <Trash className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(org.id, org.name);
+                }}
+                disabled={isPending}
+                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Remove Organizer"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
+        rowClassName={(org) => org.isDeleted ? "bg-slate-50/80 text-slate-500" : ""}
+        onRowClick={(org) => !org.isDeleted && router.push(`/dashboard/organizers/${org.id}`)}
+      />
+    </div>
   );
 }

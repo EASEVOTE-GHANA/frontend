@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminOrganizersPage() {
   const session = await getServerSession(authOptions);
   const apiClient = createServerApiClient(session?.accessToken);
-  const response = await apiClient.get("/users?withStats=true").catch(() => ({ data: [] }));
+  const response = await apiClient.get("/users?withStats=true&includeDeleted=true").catch(() => ({ data: [] }));
   const rawUsers = response.data || (Array.isArray(response) ? response : []);
 
   const organizers = rawUsers

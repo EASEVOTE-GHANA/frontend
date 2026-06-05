@@ -12,7 +12,7 @@ export default async function AdminManagementPage() {
   const apiClient = createServerApiClient(
     session?.accessToken as string | undefined,
   );
-  const rawUsers = await apiClient.get("/users").catch(() => ({ data: [] }));
+  const rawUsers = await apiClient.get("/users?includeDeleted=true").catch(() => ({ data: [] }));
   const users = Array.isArray(rawUsers) ? rawUsers : rawUsers?.data || [];
 
   const admins = users
