@@ -60,8 +60,8 @@ export default function UnifiedDashboardLayout({
         return { ...item, badge: total > 0 ? total : undefined };
       }
 
-      // SUPER_ADMIN — split badges: events on "All Events", orgs on "Organizers"
-      if (role === "SUPER_ADMIN") {
+      // ADMIN & SUPER_ADMIN — split badges: events on "All Events", orgs on "Organizers"
+      if (role === "SUPER_ADMIN" || role === "ADMIN") {
         if (item.name === "All Events") {
           return {
             ...item,
@@ -69,7 +69,10 @@ export default function UnifiedDashboardLayout({
           };
         }
         if (item.name === "Organizers") {
-          return item;
+          return {
+            ...item,
+            badge: pendingOrganizersCount > 0 ? pendingOrganizersCount : undefined,
+          };
         }
       }
 

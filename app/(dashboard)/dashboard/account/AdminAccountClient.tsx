@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { User, Lock, Mail, Phone, Camera, Loader2, Save, CheckCircle2, ArrowLeft } from "lucide-react";
@@ -30,7 +30,7 @@ export default function AdminAccountClient({ user }: AdminAccountClientProps) {
 
 function AdminAccountContent({ user }: AdminAccountClientProps) {
   const router = useRouter();
-  const { update: updateSession } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
   const modal = useModal();
@@ -49,6 +49,13 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
     phone: user.phone || "",
     avatar: user.avatar || "",
   });
+
+  // Sync avatar with session to prevent stale DB state from breaking the UI after a refresh
+  useEffect(() => {
+    if (session?.user?.avatar && session.user.avatar !== profileData.avatar) {
+      setProfileData((prev) => ({ ...prev, avatar: session.user.avatar as string }));
+    }
+  }, [session?.user?.avatar]);
 
   // Password Form State
   const [passwordData, setPasswordData] = useState({
@@ -74,6 +81,7 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
         businessName: profileData.businessName,
         email: profileData.email,
         phone: profileData.phone,
+        phoneNumber: profileData.phone, // fallback for backend schema
         avatar: profileData.avatar,
       });
 
@@ -82,7 +90,6 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
         await updateSession({ avatar: profileData.avatar, name: profileData.fullName });
 
         toast.success("Profile updated successfully!");
-        router.refresh();
       } else {
         toast.error(result.message || result.error || "Failed to update profile");
       }
@@ -103,10 +110,21 @@ function AdminAccountContent({ user }: AdminAccountClientProps) {
     try {
       const res = await api.uploadImage(file, "avatars");
       const newUrl = res.url || res.imageUrl;
+      
+      const updatedProfile = { 
+        ...profileData, 
+        avatar: newUrl,
+        phoneNumber: profileData.phone // fallback for backend schema
+      };
+
       // Update user profile with new avatar
-      await api.put(`/users/${user.id}`, { ...profileData, avatar: newUrl });
+      await api.put(`/users/${user.id}`, updatedProfile);
+      
+      // Update local state and session to render the image immediately
+      setProfileData(updatedProfile);
+      await updateSession({ avatar: newUrl });
+
       toast.success("Avatar updated successfully!");
-      router.refresh();
     } catch (err: any) {
       toast.error(err.message || "Failed to upload avatar.");
     } finally {

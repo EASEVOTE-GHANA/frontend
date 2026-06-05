@@ -25,7 +25,7 @@ export default async function AdminAccountPage() {
         fullName: rawUser.fullName || "",
         businessName: rawUser.businessName || "",
         email: rawUser.email,
-        phone: rawUser.phone || null,
+        phone: rawUser.phone || rawUser.phoneNumber || null,
         avatar: rawUser.avatar || null,
         role: rawUser.role || "ADMIN",
       }
