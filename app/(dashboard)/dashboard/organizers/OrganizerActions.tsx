@@ -93,7 +93,7 @@ export default function OrganizerActions({
         await api.delete(`/users/${organizer.user.id}`);
         await modal.alert({
           title: "Organizer Deleted",
-          message: "Organizer has been soft-deleted successfully.",
+          message: "Organizer has been removed successfully.",
           variant: "info",
         });
         window.location.reload();

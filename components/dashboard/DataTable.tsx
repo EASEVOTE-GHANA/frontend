@@ -38,6 +38,7 @@ type DataTableProps<T> = {
   emptyMessage?: string;
   actions?: (item: T, index: number) => React.ReactNode;
   filters?: FilterOption[];
+  rowClassName?: (item: T) => string;
 };
 
 export function DataTable<T extends { id: string | number }>({
@@ -52,6 +53,7 @@ export function DataTable<T extends { id: string | number }>({
   actions,
   searchKey,
   filters,
+  rowClassName,
 }: DataTableProps<T> & { searchKey?: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
@@ -254,6 +256,7 @@ export function DataTable<T extends { id: string | number }>({
                   className={clsx(
                     "hover:bg-slate-50 transition-colors",
                     onRowClick && "cursor-pointer",
+                    rowClassName?.(item)
                   )}
                   onClick={() => onRowClick?.(item)}
                 >
