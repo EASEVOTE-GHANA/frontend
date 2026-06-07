@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
 import { useModal } from "@/components/providers/ModalProvider";
@@ -40,6 +40,30 @@ export default function BlogEditor({ blog }: { blog?: any }) {
   });
 
   const categories = ["NEWS", "TUTORIAL", "ANNOUNCEMENT", "GUIDE"];
+
+  useEffect(() => {
+    // Only load draft if creating a new blog
+    if (!blog) {
+      const savedDraft = sessionStorage.getItem("blogDraft");
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          if (parsed.formData) {
+            setFormData(prev => ({ ...prev, ...parsed.formData }));
+          }
+        } catch (e) {
+          console.error("Failed to parse blog draft", e);
+        }
+      }
+    }
+  }, [blog]);
+
+  useEffect(() => {
+    if (!blog) {
+      const draft = { formData };
+      sessionStorage.setItem("blogDraft", JSON.stringify(draft));
+    }
+  }, [formData, blog]);
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -86,6 +110,7 @@ export default function BlogEditor({ blog }: { blog?: any }) {
       } else {
         const newBlog = await api.post("/blogs/admin", payload);
         toast.success("Article created successfully");
+        sessionStorage.removeItem("blogDraft");
         // Redirect to the newly created blog's edit page to prevent duplicate creations
         router.push(`/dashboard/cms/blogs/edit/${newBlog._id || newBlog.data?._id}`);
       }

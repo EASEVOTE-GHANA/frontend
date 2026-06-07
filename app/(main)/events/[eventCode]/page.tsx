@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import EventDetailClient from "./EventDetailClient";
 import { getServerSession } from "next-auth";
@@ -17,6 +17,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const apiClient = createServerApiClient();
   const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
   const event = res?.data || res?.event || res;
+
+  if (!event) return { title: "Event | EaseVote Ghana" };
+
+  // Intercept old MongoDB IDs and force a redirect to the clean eventCode URL
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
+  if (isObjectId && event.eventCode) {
+    if (event.type === "TICKETING") {
+      redirect(`/events/tickets/${event.eventCode}`);
+    } else {
+      redirect(`/events/${event.eventCode}`);
+    }
+  }
+
+  if (event.type === "TICKETING") {
+    redirect(`/events/tickets/${event.eventCode || eventCode}`);
+  }
+
   if (!event?.title) return { title: "Event | EaseVote Ghana" };
 
   const description = event.description || `Vote, nominate, and participate in ${event.title} on EaseVote.`;
@@ -63,6 +80,11 @@ export default async function EventDetailPage({ params }: PageProps) {
   }
 
   if (!event) return notFound();
+
+  // Redirect TICKETING-only events to the proper ticketing route
+  if (event.type === "TICKETING") {
+    redirect(`/events/tickets/${event.eventCode || eventCode}`);
+  }
 
   // Permissions Check for Visibility
   let isAuthorized = false;

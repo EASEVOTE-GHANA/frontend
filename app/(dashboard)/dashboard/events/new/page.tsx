@@ -166,7 +166,40 @@ export default function CreateEventPage() {
       votingStartDate: dateString,
       votingEndDate: dateString,
     }));
+    
+    // Load from sessionStorage
+    const savedDraft = sessionStorage.getItem("newEventDraft");
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed.formData) {
+          setFormData((prev) => ({ ...prev, ...parsed.formData }));
+        }
+        if (parsed.ticketTypes?.length) setTicketTypes(parsed.ticketTypes);
+        if (parsed.categories?.length) setCategories(parsed.categories);
+        if (parsed.nominationSettings) setNominationSettings(parsed.nominationSettings);
+        if (parsed.currentStep) setCurrentStep(parsed.currentStep);
+      } catch (e) {
+        console.error("Failed to parse event draft", e);
+      }
+    }
   }, []);
+
+  // Save to sessionStorage on change
+  useEffect(() => {
+    const { coverImageFile, coverImage, ...safeFormData } = formData;
+    const draft = {
+      formData: {
+        ...safeFormData,
+        coverImage: coverImage.startsWith('blob:') ? '' : coverImage
+      },
+      ticketTypes,
+      categories,
+      nominationSettings,
+      currentStep,
+    };
+    sessionStorage.setItem("newEventDraft", JSON.stringify(draft));
+  }, [formData, ticketTypes, categories, nominationSettings, currentStep]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -564,6 +597,7 @@ export default function CreateEventPage() {
         }
       }
 
+      sessionStorage.removeItem("newEventDraft");
       router.push(`/dashboard/events/${eventCode || eventId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create event");

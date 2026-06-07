@@ -442,6 +442,8 @@ export function AdminEventManager({
           <div className="shrink-0">
             <AdminEventActions
               eventId={event.id}
+              eventCode={event.eventCode}
+              eventType={event.type}
               status={event.status}
               role={role}
               onStatusChange={setCurrentStatus}

@@ -286,6 +286,39 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
     }
   }, [eventId]);
 
+  // Load draft for editing an event
+  useEffect(() => {
+    if (!eventId) return;
+    const savedDraft = sessionStorage.getItem(`eventEditDraft-${eventId}`);
+    if (savedDraft && !loading) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed.formData) {
+          setFormData((prev) => ({ ...prev, ...parsed.formData }));
+        }
+        if (parsed.ticketTypes?.length) {
+          setTicketTypes(parsed.ticketTypes);
+        }
+        toast("Recovered unsaved edits from your browser", {
+          icon: "🔄",
+          duration: 3000,
+        });
+      } catch (e) {
+        console.error("Failed to parse event edit draft", e);
+      }
+    }
+  }, [eventId, loading]);
+
+  // Save draft for editing
+  useEffect(() => {
+    if (loading || !eventId) return;
+    const draft = {
+      formData,
+      ticketTypes,
+    };
+    sessionStorage.setItem(`eventEditDraft-${eventId}`, JSON.stringify(draft));
+  }, [formData, ticketTypes, eventId, loading]);
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -465,6 +498,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
 
       toast.success("Event updated successfully!");
       setDeletedTicketTypeIds([]);
+      sessionStorage.removeItem(`eventEditDraft-${eventId}`);
       router.refresh();
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || "Failed to update event";

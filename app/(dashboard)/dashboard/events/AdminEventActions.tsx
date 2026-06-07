@@ -9,12 +9,14 @@ import toast from "react-hot-toast";
 
 type Props = {
   eventId: string;
+  eventCode?: string;
+  eventType?: string;
   status: string;
   role?: "ADMIN" | "SUPER_ADMIN" | "ORGANIZER";
   onStatusChange?: (status: string) => void;
 };
 
-export default function AdminEventActions({ eventId, status, role, onStatusChange }: Props) {
+export default function AdminEventActions({ eventId, eventCode, eventType, status, role, onStatusChange }: Props) {
   const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
   const isOrganizer = role === "ORGANIZER";
   const router = useRouter();
@@ -25,7 +27,9 @@ export default function AdminEventActions({ eventId, status, role, onStatusChang
 
   const handleShare = async () => {
     try {
-      const url = `${window.location.origin}/events/${eventId}`;
+      const isTicketing = eventType === "TICKETING";
+      const basePath = isTicketing ? "/events/tickets" : "/events";
+      const url = `${window.location.origin}${basePath}/${eventCode || eventId}`;
       await navigator.clipboard.writeText(url);
       toast.success("Link copied to clipboard!");
     } catch (err) {

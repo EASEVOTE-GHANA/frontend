@@ -19,6 +19,23 @@ export async function generateMetadata({
   const apiClient = createServerApiClient();
   const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
   const event = res?.data || res?.event || res;
+
+  if (!event) return { title: "Buy Tickets | EaseVote Ghana" };
+
+  // Intercept old MongoDB IDs and force a redirect to the clean eventCode URL
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
+  if (isObjectId && event.eventCode) {
+    if (event.type === "VOTING") {
+      redirect(`/events/${event.eventCode}`);
+    } else {
+      redirect(`/events/tickets/${event.eventCode}`);
+    }
+  }
+
+  if (event.type === "VOTING") {
+    redirect(`/events/${event.eventCode || eventCode}`);
+  }
+
   const title = event?.title ? `Tickets — ${event.title} | EaseVote` : "Buy Tickets | EaseVote Ghana";
   const image = event?.imageUrl || event?.coverImage;
   return {
@@ -30,7 +47,7 @@ export async function generateMetadata({
 }
 import { EventShareButton } from "@/components/features/events/EventShareButton";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createServerApiClient } from "@/lib/api-client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -52,6 +69,11 @@ export default async function TicketEventDetailPage({
   event = res?.data || res?.event || res;
 
   if (!event) return notFound();
+
+  // Redirect VOTING-only events to the proper voting route
+  if (event.type === "VOTING") {
+    redirect(`/events/${event.eventCode || eventCode}`);
+  }
 
   // Preview Mode Logic
   let showPreviewBanner = false;
