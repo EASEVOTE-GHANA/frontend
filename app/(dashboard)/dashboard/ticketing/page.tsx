@@ -83,6 +83,7 @@ export default async function AdminTicketingPage(props: Props) {
         ticketsSold: eventTicketsSold,
         revenue: eventRevenue,
       },
+      imageUrl: e.imageUrl || e.coverImage || e.image || "",
     };
   });
 

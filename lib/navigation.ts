@@ -57,6 +57,7 @@ export const superAdminNavigation: NavigationSection[] = [
         children: [
           { name: "Voting Events", href: "/dashboard/voting" },
           { name: "Ticketing", href: "/dashboard/ticketing" },
+          { name: "Nominations", href: "/dashboard/nominations" },
           { name: "Deleted Events", href: "/dashboard/events/deleted" },
         ],
       },
@@ -122,6 +123,7 @@ export const adminNavigation: NavigationSection[] = [
         children: [
           { name: "Voting Events", href: "/dashboard/voting" },
           { name: "Ticketing Events", href: "/dashboard/ticketing" },
+          { name: "Nominations", href: "/dashboard/nominations" },
           { name: "Deleted Events", href: "/dashboard/events/deleted" },
         ],
       },

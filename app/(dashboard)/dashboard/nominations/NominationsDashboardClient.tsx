@@ -327,7 +327,7 @@ export default function NominationsDashboardClient({
                 className={clsx(
                   "px-4 py-2 rounded-xl text-sm font-bold transition whitespace-nowrap",
                   statusFilter === status
-                    ? "bg-slate-900 text-white"
+                    ? "bg-primary-600 text-white"
                     : "bg-gray-50 text-slate-600 hover:bg-gray-100"
                 )}
               >

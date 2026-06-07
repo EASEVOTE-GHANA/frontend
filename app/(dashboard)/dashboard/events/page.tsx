@@ -65,6 +65,7 @@ export default async function AdminEventsPage(props: Props) {
         revenue,
         ticketsSold,
       },
+      imageUrl: e.imageUrl || e.coverImage || e.image || "",
     };
   });
 

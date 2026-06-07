@@ -85,6 +85,7 @@ export default async function AdminVotingPage(props: Props) {
         votes: eventVotes,
         revenue: eventRevenue,
       },
+      imageUrl: e.imageUrl || e.coverImage || e.image || "",
     };
   });
 

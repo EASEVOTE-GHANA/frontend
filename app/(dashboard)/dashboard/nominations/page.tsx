@@ -16,7 +16,11 @@ export default async function NominationsPage() {
   // Fetch data: Nominations and Events for filtering
   const [nominations, events] = await Promise.all([
     apiClient.get("/nominations").catch(() => []),
-    apiClient.get("/events/my/events?limit=100").catch(() => []),
+    apiClient.get(
+      session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN"
+        ? "/events/admin/all?limit=500"
+        : "/events/my/events?limit=100"
+    ).catch(() => []),
   ]);
 
   const nominationList = Array.isArray(nominations) ? nominations : [];
