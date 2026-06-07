@@ -56,7 +56,8 @@ export const superAdminNavigation: NavigationSection[] = [
         icon: Calendar,
         children: [
           { name: "Voting Events", href: "/dashboard/voting" },
-          { name: "Ticketing", href: "/dashboard/ticketing" },
+          { name: "Ticketing Events", href: "/dashboard/ticketing" },
+          { name: "Manage Tickets", href: "/dashboard/tickets/manage" },
           { name: "Nominations", href: "/dashboard/nominations" },
           { name: "Deleted Events", href: "/dashboard/events/deleted" },
         ],
@@ -123,6 +124,7 @@ export const adminNavigation: NavigationSection[] = [
         children: [
           { name: "Voting Events", href: "/dashboard/voting" },
           { name: "Ticketing Events", href: "/dashboard/ticketing" },
+          { name: "Manage Tickets", href: "/dashboard/tickets/manage" },
           { name: "Nominations", href: "/dashboard/nominations" },
           { name: "Deleted Events", href: "/dashboard/events/deleted" },
         ],
@@ -182,7 +184,7 @@ export const organizerNavigation: NavigationSection[] = [
     title: "Ticketing",
     items: [
       { name: "Ticket Sales", href: "/dashboard/tickets", icon: PieChart },
-      { name: "Manage Tickets", href: "/dashboard/ticketing", icon: Ticket },
+      { name: "Manage Tickets", href: "/dashboard/tickets/manage", icon: Ticket },
     ],
   },
   {
