@@ -7,27 +7,29 @@ import toast from "react-hot-toast";
 interface EventShareButtonProps {
   eventTitle: string;
   className?: string;
+  shareUrl?: string;
 }
 
-export const EventShareButton = ({ eventTitle, className }: EventShareButtonProps) => {
+export const EventShareButton = ({ eventTitle, className, shareUrl }: EventShareButtonProps) => {
   const handleShare = async () => {
+    const finalUrl = shareUrl || window.location.href;
     const shareData = {
       title: eventTitle,
       text: `Join me at ${eventTitle} on EaseVote!`,
-      url: window.location.href,
+      url: finalUrl,
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(finalUrl);
         toast.success("Link copied to clipboard!");
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         toast.error("Sharing failed. Link copied as fallback!");
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(finalUrl);
       }
     }
   };

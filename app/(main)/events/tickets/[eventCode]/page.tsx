@@ -17,8 +17,21 @@ export async function generateMetadata({
   const { eventCode } = await params;
   const { createServerApiClient } = await import("@/lib/api-client");
   const apiClient = createServerApiClient();
-  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
-  const event = res?.data || res?.event || res;
+  let event = null;
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
+
+  if (isObjectId) {
+    const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+    event = res?.data || res?.event || res;
+  } else {
+    const res = await apiClient.get<any>(`/events?eventCode=${eventCode}`).catch(() => null);
+    if (res) {
+      const eventsList = res.data || res.events || (Array.isArray(res) ? res : []);
+      event = eventsList.find((e: any) =>
+        (e.eventCode || "").toUpperCase() === eventCode.toUpperCase()
+      );
+    }
+  }
 
   if (!event) return { title: "Buy Tickets | EaseVote Ghana" };
 
@@ -216,6 +229,7 @@ export default async function TicketEventDetailPage({
 
               <EventShareButton 
                 eventTitle={pageEvent.title} 
+                shareUrl={`${typeof window !== "undefined" ? window.location.origin : "https://www.easevotegh.com"}/events/tickets/${pageEvent.eventCode || pageEvent._id || pageEvent.id}`}
                 className="w-full bg-white text-slate-700 border border-gray-200 py-3 rounded-xl font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
               />
 

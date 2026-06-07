@@ -15,8 +15,21 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { eventCode } = await params;
   const apiClient = createServerApiClient();
-  const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
-  const event = res?.data || res?.event || res;
+  let event = null;
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
+
+  if (isObjectId) {
+    const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
+    event = res?.data || res?.event || res;
+  } else {
+    const res = await apiClient.get<any>(`/events?eventCode=${eventCode}`).catch(() => null);
+    if (res) {
+      const eventsList = res.data || res.events || (Array.isArray(res) ? res : []);
+      event = eventsList.find((e: any) =>
+        (e.eventCode || "").toUpperCase() === eventCode.toUpperCase()
+      );
+    }
+  }
 
   if (!event) return { title: "Event | EaseVote Ghana" };
 

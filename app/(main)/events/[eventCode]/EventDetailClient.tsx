@@ -247,7 +247,10 @@ export default function EventDetailClient({
               {/* Actions Bar */}
               {/* Share Button */}
               <div className="flex flex-wrap gap-4">
-                <EventShareButton eventTitle={event.title} />
+                <EventShareButton 
+                  eventTitle={event.title} 
+                  shareUrl={`${typeof window !== "undefined" ? window.location.origin : ""}${event.type === "TICKETING" ? "/events/tickets/" : "/events/"}${event.eventCode || event._id || event.id}`}
+                />
                 {/* Nominate Button */}
                 {/* Nominate Button - Only show if Nomination is Open AND Voting is NOT Open */}
                 {event.isNominationOpen && !event.isVotingOpen && (
