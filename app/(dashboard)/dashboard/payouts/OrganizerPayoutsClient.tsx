@@ -146,8 +146,13 @@ export default function OrganizerPayoutsClient({
     const style = styles[status as keyof typeof styles] || "bg-gray-100 text-gray-700";
 
     return (
-      <span className={clsx("px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-tighter", style)}>
-        {status}
+      <span
+        className={clsx(
+          "px-2 py-0.5 rounded-full text-[10px] font-black border capitalize tracking-widest whitespace-nowrap",
+          style
+        )}
+      >
+        {status.toLowerCase()}
       </span>
     );
   };

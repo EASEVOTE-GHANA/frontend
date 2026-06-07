@@ -93,8 +93,8 @@ export default function AdminPayoutsClient({ initialPayouts }: AdminPayoutsClien
     const style = styles[status as keyof typeof styles] || "bg-gray-100 text-gray-700";
 
     return (
-      <span className={clsx("px-2 py-0.5 rounded text-[10px] font-black border uppercase tracking-widest whitespace-nowrap", style)}>
-        {status}
+      <span className={clsx("px-2 py-0.5 rounded-full text-[10px] font-black border capitalize tracking-widest whitespace-nowrap", style)}>
+        {status.toLowerCase()}
       </span>
     );
   };
@@ -227,7 +227,7 @@ export default function AdminPayoutsClient({ initialPayouts }: AdminPayoutsClien
                   <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                       <div>
                           <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                              Payout Details <StatusBadge status={selectedPayout.status} />
+                              Payout Details
                           </h3>
                           <p className="text-xs font-bold text-slate-500 font-mono mt-1 uppercase tracking-widest">{selectedPayout.reference}</p>
                       </div>
@@ -284,35 +284,41 @@ export default function AdminPayoutsClient({ initialPayouts }: AdminPayoutsClien
                               <p className="text-xs font-medium text-slate-500">Select a new status to update the payout.</p>
                           </div>
                           
-                          <div className="flex items-center gap-3">
-                              <div className="relative">
-                                  <select
-                                      value={stagedStatus}
-                                      onChange={(e) => setStagedStatus(e.target.value)}
-                                      disabled={processingId === selectedPayout._id}
-                                      className="appearance-none bg-slate-50 border border-slate-200 text-slate-900 text-sm font-bold py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white cursor-pointer transition-all disabled:opacity-50 min-w-[140px]"
-                                  >
-                                      <option value="PENDING">Pending</option>
-                                      <option value="PROCESSING">Processing</option>
-                                      <option value="PAID">Paid</option>
-                                      <option value="REJECTED">Rejected</option>
-                                  </select>
-                                  <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                              <div className="flex bg-slate-100 p-1.5 rounded-full border border-slate-200">
+                                  {["PENDING", "PROCESSING", "PAID", "REJECTED"].map((status) => (
+                                      <button
+                                          key={status}
+                                          onClick={() => setStagedStatus(status)}
+                                          disabled={processingId === selectedPayout._id}
+                                          className={clsx(
+                                              "px-4 py-1.5 text-[10px] sm:text-xs font-black rounded-full transition-all capitalize tracking-widest disabled:opacity-50",
+                                              stagedStatus === status
+                                                  ? status === "PAID" ? "bg-green-100 text-green-700 shadow-sm border border-green-200"
+                                                  : status === "PROCESSING" ? "bg-blue-100 text-blue-700 shadow-sm border border-blue-200"
+                                                  : status === "PENDING" ? "bg-yellow-100 text-yellow-700 shadow-sm border border-yellow-200"
+                                                  : "bg-red-100 text-red-700 shadow-sm border border-red-200"
+                                                  : "text-slate-500 hover:text-slate-900 border border-transparent"
+                                          )}
+                                      >
+                                          {status.toLowerCase()}
+                                      </button>
+                                  ))}
                               </div>
-                              
                               <button
                                   onClick={() => handleUpdateStatus(selectedPayout._id, stagedStatus)}
                                   disabled={processingId === selectedPayout._id || stagedStatus === selectedPayout.status}
-                                  className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all shadow-md disabled:shadow-none"
+                                  className="flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-xs font-bold rounded-full transition-all shadow-md disabled:shadow-none"
                               >
                                   {processingId === selectedPayout._id ? (
-                                      <><Loader2 size={16} className="animate-spin" /> Saving...</>
+                                      <><Loader2 size={14} className="animate-spin" /> Saving</>
                                   ) : (
-                                      "Save Changes"
+                                      "Save"
                                   )}
                               </button>
                           </div>
                       </div>
+                      
                   </div>
               </div>
           </div>
