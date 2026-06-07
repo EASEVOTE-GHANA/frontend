@@ -169,7 +169,7 @@ export default function EarningsDashboardClient({
           style
         )}
       >
-        {status.toLowerCase()}
+        {status}
       </span>
     );
   };
