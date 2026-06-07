@@ -190,8 +190,8 @@ export default function EventDetailClient({
             <ArrowLeft size={20} /> Back to Events
           </button>
 
-          <div className="flex flex-col md:flex-row gap-8 items-end">
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800 relative">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-end">
+            <div className="w-full aspect-video md:w-48 md:h-48 md:aspect-square rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800 relative">
               <Image
                 src={
                   event.imageUrl ||
@@ -206,7 +206,7 @@ export default function EventDetailClient({
               />
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white! ${getEventStatus(event).color}`}

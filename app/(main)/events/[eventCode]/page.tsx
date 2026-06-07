@@ -20,19 +20,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!event) return { title: "Event | EaseVote Ghana" };
 
-  // Intercept old MongoDB IDs and force a redirect to the clean eventCode URL
-  const isObjectId = /^[0-9a-fA-F]{24}$/.test(eventCode);
-  if (isObjectId && event.eventCode) {
-    if (event.type === "TICKETING") {
-      redirect(`/events/tickets/${event.eventCode}`);
-    } else {
-      redirect(`/events/${event.eventCode}`);
-    }
-  }
-
-  if (event.type === "TICKETING") {
-    redirect(`/events/tickets/${event.eventCode || eventCode}`);
-  }
+  // Note: We intentionally do NOT redirect inside generateMetadata anymore.
+  // Some crawlers (like Telegram) refuse to follow 307 redirects for OpenGraph tags
+  // and will show fallback metadata. Instead, we generate the proper tags right here
+  // and let the actual Page component handle the user redirection.
 
   if (!event?.title) return { title: "Event | EaseVote Ghana" };
 
