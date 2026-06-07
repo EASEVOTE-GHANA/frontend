@@ -383,6 +383,10 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
         : undefined;
 
       // Validation
+      if (!formData.description.trim()) {
+        setError("Event description is required.");
+        return;
+      }
       if ((formData.type === "VOTING" || formData.type === "HYBRID")) {
         if (!votingStartISO || !votingEndISO) {
           setError("Voting start and end dates are required for voting events.");
@@ -568,7 +572,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Description
+                Description *
               </label>
               <textarea
                 name="description"
@@ -576,6 +580,7 @@ export function EventForm({ eventId, currentStatus, backUrl }: EventFormProps) {
                 onChange={handleChange}
                 rows={4}
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                required
               />
             </div>
 

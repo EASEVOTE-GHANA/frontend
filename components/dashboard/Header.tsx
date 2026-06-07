@@ -66,8 +66,7 @@ export function Header({
     });
 
     if (confirmed) {
-      await signOut({ redirect: false });
-      window.location.href = "/sign-in";
+      signOut({ callbackUrl: "/sign-in" });
     }
   };
 

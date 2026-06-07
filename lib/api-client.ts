@@ -1,4 +1,4 @@
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 /**
  * Client-side: routes through the local Next.js proxy at /api/proxy
@@ -31,7 +31,7 @@ class ApiClient {
     if (!res.ok) {
       // Global 401 handler for client-side
       if (res.status === 401 && typeof window !== "undefined") {
-        window.location.href = "/sign-in?callbackUrl=" + window.location.pathname;
+        signOut({ callbackUrl: "/sign-in?callbackUrl=" + window.location.pathname });
       }
       
       let errorMessage = data.message || data.error || `HTTP ${res.status}`;
@@ -72,8 +72,7 @@ class ApiClient {
 
     if (!res.ok) {
       if (res.status === 401 && typeof window !== "undefined") {
-        window.location.href =
-          "/sign-in?callbackUrl=" + window.location.pathname;
+        signOut({ callbackUrl: "/sign-in?callbackUrl=" + window.location.pathname });
       }
       let errorMessage = data.message || data.error || `HTTP ${res.status}`;
       if (typeof errorMessage === 'string') {

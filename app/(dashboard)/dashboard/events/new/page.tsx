@@ -338,6 +338,7 @@ export default function CreateEventPage() {
 
   const validateForm = () => {
     if (!formData.title.trim()) return "Event title is required";
+    if (!formData.description.trim()) return "Event description is required";
     if (!formData.type) return "Please select an event type";
     if (isAdmin && !selectedOrganizerId) return "Please select an organizer";
     if (formData.type === "VOTING") {
@@ -444,7 +445,7 @@ export default function CreateEventPage() {
 
       const eventPayload = {
         title: formData.title,
-        description: formData.description || null,
+        description: formData.description,
         type: formData.type,
         imageUrl,
         imagePublicId,
@@ -765,7 +766,7 @@ export default function CreateEventPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Description
+                    Description *
                   </label>
                   <textarea
                     name="description"
@@ -774,6 +775,7 @@ export default function CreateEventPage() {
                     rows={4}
                     placeholder="Tell people what this event is about..."
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
                   />
                 </div>
 
