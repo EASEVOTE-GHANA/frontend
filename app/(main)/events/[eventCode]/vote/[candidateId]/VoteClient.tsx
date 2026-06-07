@@ -191,7 +191,7 @@ export default function VoteClient({ event, candidate }: VoteClientProps) {
             {/* Full Name */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Full Name <span className="text-gray-400 font-normal">(optional)</span>
+                Full Name
               </label>
               <input
                 type="text"
