@@ -79,9 +79,9 @@ function SetupPasswordForm() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left brand panel */}
-      <div className="hidden lg:flex w-1/2 bg-indigo-900 relative overflow-hidden items-center justify-center p-12">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[100px]" />
+      <div className="hidden lg:flex w-1/2 bg-primary-900 relative overflow-hidden items-center justify-center p-12">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-600/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary-600/20 rounded-full blur-[100px]" />
         <div
           className="absolute inset-0 opacity-10"
           style={{
@@ -95,9 +95,9 @@ function SetupPasswordForm() {
             <ShieldCheck size={32} className="text-white" />
           </div>
           <h2 className="text-5xl font-display font-bold leading-tight text-white!">
-            Welcome to the <span className="text-indigo-400">Admin Team</span>.
+            Welcome to the <span className="text-primary-400">Admin Team</span>.
           </h2>
-          <p className="text-lg text-indigo-100/80 leading-relaxed">
+          <p className="text-lg text-primary-100/80 leading-relaxed text-white!">
             Please set a secure password to activate your EaseVote administrator
             account and start managing the platform.
           </p>
@@ -108,8 +108,8 @@ function SetupPasswordForm() {
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-24 py-12 bg-white overflow-y-auto">
         <div className="max-w-md w-full mx-auto">
           <div className="lg:hidden mb-8 mt-8">
-            <span className="text-2xl font-display font-bold text-indigo-800">
-              EaseVote<span className="text-indigo-500">.gh</span>
+            <span className="text-2xl font-display font-bold text-primary-800">
+              EaseVote<span className="text-primary-500">.gh</span>
             </span>
           </div>
 
@@ -279,7 +279,7 @@ export default function SetupPasswordPage() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center min-h-screen bg-slate-50">
-          <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
         </div>
       }
     >

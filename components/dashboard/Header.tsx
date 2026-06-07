@@ -298,7 +298,7 @@ export function Header({
                   alt={user.name || "User"}
                   width={36}
                   height={36}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
                 />
               ) : (
                 <User className="h-4 w-4 text-primary-600" />

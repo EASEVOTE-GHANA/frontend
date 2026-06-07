@@ -113,14 +113,14 @@ export default function AdminsTable({ admins }: { admins: any[] }) {
       header: "Admin",
       render: (admin: any) => (
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 overflow-hidden">
+          <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 overflow-hidden">
             {admin.avatar?.startsWith("http") ? (
               <Image
                 width={40}
                 height={40}
                 src={admin.avatar}
                 alt={admin.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover rounded-full"
               />
             ) : (
               <UserCog className="w-5 h-5" />

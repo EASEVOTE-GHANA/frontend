@@ -166,14 +166,14 @@ export default function OrganizersTable({
       header: "Organizer",
       render: (org: Organizer) => (
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-sm font-bold overflow-hidden">
+          <div className="h-10 w-10 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-sm font-bold overflow-hidden">
             {org.avatar?.startsWith("http") ? (
               <Image
                 width={40}
                 height={40}
                 src={org.avatar}
                 alt={org.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover rounded-full"
               />
             ) : (
               (org.name || "??").substring(0, 2).toUpperCase()
