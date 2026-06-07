@@ -215,6 +215,7 @@ export default async function AdminTransactionsPage(props: {
           pagination={pagination} 
           eventsList={eventsList}
           currentFilters={{ eventId, status, type, gateway, channel }}
+          isOrganizer={isOrganizer}
         />
       </div>
     </div>

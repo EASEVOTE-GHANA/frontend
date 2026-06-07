@@ -105,11 +105,13 @@ export default function TransactionsTable({
   pagination,
   eventsList,
   currentFilters,
+  isOrganizer = false,
 }: {
   transactions: Transaction[];
   pagination: Pagination;
   eventsList: { id: string; title: string }[];
   currentFilters: { eventId: string; status: string; type?: string; gateway?: string; channel?: string };
+  isOrganizer?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -147,7 +149,7 @@ export default function TransactionsTable({
       })
     : transactions;
 
-  const columns = [
+  const allColumns = [
     {
       key: "reference",
       header: "Reference",
@@ -285,6 +287,11 @@ export default function TransactionsTable({
     },
   ];
 
+  const columns = allColumns.filter((col) => {
+    if (isOrganizer && col.key === "gateway") return false;
+    return true;
+  });
+
   return (
     <div className="space-y-4">
       {/* Search & Filter Bar */}
@@ -318,16 +325,18 @@ export default function TransactionsTable({
             <option value="TICKET">Ticket</option>
           </select>
 
-          <select
-            value={currentFilters.gateway || "ALL"}
-            onChange={(e) => handleParamChange("gateway", e.target.value)}
-            className="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-          >
-            <option value="ALL">All Gateways</option>
-            <option value="PAYSTACK">Paystack</option>
-            <option value="NALO">Nalo</option>
-            <option value="APPSMOBILE">AppsMobile</option>
-          </select>
+          {!isOrganizer && (
+            <select
+              value={currentFilters.gateway || "ALL"}
+              onChange={(e) => handleParamChange("gateway", e.target.value)}
+              className="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            >
+              <option value="ALL">All Gateways</option>
+              <option value="PAYSTACK">Paystack</option>
+              <option value="NALO">Nalo</option>
+              <option value="APPSMOBILE">AppsMobile</option>
+            </select>
+          )}
 
           <select
             value={currentFilters.channel || "ALL"}
