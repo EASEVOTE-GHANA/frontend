@@ -79,7 +79,7 @@ export default function EventCard({ event }: { event: any }) {
           </div>
           <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
             <div className="w-1.5 h-1.5 rounded-full bg-primary-400"></div>
-            <span>{formatEventDate(event.startDate || event.date)}</span>
+            <span>{formatEventDate(event.endDate || event.startDate || event.date)}</span>
           </div>
         </div>
 
