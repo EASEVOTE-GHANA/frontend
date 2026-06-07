@@ -26,7 +26,7 @@ export default function EventCard({ event }: { event: any }) {
       href={eventUrl}
       className="snap-center shrink-0 w-[85vw] md:w-auto group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-2 border border-gray-100 flex flex-col h-full cursor-pointer"
     >
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
         <Image
           src={optimizedImageSrc}
           alt={event.title}
@@ -54,7 +54,7 @@ export default function EventCard({ event }: { event: any }) {
         <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-60" />
       </div>
 
-      <div className="p-6 relative flex-1 flex flex-col">
+      <div className="p-5 relative flex-1 flex flex-col">
         <div className="flex items-center gap-1.5 mb-2">
           {event.type === "TICKETING" ? (
             <Ticket size={12} className="text-secondary-600" />
@@ -68,23 +68,23 @@ export default function EventCard({ event }: { event: any }) {
           </p>
         </div>
 
-        <h3 className="text-lg font-bold text-slate-900 mb-3 line-clamp-1 group-hover:text-primary-700 transition-colors">
+        <h3 className="text-base font-bold text-slate-900 mb-2.5 line-clamp-1 group-hover:text-primary-700 transition-colors">
           {event.title}
         </h3>
 
-        <div className="space-y-2 mb-6">
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-            <MapPin size={14} className="text-primary-500" />
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium">
+            <MapPin size={12} className="text-primary-500" />
             <span className="line-clamp-1">{event.location || event.venue || "Tamale, Ghana"}</span>
           </div>
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
+          <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium">
             <div className="w-1.5 h-1.5 rounded-full bg-primary-400"></div>
             <span>{formatEventDate(event.endDate || event.startDate || event.date)}</span>
           </div>
         </div>
 
         <div
-          className="mt-auto block w-full text-center py-3 rounded-xl bg-primary-800 text-white! font-bold hover:bg-primary-900 transition-all shadow-lg shadow-primary-900/10"
+          className="mt-auto block w-full text-center py-2.5 text-sm rounded-xl bg-primary-800 text-white! font-bold hover:bg-primary-900 transition-all shadow-lg shadow-primary-900/10"
         >
           {buttonText}
         </div>
