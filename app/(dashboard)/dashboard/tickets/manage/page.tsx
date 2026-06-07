@@ -102,24 +102,6 @@ export default async function AdminTicketingPage(props: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            {isAdmin ? "Ticketing Management" : "My Ticketing Events"}
-          </h1>
-          <p className="text-slate-500">
-            {isAdmin 
-              ? "Monitor ticket sales and manage ticketing events."
-              : "Track ticket sales and manage your events."}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/events/new?type=TICKETING"
-          className="flex items-center gap-2 bg-primary-700 hover:bg-primary-800 text-white! px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + Add Ticketing Event
-        </Link>
-      </div>
 
       {/* Ticket Management Interface */}
       <TicketManagementClient events={events} />

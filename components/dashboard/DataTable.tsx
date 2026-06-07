@@ -150,9 +150,9 @@ export function DataTable<T extends { id: string | number }>({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 relative">
+    <div className="bg-white rounded-xl border border-slate-200 relative !overflow-visible">
       {searchable && (
-        <div className="p-4 border-b border-slate-200 flex items-center gap-3">
+        <div className="p-4 border-b border-slate-200 flex items-center gap-3 relative z-10">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
@@ -183,7 +183,7 @@ export function DataTable<T extends { id: string | number }>({
                 )}
               </button>
               {showFilterDropdown && (
-                <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-20 min-w-[200px] p-2">
+                <div className="absolute right-0 top-full mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 min-w-[200px] p-2">
                   {filters.map((filter) => (
                     <div key={filter.key} className="space-y-1">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pt-2">{filter.label}</p>
