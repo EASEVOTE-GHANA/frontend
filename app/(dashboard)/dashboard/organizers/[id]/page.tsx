@@ -351,7 +351,7 @@ export default async function OrganizerDetailsPage(props: Props) {
                           </span>
                         </td>
                         <td className="px-6 py-3 text-slate-500">
-                          {payout.createdAt.toLocaleDateString()}
+                          {new Date(payout.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-3 text-slate-400 font-mono text-xs">
                           {payout.reference || "-"}
