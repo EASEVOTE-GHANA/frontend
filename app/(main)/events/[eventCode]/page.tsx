@@ -4,7 +4,7 @@ import EventDetailClient from "./EventDetailClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PreviewBanner } from "@/components/preview/PreviewBanner";
-import EventStatusNotification from "./EventStatusNotification";
+
 import { createServerApiClient } from "@/lib/api-client";
 import { getEventStatus } from "@/lib/utils/event-status";
 
@@ -164,7 +164,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <EventStatusNotification event={clientEvent} />
+
       {showPreviewBanner && <PreviewBanner status={event.status} />}
       <EventDetailClient event={clientEvent} />
     </>

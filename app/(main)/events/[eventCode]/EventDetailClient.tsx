@@ -190,8 +190,8 @@ export default function EventDetailClient({
             <ArrowLeft size={20} /> Back to Events
           </button>
 
-          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-end">
-            <div className="w-full aspect-video md:w-48 md:h-48 md:aspect-square rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800 relative">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start md:items-stretch">
+            <div className="w-full aspect-video md:w-72 md:aspect-auto md:min-h-[240px] rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl shrink-0 bg-slate-800 relative">
               <Image
                 src={
                   event.imageUrl ||
@@ -206,7 +206,7 @@ export default function EventDetailClient({
               />
             </div>
 
-            <div className="flex-1 w-full">
+            <div className="flex-1 w-full flex flex-col justify-between py-1 md:py-2">
               <div className="flex flex-wrap items-center gap-3 mb-3">
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white! ${getEventStatus(event).color}`}
@@ -603,14 +603,7 @@ export default function EventDetailClient({
                 </div>
               ) : (
                 <>
-                  {getEventStatus(event).phase !== "ENDED" && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full mb-4">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span>
-                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">
-                        Refreshing Live
-                      </span>
-                    </div>
-                  )}
+                  
                   <h2 className="text-3xl font-bold font-display text-slate-900 mb-2">
                     {getEventStatus(event).phase === "ENDED"
                       ? "Final Results"
