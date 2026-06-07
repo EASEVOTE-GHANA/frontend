@@ -12,6 +12,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/faqs",
   },
+  openGraph: {
+    title: "Frequently Asked Questions | EaseVote Ghana",
+    description: "Find answers to common questions about creating events, buying tickets, and voting on EaseVote Ghana.",
+    url: "/faqs",
+    images: [{ url: "/images/seo/faqs.jpg", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Frequently Asked Questions | EaseVote Ghana",
+    description: "Find answers to common questions about EaseVote Ghana.",
+    images: ["/images/seo/faqs.jpg"],
+  },
 };
 
 export default function FaqsPage() {

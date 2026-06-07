@@ -13,10 +13,24 @@ export async function generateMetadata({
   const res = await apiClient.get<any>(`/events/${eventCode}`).catch(() => null);
   const event = res?.data || res?.event || res;
   const title = event?.title ? `Nominate for ${event.title} | EaseVote` : "File a Nomination | EaseVote";
+  const description = event?.title ? `Submit your nomination for ${event.title}. Powered by EaseVote Ghana.` : "Submit a nomination on EaseVote.";
+  const image = event?.imageUrl || event?.coverImage || "/easevote.svg";
+
   return {
     title,
-    description: event?.title ? `Submit your nomination for ${event.title}. Powered by EaseVote Ghana.` : "Submit a nomination on EaseVote.",
-    robots: { index: false },
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `/events/${eventCode}/nominate`,
+      images: [{ url: image, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 

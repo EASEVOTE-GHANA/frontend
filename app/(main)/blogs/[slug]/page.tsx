@@ -10,8 +10,47 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { BlogShareButton } from "@/components/features/blogs/BlogShareButton";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const apiClient = createServerApiClient();
+  const res = await apiClient.get(`/blogs/${resolvedParams.slug}`).catch(() => null);
+  const blog = res?.data || res;
+
+  if (!blog) {
+    return {
+      title: "Blog Not Found | EaseVote",
+      description: "The requested blog post could not be found.",
+    };
+  }
+
+  const title = `${blog.title} | EaseVote News`;
+  const description = blog.excerpt || `Read ${blog.title} on the EaseVote platform.`;
+  const image = blog.coverImage || "/easevote.svg";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      publishedTime: blog.publishedAt,
+      authors: blog.author?.fullName ? [blog.author.fullName] : undefined,
+      url: `/blogs/${resolvedParams.slug}`,
+      images: [{ url: image, alt: blog.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function SingleBlogPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;

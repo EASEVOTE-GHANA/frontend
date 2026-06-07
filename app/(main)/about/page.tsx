@@ -15,6 +15,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/about",
   },
+  openGraph: {
+    title: "About Us | EaseVote Ghana",
+    description: "Learn about EaseVote's mission to revolutionize e-voting and event ticketing in Ghana. Meet our team and discover our values.",
+    url: "/about",
+    images: [{ url: "/images/seo/about.webp", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Us | EaseVote Ghana",
+    description: "Learn about EaseVote's mission to revolutionize e-voting and event ticketing in Ghana.",
+    images: ["/images/seo/about.webp"],
+  },
 };
 
 export default function AboutPage() {

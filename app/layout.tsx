@@ -38,10 +38,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/seo/home.png",
         width: 1200,
         height: 630,
-        alt: "EaseVote Ghana — Premier E-Voting & Ticketing Platform",
+        alt: "EaseVote Ghana Logo",
       },
     ],
   },
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
     title: "EaseVote Ghana",
     description:
       "Ghana's premier e-voting and ticketing platform. Secure, reliable, and easy to use.",
-    creator: "@easevote", // Placeholder handle
-    images: ["/twitter-image"],
+    creator: "@easevote",
+    images: ["/images/seo/home.png"],
   },
   alternates: {
     canonical: "/",

@@ -17,13 +17,38 @@ export async function generateMetadata({
     const c = cat.candidates?.find((c: any) => (c._id || c.id) === candidateId);
     if (c) { candidateName = c.name; break; }
   }
+  let candidateImage = "";
+  if (candidateName) {
+    for (const cat of event?.categories || []) {
+      const c = cat.candidates?.find((c: any) => (c._id || c.id) === candidateId);
+      if (c) {
+        candidateImage = c.imageUrl || c.image || "";
+        break;
+      }
+    }
+  }
+
   const title = candidateName && event?.title
     ? `Vote for ${candidateName} — ${event.title} | EaseVote`
     : "Cast Your Vote | EaseVote Ghana";
+  const description = candidateName ? `Support ${candidateName} by casting your vote on EaseVote Ghana.` : "Cast your vote securely on EaseVote.";
+  const image = candidateImage || event?.imageUrl || event?.coverImage || "/easevote.svg";
+
   return {
     title,
-    description: candidateName ? `Support ${candidateName} by casting your vote on EaseVote Ghana.` : "Cast your vote securely on EaseVote.",
-    robots: { index: false },
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `/events/${eventCode}/vote/${candidateId}`,
+      images: [{ url: image, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 

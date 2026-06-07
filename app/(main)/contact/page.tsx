@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://easevotegh.com/contact",
   },
+  openGraph: {
+    title: "Contact Us | EaseVote Ghana",
+    description: "Get in touch with the EaseVote team. We are here to help with your e-voting and ticketing needs in Ghana.",
+    url: "/contact",
+    images: [{ url: "/images/seo/contact.webp", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact Us | EaseVote Ghana",
+    description: "Get in touch with the EaseVote team.",
+    images: ["/images/seo/contact.webp"],
+  },
 };
 
 export default function ContactUsPage() {

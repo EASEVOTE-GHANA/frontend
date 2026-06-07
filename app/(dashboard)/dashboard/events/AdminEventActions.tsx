@@ -139,21 +139,7 @@ export default function AdminEventActions({ eventId, status, role, onStatusChang
             )}
           </button>
         )}
-        {isAdmin && (
-          <button
-            disabled={isPending}
-            onClick={() => handleAction("approve")}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium transition-colors"
-          >
-            {loadingAction === "approve" ? (
-              "Approving..."
-            ) : (
-              <>
-                <CheckCircle className="w-4 h-4" /> Approve Draft
-              </>
-            )}
-          </button>
-        )}
+
         <button
           disabled={isPending}
           onClick={() => handleAction("delete")}
