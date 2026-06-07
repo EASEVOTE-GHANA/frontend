@@ -37,6 +37,9 @@ type AdminEvent = {
   id: string;
   eventCode: string;
   title: string;
+  image?: string;
+  imageUrl?: string;
+  coverImage?: string;
   organizer: {
     name: string;
     avatar: string;
@@ -349,14 +352,21 @@ export default function EventsTable({ events, showFilters = ["type", "status"], 
       key: "title",
       header: "Event",
       render: (event: AdminEvent) => {
+        const imageSrc = event.image || event.imageUrl || event.coverImage;
         const Icon = typeConfig[event.type]?.icon || Calendar;
         return (
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400">
-              <Icon className="h-5 w-5" />
-            </div>
+            {imageSrc ? (
+              <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 border border-slate-100 bg-slate-50">
+                <Image src={imageSrc} alt={event.title} width={40} height={40} className="h-full w-full object-cover" />
+              </div>
+            ) : (
+              <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 shrink-0 border border-slate-100">
+                <Icon className="h-5 w-5" />
+              </div>
+            )}
             <div>
-              <p className="font-medium text-slate-900">{event.title}</p>
+              <p className="font-medium text-slate-900 line-clamp-1">{event.title}</p>
               <p className="text-xs text-slate-500">{event.eventCode}</p>
             </div>
           </div>
