@@ -62,9 +62,7 @@ export default function EventCard({ event }: { event: any }) {
             <Trophy size={12} className="text-secondary-600" />
           )}
           <p className="text-[10px] font-bold text-secondary-600 uppercase tracking-widest">
-            {event.type === "VOTING" && event.categories?.length > 0
-              ? `${event.categories.length} Categories`
-              : event.type || "EVENT"}
+            {event.type || "EVENT"}
           </p>
         </div>
 
