@@ -294,6 +294,32 @@ export default function AdminEventActions({ eventId, eventCode, eventType, statu
     );
   }
 
+  if (currentStatus === "ENDED" || currentStatus === "COMPLETED") {
+    return (
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium transition-colors"
+        >
+          <Share2 className="w-4 h-4" /> Share Event
+        </button>
+        <button
+          disabled={isPending}
+          onClick={() => handleAction("delete")}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 text-sm font-medium transition-colors"
+        >
+          {loadingAction === "delete" ? (
+            "Deleting..."
+          ) : (
+            <>
+              <Trash2 className="w-4 h-4" /> Delete Event
+            </>
+          )}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <button
       onClick={handleShare}

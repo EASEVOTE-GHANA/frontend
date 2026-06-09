@@ -7,7 +7,9 @@ import NominationsDashboardClient from "./NominationsDashboardClient";
 export default async function NominationsPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user?.organizerId) {
+  const isAdmin = session?.user?.role === "ADMIN" || session?.user?.role === "SUPER_ADMIN";
+  
+  if (!session || (!session.user?.organizerId && !isAdmin)) {
     redirect("/sign-in");
   }
 
