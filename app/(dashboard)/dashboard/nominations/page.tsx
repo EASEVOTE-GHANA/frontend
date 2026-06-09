@@ -25,7 +25,10 @@ export default async function NominationsPage() {
     ).catch(() => []),
   ]);
 
-  const nominationList = Array.isArray(nominations) ? nominations : [];
+  const nominationList = Array.isArray(nominations) 
+    ? nominations 
+    : (nominations?.data || nominations?.nominations || []);
+  
   const eventsList = (Array.isArray(events) ? events : events?.data || []).map((e: any) => ({
     id: e._id || e.id,
     title: e.title,

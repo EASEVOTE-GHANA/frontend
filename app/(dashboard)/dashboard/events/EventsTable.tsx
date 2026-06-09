@@ -593,7 +593,8 @@ export default function EventsTable({ events, showFilters = ["type", "status"], 
                   </button>
                 )}
 
-                {!["LIVE", "PAUSED", "PUBLISHED"].includes(event.status) && (
+                {!["LIVE", "PAUSED", "PUBLISHED"].includes(event.status) && 
+                 (!["ENDED", "COMPLETED", "ARCHIVED", "CANCELLED"].includes(event.status) || role === "SUPER_ADMIN") && (
                   <button
                     onClick={() => handleAction("delete", event.id)}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"

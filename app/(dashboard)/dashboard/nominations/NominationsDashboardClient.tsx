@@ -77,8 +77,8 @@ export default function NominationsDashboardClient({
     const matchesStatus = statusFilter === "ALL" || nom.status === statusFilter;
     const matchesEvent = eventFilter === "ALL" || nom.event?.id === eventFilter;
     const matchesSearch =
-      nom.nomineeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      nom.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (nom.nomineeName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (nom.categoryName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (nom.event?.title || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesEvent && matchesSearch;
   });

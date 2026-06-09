@@ -862,6 +862,24 @@ export function AdminEventManager({
                     Open Builder
                   </Link>
                 </div>
+
+                <div className="flex items-center justify-between py-4">
+                  <div>
+                    <h4 className="font-medium text-slate-900">
+                      Review Nominations
+                    </h4>
+                    <p className="text-sm text-slate-500">
+                      View, approve, or reject candidate nominations for this event.
+                    </p>
+                  </div>
+                  <Link
+                    href={`/dashboard/events/${event.id}/nominations`}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg font-bold hover:bg-primary-50 transition-colors"
+                  >
+                    <Users className="w-4 h-4" />
+                    View Nominations
+                  </Link>
+                </div>
               </div>
 
               <div className="bg-white rounded-xl border border-slate-200 p-6">
