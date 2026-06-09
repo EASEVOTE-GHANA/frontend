@@ -1,7 +1,8 @@
+import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServerApiClient } from "@/lib/api-client";
-import { Trash2, ArrowLeft } from "lucide-react";
+import { Trash2, ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
 import RestoreButton from "./RestoreButton";
 import PermanentDeleteButton from "./PermanentDeleteButton";
@@ -60,11 +61,24 @@ export default async function DeletedEventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {deletedEvents.map((event: any) => (
+                {deletedEvents.map((event: any) => {
+                  const imageSrc = event.image || event.imageUrl || event.coverImage;
+                  return (
                   <tr key={event._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-medium text-slate-900">{event.title}</div>
-                      <div className="text-xs text-slate-500 font-mono">{event.eventCode || event._id}</div>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full overflow-hidden shrink-0 border border-slate-100 bg-slate-50 flex items-center justify-center">
+                          {imageSrc ? (
+                            <Image src={imageSrc} alt={event.title} width={40} height={40} className="h-full w-full object-cover" />
+                          ) : (
+                            <Calendar className="h-5 w-5 text-slate-400" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-900">{event.title}</div>
+                          <div className="text-xs text-slate-500 font-mono">{event.eventCode || event._id}</div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-xs font-medium px-2 py-1 rounded bg-slate-100 text-slate-600">
@@ -79,7 +93,8 @@ export default async function DeletedEventsPage() {
                       <PermanentDeleteButton eventId={event._id || event.id} />
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
