@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -90,6 +90,8 @@ export function CategoriesManager({
     cand: number;
   } | null>(null);
 
+  const draftKey = `categoriesDraft-${eventId}`;
+
   const fetchEvent = async () => {
     try {
       const data = await api.get(`/events/${eventId}`);
@@ -130,11 +132,53 @@ export function CategoriesManager({
     if (eventId) fetchEvent();
   }, [eventId]);
 
-  // Re-fetch when the tab regains focus so stale state doesn't overwrite
-  // nomination-approved candidates that appeared while the organizer was away.
+  // Restore unsaved draft after server data has loaded
+  const draftChecked = useRef(false);
+  useEffect(() => {
+    if (loading || draftChecked.current) return;
+    draftChecked.current = true;
+    const savedDraft = sessionStorage.getItem(draftKey);
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed.categories?.length) {
+          setCategories(parsed.categories);
+        }
+        if (parsed.deletedCategoryIds?.length) {
+          setDeletedCategoryIds(parsed.deletedCategoryIds);
+        }
+        if (parsed.deletedCandidateIds?.length) {
+          setDeletedCandidateIds(parsed.deletedCandidateIds);
+        }
+        toast("Recovered unsaved edits from your browser", {
+          icon: "🔄",
+          duration: 3000,
+        });
+      } catch (e) {
+        console.error("Failed to parse categories draft", e);
+      }
+    }
+  }, [loading]);
+
+  // Auto-save draft to sessionStorage on every change
+  useEffect(() => {
+    if (loading || !draftChecked.current) return;
+    const draft = {
+      categories,
+      deletedCategoryIds,
+      deletedCandidateIds,
+    };
+    sessionStorage.setItem(draftKey, JSON.stringify(draft));
+  }, [categories, deletedCategoryIds, deletedCandidateIds, loading]);
+
+  // Re-fetch when the tab regains focus, but only if there's no active draft
+  // to avoid overwriting unsaved work.
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") fetchEvent();
+      if (document.visibilityState === "visible") {
+        const hasDraft = sessionStorage.getItem(draftKey);
+        if (!hasDraft) fetchEvent();
+      }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -443,6 +487,7 @@ export function CategoriesManager({
       toast.success("Changes saved successfully!");
       setDeletedCategoryIds([]);
       setDeletedCandidateIds([]);
+      sessionStorage.removeItem(draftKey);
       router.refresh();
       fetchEvent();
     } catch (err: any) {
