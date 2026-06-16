@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import toast from "react-hot-toast";
+import dynamic from "next/dynamic";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 export default function BlogEditor({ blog }: { blog?: any }) {
   const router = useRouter();
@@ -266,12 +269,13 @@ export default function BlogEditor({ blog }: { blog?: any }) {
                 />
                 <div className="h-px w-full bg-slate-100"></div>
               </div>
-              <textarea
-                placeholder="Tell your story... (Markdown supported)"
-                className="w-full min-h-[600px] text-lg leading-relaxed text-slate-700 border-none outline-none focus:ring-0 placeholder:text-slate-300 resize-none font-medium bg-transparent"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              />
+              <div className="w-full mt-4 prose-editor rounded-xl overflow-hidden border border-slate-200">
+                <JoditEditor
+                  value={formData.content}
+                  config={{ height: 600, placeholder: "Tell your story...", style: { background: "transparent" } }}
+                  onBlur={(newContent) => setFormData({ ...formData, content: newContent })}
+                />
+              </div>
             </>
           )}
         </div>

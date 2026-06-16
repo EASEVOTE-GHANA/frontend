@@ -1,9 +1,9 @@
 "use client";
 
 import { api } from "@/lib/api-client";
-import { CheckCircle, XCircle, AlertCircle, PauseCircle, Send, Trash2, Zap, Share2 } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, PauseCircle, Send, Trash2, Zap, Share2, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useModal } from "@/components/providers/ModalProvider";
 import toast from "react-hot-toast";
 
@@ -24,8 +24,21 @@ export default function AdminEventActions({ eventId, eventCode, eventType, statu
   const [isPending, startTransition] = useTransition();
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [currentStatus, setCurrentStatus] = useState(status);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleShare = async () => {
+    setIsOpen(false);
     try {
       const isTicketing = eventType === "TICKETING";
       const basePath = isTicketing ? "/events/tickets" : "/events";
@@ -39,6 +52,7 @@ export default function AdminEventActions({ eventId, eventCode, eventType, statu
 
 
   const handleAction = async (action: string) => {
+    setIsOpen(false);
     const actionLabels: Record<string, { title: string; message: string; variant: "danger" | "warning" | "info" }> = {
       approve: { title: "Approve Event", message: "Are you sure you want to approve this event? It will go live.", variant: "info" },
       suspend: { title: "Suspend Event", message: "Are you sure you want to suspend this event? It will be paused for all users.", variant: "warning" },
@@ -119,217 +133,85 @@ export default function AdminEventActions({ eventId, eventCode, eventType, statu
     });
   };
 
-  if (currentStatus === "DRAFT") {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium transition-colors"
-        >
-          <Share2 className="w-4 h-4" /> Share
-        </button>
-        {isOrganizer && (
-          <button
-            disabled={isPending}
-            onClick={() => handleAction("submit")}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm font-medium transition-colors"
-          >
-            {loadingAction === "submit" ? (
-              "Submitting..."
-            ) : (
-              <>
-                <Send className="w-4 h-4" /> Submit for Review
-              </>
-            )}
-          </button>
-        )}
+  const getActions = () => {
+    const actions = [];
+    
+    if (currentStatus === "DRAFT") {
+      actions.push({ label: "Share", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+      if (isOrganizer) {
+        actions.push({ label: "Submit for Review", icon: Send, onClick: () => handleAction("submit"), color: "text-primary-600" });
+      }
+      actions.push({ label: "Delete Draft", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else if (currentStatus === "PENDING_REVIEW") {
+      if (isAdmin) {
+        actions.push({ label: "Approve", icon: CheckCircle, onClick: () => handleAction("approve"), color: "text-green-600" });
+      }
+      actions.push({ label: "Delete", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else if (currentStatus === "APPROVED") {
+      actions.push({ label: "Share", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+      if (isOrganizer) {
+        actions.push({ label: "Publish", icon: Send, onClick: () => handleAction("publish"), color: "text-primary-600" });
+      }
+      actions.push({ label: "Delete", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else if (currentStatus === "PUBLISHED") {
+      actions.push({ label: "Share", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+      actions.push({ label: "Suspend", icon: PauseCircle, onClick: () => handleAction("suspend"), color: "text-amber-600" });
+      actions.push({ label: "Delete", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else if (currentStatus === "LIVE") {
+      actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+      actions.push({ label: "Suspend Event", icon: PauseCircle, onClick: () => handleAction("suspend"), color: "text-amber-600" });
+      actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else if (currentStatus === "PAUSED") {
+      actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+      actions.push({ label: "Resume Event", icon: CheckCircle, onClick: () => handleAction("resume"), color: "text-green-600" });
+      actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else if (currentStatus === "ENDED" || currentStatus === "COMPLETED") {
+      actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+      actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+    } else {
+      actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
+    }
 
-        <button
-          disabled={isPending}
-          onClick={() => handleAction("delete")}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 text-sm font-medium transition-colors"
-        >
-          {loadingAction === "delete" ? (
-            "Deleting..."
-          ) : (
-            <>
-              <Trash2 className="w-4 h-4" /> Delete Draft
-            </>
-          )}
-        </button>
-      </div>
-    );
-  }
+    return actions;
+  };
 
-  if (currentStatus === "PENDING_REVIEW") {
-    return (
-      <div className="flex items-center gap-2">
-        {isAdmin && (
-          <>
-            <button
-              disabled={isPending}
-              onClick={() => handleAction("approve")}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium transition-colors"
-            >
-              {loadingAction === "approve" ? (
-                "Processing..."
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4" /> Approve
-                </>
-              )}
-            </button>
-            <button
-              disabled
-              className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 text-slate-400 rounded-lg cursor-not-allowed text-sm font-medium transition-colors"
-              title="Rejection endpoint is currently being finalized"
-            >
-              <XCircle className="w-4 h-4" /> Reject (Planned)
-            </button>
-          </>
-        )}
+  const actions = getActions();
 
-        <button
-          disabled={isPending}
-          onClick={() => handleAction("delete")}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 text-sm font-medium transition-colors"
-        >
-          {loadingAction === "delete" ? "Deleting..." : "Delete"}
-        </button>
-      </div>
-    );
-  }
-
-  if (currentStatus === "APPROVED") {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium transition-colors"
-        >
-          <Share2 className="w-4 h-4" /> Share
-        </button>
-        {isOrganizer && (
-          <button
-            disabled={isPending}
-            onClick={() => handleAction("publish")}
-            className="flex items-center gap-2 px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-800 disabled:opacity-50 text-sm font-medium transition-colors"
-          >
-            {loadingAction === "publish" ? "Publishing..." : "Publish"}
-          </button>
-        )}
-
-        <button
-          disabled={isPending}
-          onClick={() => handleAction("delete")}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 text-sm font-medium transition-colors"
-        >
-          {loadingAction === "delete" ? "Deleting..." : "Delete"}
-        </button>
-      </div>
-    );
-  }  if (currentStatus === "PUBLISHED") {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          disabled={isPending}
-          onClick={() => handleAction("suspend")}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 disabled:opacity-50 text-sm font-medium transition-colors"
-        >
-          {loadingAction === "suspend" ? "Suspending..." : "Suspend"}
-        </button>
-      </div>
-    );
-  }
-
-  if (currentStatus === "LIVE") {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium transition-colors"
-        >
-          <Share2 className="w-4 h-4" /> Share Event
-        </button>
-        <button
-          disabled={isPending}
-          onClick={() => handleAction("suspend")}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 disabled:opacity-50 text-sm font-medium transition-colors"
-        >
-          {loadingAction === "suspend" ? (
-            "Processing..."
-          ) : (
-            <>
-              <PauseCircle className="w-4 h-4" /> Suspend Event
-            </>
-          )}
-        </button>
-      </div>
-    );
-  }
-
-  if (currentStatus === "PAUSED") {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium transition-colors"
-        >
-          <Share2 className="w-4 h-4" /> Share Event
-        </button>
-        <button
-          disabled={isPending}
-          onClick={() => handleAction("resume")}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm font-medium transition-colors"
-        >
-          {loadingAction === "resume" ? (
-            "Processing..."
-          ) : (
-            <>
-              <CheckCircle className="w-4 h-4" /> Resume Event
-            </>
-          )}
-        </button>
-      </div>
-    );
-  }
-
-  if (currentStatus === "ENDED" || currentStatus === "COMPLETED") {
-    return (
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-primary-200 text-primary-600 rounded-lg hover:bg-primary-50 text-sm font-medium transition-colors"
-        >
-          <Share2 className="w-4 h-4" /> Share Event
-        </button>
-        {role === "SUPER_ADMIN" && (
-          <button
-            disabled={isPending}
-            onClick={() => handleAction("delete")}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 disabled:opacity-50 text-sm font-medium transition-colors"
-          >
-            {loadingAction === "delete" ? (
-              "Deleting..."
-            ) : (
-              <>
-                <Trash2 className="w-4 h-4" /> Delete Event
-              </>
-            )}
-          </button>
-        )}
-      </div>
-    );
-  }
+  if (actions.length === 0) return null;
 
   return (
-    <button
-      onClick={handleShare}
-      className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-200 transition-all font-bold"
-    >
-      <Share2 className="w-5 h-5" /> Share Event
-    </button>
-  );
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        disabled={loadingAction !== null || isPending}
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50 text-sm font-medium"
+      >
+        {loadingAction ? (
+          <span className="flex items-center gap-2">
+            <span className="animate-spin inline-block w-4 h-4 border-[2px] border-current border-t-transparent text-primary-600 rounded-full" />
+            Processing...
+          </span>
+        ) : (
+          <>
+            Actions <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+          </>
+        )}
+      </button>
 
-  return null;
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-lg z-50 py-1 overflow-hidden">
+          {actions.map((action, idx) => (
+            <button
+              key={idx}
+              onClick={action.onClick}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-slate-50 transition-colors text-left ${action.color}`}
+            >
+              <action.icon className="w-4 h-4" />
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -208,12 +208,6 @@ export function CategoriesManager({
 
   const removeCategory = async (index: number) => {
     const category = categories[index];
-    if (category.totalVotes && category.totalVotes > 0) {
-      setError(
-        `Cannot delete category "${category.name}" because it has existing votes.`,
-      );
-      return;
-    }
 
     const confirmed = await modal.confirm({
       title: "Delete Category",
@@ -284,12 +278,6 @@ export function CategoriesManager({
 
   const removeCandidate = async (catIdx: number, candIdx: number) => {
     const candidate = categories[catIdx].candidates[candIdx];
-    if (candidate.voteCount && candidate.voteCount > 0) {
-      setError(
-        `Cannot delete candidate "${candidate.name}" because they have existing votes.`,
-      );
-      return;
-    }
 
     const confirmed = await modal.confirm({
       title: "Delete Candidate",
