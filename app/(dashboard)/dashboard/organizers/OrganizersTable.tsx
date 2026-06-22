@@ -158,19 +158,7 @@ export default function OrganizersTable({
       sortable: true,
     },
 
-    {
-      key: "totalRevenue",
-      header: "Revenue",
-      render: (org: Organizer) => (
-        <span className="font-medium text-slate-900">
-          {new Intl.NumberFormat("en-GH", {
-            style: "currency",
-            currency: "GHS",
-          }).format(org.totalRevenue)}
-        </span>
-      ),
-      sortable: true,
-    },
+
     {
       key: "eventsCount",
       header: "Events",
