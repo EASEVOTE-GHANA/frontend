@@ -62,7 +62,7 @@ export default function OrganizerActions({
 
     startTransition(async () => {
       try {
-        await api.patch(`/users/${organizer.user.id}/status`, { status: "SUSPENDED" });
+        await api.put(`/users/${organizer.user.id}`, { status: "DISABLED" });
         await modal.alert({
           title: "Organizer Rejected",
           message: "Organizer account has been rejected.",
