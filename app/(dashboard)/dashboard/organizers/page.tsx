@@ -21,7 +21,6 @@ export default async function AdminOrganizersPage() {
       email: user.email,
       phone: user.phone || "N/A",
       avatar: user.avatar || "",
-      verificationStatus: user.status === "ACTIVE" ? "VERIFIED" : user.status,
       userStatus: user.status,
       eventsCount: user.eventsCount || 0,
       totalRevenue: user.totalRevenue || 0,

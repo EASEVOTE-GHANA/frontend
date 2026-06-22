@@ -27,7 +27,6 @@ type Organizer = {
   email: string;
   phone: string;
   avatar: string;
-  verificationStatus: string;
   userStatus: string;
   eventsCount: number;
   totalRevenue: number;
@@ -36,35 +35,6 @@ type Organizer = {
   isDeleted: boolean;
 };
 
-const statusConfig: Record<
-  string,
-  { label: string; color: string; bg: string; icon: any }
-> = {
-  VERIFIED: {
-    label: "Verified",
-    color: "text-green-700",
-    bg: "bg-green-100",
-    icon: CheckCircle,
-  },
-  PENDING: {
-    label: "Pending",
-    color: "text-amber-700",
-    bg: "bg-amber-100",
-    icon: Clock,
-  },
-  REJECTED: {
-    label: "Rejected",
-    color: "text-red-700",
-    bg: "bg-red-100",
-    icon: XCircle,
-  },
-  DELETED: {
-    label: "Deleted",
-    color: "text-slate-700",
-    bg: "bg-slate-200",
-    icon: XCircle,
-  },
-};
 
 export default function OrganizersTable({
   organizers,
@@ -187,31 +157,7 @@ export default function OrganizersTable({
       ),
       sortable: true,
     },
-    {
-      key: "verificationStatus",
-      header: "Verification",
-      render: (org: Organizer) => {
-        const config = statusConfig[org.verificationStatus] || {
-          label: org.verificationStatus,
-          color: "text-slate-600",
-          bg: "bg-slate-100",
-          icon: Clock,
-        };
-        return (
-          <span
-            className={clsx(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-              config.bg,
-              config.color
-            )}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-            {config.label}
-          </span>
-        );
-      },
-      sortable: true,
-    },
+
     {
       key: "totalRevenue",
       header: "Revenue",
@@ -313,15 +259,6 @@ export default function OrganizersTable({
               { label: "Disabled", value: "DISABLED" },
             ],
           },
-          {
-            label: "Verification",
-            key: "verificationStatus",
-            options: [
-              { label: "Verified", value: "VERIFIED" },
-              { label: "Pending", value: "PENDING" },
-              { label: "Rejected", value: "REJECTED" },
-            ],
-          },
         ]}
         actions={(org) => (
           <div className="flex items-center gap-1">
@@ -338,7 +275,7 @@ export default function OrganizersTable({
               </button>
             )}
 
-            {!org.isDeleted && org.verificationStatus !== "VERIFIED" && (
+            {!org.isDeleted && org.userStatus !== "ACTIVE" && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
