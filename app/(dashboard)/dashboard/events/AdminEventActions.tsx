@@ -156,18 +156,18 @@ export default function AdminEventActions({ eventId, eventCode, eventType, statu
     } else if (currentStatus === "PUBLISHED") {
       actions.push({ label: "Share", icon: Share2, onClick: handleShare, color: "text-slate-700" });
       actions.push({ label: "Suspend", icon: PauseCircle, onClick: () => handleAction("suspend"), color: "text-amber-600" });
-      actions.push({ label: "Delete", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+      if (role === "SUPER_ADMIN") actions.push({ label: "Delete", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
     } else if (currentStatus === "LIVE") {
       actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
       actions.push({ label: "Suspend Event", icon: PauseCircle, onClick: () => handleAction("suspend"), color: "text-amber-600" });
-      actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+      if (role === "SUPER_ADMIN") actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
     } else if (currentStatus === "PAUSED") {
       actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
       actions.push({ label: "Resume Event", icon: CheckCircle, onClick: () => handleAction("resume"), color: "text-green-600" });
-      actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+      if (role === "SUPER_ADMIN") actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
     } else if (currentStatus === "ENDED" || currentStatus === "COMPLETED") {
       actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
-      actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
+      if (role === "SUPER_ADMIN") actions.push({ label: "Delete Event", icon: Trash2, onClick: () => handleAction("delete"), color: "text-red-600" });
     } else {
       actions.push({ label: "Share Event", icon: Share2, onClick: handleShare, color: "text-slate-700" });
     }

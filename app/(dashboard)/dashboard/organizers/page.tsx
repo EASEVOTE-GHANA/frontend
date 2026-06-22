@@ -50,7 +50,7 @@ export default async function AdminOrganizersPage() {
             {organizers.length} Total
           </span>
         </div>
-        <OrganizersTable organizers={organizers} />
+        <OrganizersTable organizers={organizers} userRole={session?.user?.role as string} />
       </div>
     </div>
   );

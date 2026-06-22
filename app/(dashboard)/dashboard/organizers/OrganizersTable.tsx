@@ -38,8 +38,10 @@ type Organizer = {
 
 export default function OrganizersTable({
   organizers,
+  userRole,
 }: {
   organizers: Organizer[];
+  userRole: string;
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -303,17 +305,19 @@ export default function OrganizersTable({
                 </button>
               </>
             ) : (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(org.id, org.name);
-                }}
-                disabled={isPending}
-                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Remove Organizer"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              (userRole === "SUPER_ADMIN" || org.eventsCount === 0) && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(org.id, org.name);
+                  }}
+                  disabled={isPending}
+                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Remove Organizer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )
             )}
           </div>
         )}
