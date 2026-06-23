@@ -94,18 +94,23 @@ class ApiClient {
   async uploadImage(file: File, folder: string = "general", path: string = "/upload/image"): Promise<any> {
     let fileToUpload = file;
     
-    // Only compress on the client side if it's an image
+    // Only compress on the client side if it's an image and larger than 8MB
     if (file.type.startsWith("image/") && typeof window !== "undefined") {
-      try {
-        const imageCompression = (await import("browser-image-compression")).default;
-        const options = {
-          maxSizeMB: 1.5,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true
-        };
-        fileToUpload = await imageCompression(file, options);
-      } catch (error) {
-        console.warn("Client-side image compression failed, using original file", error);
+      const EIGHT_MB = 8 * 1024 * 1024;
+      
+      if (file.size > EIGHT_MB) {
+        try {
+          const imageCompression = (await import("browser-image-compression")).default;
+          const options = {
+            maxSizeMB: 7,
+            maxWidthOrHeight: 1600,
+            useWebWorker: true,
+            fileType: file.type // Strictly preserve original format, do not convert to webp
+          };
+          fileToUpload = await imageCompression(file, options);
+        } catch (error) {
+          console.warn("Client-side image compression failed, using original file", error);
+        }
       }
     }
 
