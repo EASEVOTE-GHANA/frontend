@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import Image from "next/image";
+import { ImageWithPreview } from "@/components/ui/ImageWithPreview";
 
 type Candidate = {
   id: string;
@@ -192,7 +193,7 @@ export default function ResultsDashboardClient({ events }: DashboardProps) {
                             const isValid = url && typeof url === 'string' && !url.includes('example/image/upload') && !url.includes('null');
                             
                             return isValid ? (
-                              <Image
+                              <ImageWithPreview
                                 src={url}
                                 alt={candidate.name}
                                 fill

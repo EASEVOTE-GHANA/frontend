@@ -18,6 +18,7 @@ import { api } from "@/lib/api-client";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useModal } from "@/components/providers/ModalProvider";
+import { ImageWithPreview } from "@/components/ui/ImageWithPreview";
 
 type CandidateForm = {
   id?: string;
@@ -669,7 +670,7 @@ export function CategoriesManager({
                             />
                             <div className="flex gap-2">
                               {candidate.image && (
-                                <Image
+                                <ImageWithPreview
                                   src={candidate.image}
                                   alt="candidate preview"
                                   width={40}

@@ -35,6 +35,7 @@ import { EventForm } from "./EventForm";
 import { CategoriesManager } from "./CategoriesManager";
 import AdminEventActions from "@/app/(dashboard)/dashboard/events/AdminEventActions";
 import Image from "next/image";
+import { ImageWithPreview } from "@/components/ui/ImageWithPreview";
 
 type EventDetails = {
   id: string;
@@ -1318,7 +1319,7 @@ function CandidateProfileCard({
         <div className="relative w-16 h-16 shrink-0">
           {candidate.imageUrl ? (
             <div className="w-full h-full rounded-2xl overflow-hidden ring-2 ring-white ring-offset-2 ring-offset-slate-100 group-hover:ring-primary-100 transition-all">
-              <Image
+              <ImageWithPreview
                 width={64}
                 height={64}
                 src={candidate.imageUrl}

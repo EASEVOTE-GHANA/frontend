@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { ImageWithPreview } from "@/components/ui/ImageWithPreview";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import {
@@ -137,7 +138,7 @@ export default function NominationsTable({
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {nom.nomineePhotoUrl ? (
-                        <Image
+                        <ImageWithPreview
                           width={40}
                           height={40}
                           src={nom.nomineePhotoUrl}

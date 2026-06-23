@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ImageWithPreview } from "@/components/ui/ImageWithPreview";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { createServerApiClient } from "@/lib/api-client";
@@ -100,7 +101,7 @@ export default async function NominationDetailPage({
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="shrink-0">
                 {nomination.nomineePhotoUrl ? (
-                  <Image
+                  <ImageWithPreview
                     width={128}
                     height={128}
                     src={nomination.nomineePhotoUrl}
