@@ -121,7 +121,8 @@ export default async function AdminTransactionsPage(props: {
     candidate: (tx.candidate || tx.candidateId) ? {
       name: tx.candidate?.name || tx.candidateId?.name || "Unknown",
       code: tx.candidate?.code || tx.candidateId?.code || "Unknown",
-      categoryName: tx.categoryName ||
+      categoryName: tx.candidate?.categoryName ||
+                    tx.categoryName ||
                     tx.categoryId?.name || 
                     tx.category?.name || 
                     tx.candidate?.categoryId?.name ||
