@@ -120,7 +120,18 @@ export default async function AdminTransactionsPage(props: {
     channel: (tx.channel || tx.paymentChannel || tx.source || "WEB").toUpperCase(),
     candidate: (tx.candidate || tx.candidateId) ? {
       name: tx.candidate?.name || tx.candidateId?.name || "Unknown",
-      code: tx.candidate?.code || tx.candidateId?.code || "Unknown"
+      code: tx.candidate?.code || tx.candidateId?.code || "Unknown",
+      categoryName: tx.categoryName ||
+                    tx.categoryId?.name || 
+                    tx.category?.name || 
+                    tx.candidate?.categoryId?.name ||
+                    tx.candidate?.category?.name || 
+                    tx.candidateId?.categoryId?.name ||
+                    tx.candidateId?.category?.name ||
+                    (typeof tx.metadata === 'string' ? ((): string => { try { return JSON.parse(tx.metadata).categoryName || "" } catch(e) { return "" } })() : tx.metadata?.categoryName) || 
+                    (typeof tx.candidate?.category === 'string' ? tx.candidate.category : null) ||
+                    (typeof tx.candidateId?.category === 'string' ? tx.candidateId.category : null) ||
+                    ""
     } : null
   }));
 

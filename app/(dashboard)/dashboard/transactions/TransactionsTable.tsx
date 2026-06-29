@@ -25,6 +25,7 @@ type Transaction = {
   candidate?: {
     name: string;
     code: string;
+    categoryName?: string;
   } | null;
   phone?: string;
   event: string;
@@ -200,10 +201,10 @@ export default function TransactionsTable({
           {tx.candidate ? (
             <>
               <span className="text-sm font-black text-slate-900 truncate max-w-[200px]">
-                {tx.candidate.code}
+                {tx.candidate.name}
               </span>
               <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest truncate max-w-[200px]">
-                {tx.candidate.name}
+                {tx.candidate.categoryName || "N/A"}
               </span>
             </>
           ) : (
