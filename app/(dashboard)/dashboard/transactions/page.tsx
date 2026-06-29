@@ -131,7 +131,8 @@ export default async function AdminTransactionsPage(props: {
                     (typeof tx.metadata === 'string' ? ((): string => { try { return JSON.parse(tx.metadata).categoryName || "" } catch(e) { return "" } })() : tx.metadata?.categoryName) || 
                     (typeof tx.candidate?.category === 'string' ? tx.candidate.category : null) ||
                     (typeof tx.candidateId?.category === 'string' ? tx.candidateId.category : null) ||
-                    ""
+                    "",
+      category: tx.candidate?.category || null,
     } : null
   }));
 
