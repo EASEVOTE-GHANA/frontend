@@ -8,6 +8,8 @@ import {
   Search,
   RotateCw,
   XCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useState } from "react";
@@ -31,6 +33,34 @@ type Transaction = {
   ticketQuantity?: number;
   gateway?: string;
   channel?: string;
+};
+
+const CopyableReference = ({ reference }: { reference: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(reference);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div 
+      className="flex items-center gap-1.5 group cursor-pointer" 
+      onClick={handleCopy} 
+      title="Copy reference"
+    >
+      <div className="font-mono text-[10px] text-slate-500 max-w-[80px] truncate group-hover:text-indigo-600 transition-colors">
+        {reference}
+      </div>
+      {copied ? (
+        <Check className="w-3 h-3 text-green-500" />
+      ) : (
+        <Copy className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 group-hover:text-indigo-500 transition-all" />
+      )}
+    </div>
+  );
 };
 
 const formatCompactCurrency = (num: number) => {
@@ -159,9 +189,7 @@ export default function TransactionsTable({
     {
       key: "reference",
       header: "Reference",
-      render: (tx: Transaction) => (
-        <div className="font-mono text-[10px] text-slate-500 max-w-[80px] truncate" title={tx.reference}>{tx.reference}</div>
-      ),
+      render: (tx: Transaction) => <CopyableReference reference={tx.reference} />,
       sortable: true,
     },
     {
