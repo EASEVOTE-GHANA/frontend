@@ -171,10 +171,10 @@ export default function TransactionsTable({
         <div className="flex flex-col gap-0.5" title={tx.candidate?.name}>
           {tx.candidate ? (
             <>
-              <span className="text-sm font-black text-slate-900 truncate max-w-[120px]">
+              <span className="text-sm font-black text-slate-900 truncate max-w-[200px]">
                 {tx.candidate.code}
               </span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest truncate max-w-[200px]">
                 {tx.candidate.name}
               </span>
             </>
@@ -207,7 +207,7 @@ export default function TransactionsTable({
     },
     {
       key: "amount",
-      header: "Amount (GHS)",
+      header: "AMT",
       render: (tx: Transaction) => (
         <span className="text-sm font-medium text-slate-900">
           {formatCompactCurrency(tx.amount)}
