@@ -25,6 +25,7 @@ type Transaction = {
   candidate?: {
     name: string;
     code: string;
+    category?: string | null;
   } | null;
   phone?: string;
   event: string;
@@ -196,15 +197,17 @@ export default function TransactionsTable({
       key: "candidate",
       header: "Candidate",
       render: (tx: Transaction) => (
-        <div className="flex flex-col gap-0.5" title={tx.candidate?.name}>
+        <div className="flex flex-col gap-0.5" title={tx.candidate ? `${tx.candidate.name}${tx.candidate.category ? ` · ${tx.candidate.category}` : ""}` : undefined}>
           {tx.candidate ? (
             <>
-              <span className="text-sm font-black text-slate-900 truncate max-w-[200px]">
-                {tx.candidate.code}
-              </span>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest truncate max-w-[200px]">
+              <span className="text-sm font-semibold text-slate-900 truncate max-w-[200px]">
                 {tx.candidate.name}
               </span>
+              {tx.candidate.category && (
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest truncate max-w-[200px]">
+                  {tx.candidate.category}
+                </span>
+              )}
             </>
           ) : (
             <span className="text-sm font-medium text-slate-400">-</span>
