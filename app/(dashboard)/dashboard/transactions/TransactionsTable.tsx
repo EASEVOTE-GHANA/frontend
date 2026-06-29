@@ -20,6 +20,10 @@ type Transaction = {
   amount: number;
   status: string;
   payer: string;
+  candidate?: {
+    name: string;
+    code: string;
+  } | null;
   phone?: string;
   event: string;
   date: Date;
@@ -110,7 +114,7 @@ export default function TransactionsTable({
   transactions: Transaction[];
   pagination: Pagination;
   eventsList: { id: string; title: string }[];
-  currentFilters: { eventId: string; status: string; type?: string; gateway?: string; channel?: string };
+  currentFilters: { eventId: string; status: string; type?: string; gateway?: string; channel?: string; date?: string };
   isOrganizer?: boolean;
 }) {
   const router = useRouter();
@@ -143,6 +147,8 @@ export default function TransactionsTable({
         return (
           tx.reference.toLowerCase().includes(query) ||
           tx.payer.toLowerCase().includes(query) ||
+          (tx.candidate?.name?.toLowerCase().includes(query)) ||
+          (tx.candidate?.code?.toLowerCase().includes(query)) ||
           (tx.phone && tx.phone.toLowerCase().includes(query)) ||
           tx.event.toLowerCase().includes(query)
         );
@@ -159,11 +165,22 @@ export default function TransactionsTable({
       sortable: true,
     },
     {
-      key: "payer",
-      header: "Payer",
+      key: "candidate",
+      header: "Candidate",
       render: (tx: Transaction) => (
-        <div className="text-sm font-medium text-slate-900 max-w-[120px] truncate" title={tx.payer}>
-          {tx.payer}
+        <div className="flex flex-col gap-0.5" title={tx.candidate?.name}>
+          {tx.candidate ? (
+            <>
+              <span className="text-sm font-black text-slate-900 truncate max-w-[120px]">
+                {tx.candidate.code}
+              </span>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate max-w-[120px]">
+                {tx.candidate.name}
+              </span>
+            </>
+          ) : (
+            <span className="text-sm font-medium text-slate-400">-</span>
+          )}
         </div>
       ),
       sortable: true,
@@ -358,6 +375,13 @@ export default function TransactionsTable({
             <option value="PENDING">Pending</option>
             <option value="FAILED">Failed</option>
           </select>
+
+          <input
+            type="date"
+            value={currentFilters.date || ""}
+            onChange={(e) => handleParamChange("date", e.target.value)}
+            className="px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white min-w-[140px]"
+          />
         </div>
       </div>
 
