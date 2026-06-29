@@ -312,8 +312,8 @@ export default function TransactionsTable({
   return (
     <div className="space-y-4">
       {/* Search & Filter Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
+      <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col gap-4">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
@@ -324,7 +324,7 @@ export default function TransactionsTable({
           />
         </div>
         
-        <div className="flex flex-col md:flex-row gap-4 items-center">
+        <div className="flex flex-wrap gap-4 items-center">
           <EventFilterDropdown
             value={currentFilters.eventId}
             onChange={(val) => handleParamChange("eventId", val)}
